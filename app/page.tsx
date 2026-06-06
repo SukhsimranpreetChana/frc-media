@@ -1,65 +1,96 @@
-import Image from "next/image";
+import Link from "next/link";
+import TeamCard from "@/components/TeamCard";
+import { featuredTeams } from "@/lib/search";
+
+const discordInvite = "https://discord.gg/xCqryxThbC";
+const iceDriveFolder = "https://icedrive.net/s/Z4F8bBxaRiFNPZCiz7DXDQPby8Vx";
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
+    <main className="flex-1 bg-zinc-50">
+      <section className="border-b border-zinc-200 bg-white">
+        <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-6 py-16">
+          <div className="max-w-3xl">
+            <p className="mb-4 text-sm font-semibold uppercase tracking-wide text-red-700">
+              FIRST Media Community
+            </p>
+            <h1 className="text-4xl font-bold tracking-tight text-zinc-950 sm:text-5xl">
+              A home base for aspiring FIRST creatives.
+            </h1>
+            <p className="mt-6 text-lg leading-8 text-zinc-700">
+              We are a community of students, alumni, and mentors who share
+              ideas and create media of any variety. Our goal is to make media
+              more accessible, help others improve their work, and connect
+              creatives across photography, videography, graphic design, social
+              media, and more.
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-3 sm:flex-row">
             <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+              className="inline-flex h-11 items-center justify-center rounded-md bg-zinc-950 px-5 text-sm font-semibold text-white hover:bg-zinc-800"
+              href={discordInvite}
+              target="_blank"
+              rel="noopener noreferrer"
             >
-              Templates
-            </a>{" "}
-            or the{" "}
+              Join the Discord
+            </a>
             <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+              className="inline-flex h-11 items-center justify-center rounded-md border border-zinc-300 bg-white px-5 text-sm font-semibold text-zinc-950 hover:bg-zinc-100"
+              href={iceDriveFolder}
+              target="_blank"
+              rel="noopener noreferrer"
             >
-              Learning
-            </a>{" "}
-            center.
+              View media drive
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto grid w-full max-w-6xl gap-6 px-6 py-12 md:grid-cols-3">
+        <div className="rounded-lg border border-zinc-200 bg-white p-6">
+          <h2 className="text-lg font-semibold text-zinc-950">Share Work</h2>
+          <p className="mt-3 text-sm leading-6 text-zinc-600">
+            Post photos, videos, graphics, reels, recaps, and resources from
+            events or team projects.
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+        <div className="rounded-lg border border-zinc-200 bg-white p-6">
+          <h2 className="text-lg font-semibold text-zinc-950">Learn Together</h2>
+          <p className="mt-3 text-sm leading-6 text-zinc-600">
+            Ask questions, get feedback, trade editing tips, and build skills
+            with creatives who understand FIRST.
+          </p>
         </div>
-      </main>
-    </div>
+        <div className="rounded-lg border border-zinc-200 bg-white p-6">
+          <h2 className="text-lg font-semibold text-zinc-950">Collaborate</h2>
+          <p className="mt-3 text-sm leading-6 text-zinc-600">
+            Find people for event coverage, team branding, social projects, and
+            commission work.
+          </p>
+        </div>
+      </section>
+
+      <section className="mx-auto w-full max-w-6xl px-6 pb-16">
+        <div className="max-w-3xl">
+          <div className="mb-4 flex items-end justify-between gap-4">
+            <div>
+              <p className="text-sm font-medium text-zinc-500">Find media</p>
+              <h2 className="text-2xl font-semibold text-zinc-950">
+                Search teams and find their clips
+              </h2>
+            </div>
+            <Link className="text-sm font-semibold text-red-700" href="/teams">
+              Open teams
+            </Link>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            {featuredTeams.slice(0, 2).map((team) => (
+              <TeamCard key={team.id} team={team} />
+            ))}
+          </div>
+        </div>
+      </section>
+    </main>
   );
 }
