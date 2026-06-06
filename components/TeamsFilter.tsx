@@ -19,7 +19,7 @@ export default function TeamsFilter({ teams }: TeamsFilterProps) {
       <label className="block">
         <span className="sr-only">Search teams</span>
         <input
-          className="h-11 w-full rounded-md border border-zinc-300 bg-white px-4 text-sm text-zinc-950 outline-none ring-red-700/20 placeholder:text-zinc-500 focus:border-red-700 focus:ring-4"
+          className="h-11 w-full rounded-md border border-[#72007E]/30 bg-white px-4 text-sm text-[#17001C] outline-none ring-[#A335E6]/20 placeholder:text-[#17001C]/45 focus:border-[#7137E3] focus:ring-4"
           onChange={(event) => setQuery(event.target.value)}
           placeholder="Search teams by number, name, location, or media focus"
           type="search"
@@ -27,7 +27,7 @@ export default function TeamsFilter({ teams }: TeamsFilterProps) {
         />
       </label>
 
-      <p className="mt-4 text-sm text-zinc-600">
+      <p className="mt-4 text-sm text-[#17001C]/70">
         Showing {filteredTeams.length} of {teams.length} teams
       </p>
 
@@ -38,7 +38,7 @@ export default function TeamsFilter({ teams }: TeamsFilterProps) {
       </div>
 
       {filteredTeams.length === 0 ? (
-        <div className="mt-6 rounded-lg border border-dashed border-zinc-300 bg-white p-6 text-sm text-zinc-600">
+        <div className="mt-6 rounded-lg border border-dashed border-[#72007E]/40 bg-white p-6 text-sm text-[#17001C]/70">
           No teams found. Try a team number, location, or media type.
         </div>
       ) : null}

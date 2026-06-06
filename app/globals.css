@@ -2,25 +2,35 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #17001c;
+  --fmc-white: #ffffff;
+  --fmc-black: #000000;
+  --fmc-blush: #f4e7e7;
+  --fmc-night: #17001c;
+  --fmc-coral: #f85259;
+  --fmc-plum: #72007e;
+  --fmc-violet: #a335e6;
+  --fmc-indigo: #7137e3;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-sans: var(--font-nunito);
+  --font-primary: var(--font-montserrat);
+  --font-secondary: var(--font-nunito);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-nunito), Arial, Helvetica, sans-serif;
+}
+
+h1,
+h2,
+h3,
+.font-primary {
+  font-family: var(--font-montserrat), Arial, Helvetica, sans-serif;
+  font-weight: 900;
 }

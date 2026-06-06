@@ -7,17 +7,17 @@ const iceDriveFolder = "https://icedrive.net/s/Z4F8bBxaRiFNPZCiz7DXDQPby8Vx";
 
 export default function Home() {
   return (
-    <main className="flex-1 bg-zinc-50">
-      <section className="border-b border-zinc-200 bg-white">
+    <main className="flex-1 bg-[#F4E7E7]">
+      <section
+        className="border-b border-[#72007E]/30 bg-black bg-contain bg-center bg-no-repeat text-white"
+        style={{ backgroundImage: "url('/blackboard.jpg')" }}
+      >
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-6 py-16">
           <div className="max-w-3xl">
-            <p className="mb-4 text-sm font-semibold uppercase tracking-wide text-red-700">
-              FIRST Media Community
-            </p>
-            <h1 className="text-4xl font-bold tracking-tight text-zinc-950 sm:text-5xl">
+            <h1 className="text-4xl text-white sm:text-5xl">
               A home base for aspiring FIRST creatives.
             </h1>
-            <p className="mt-6 text-lg leading-8 text-zinc-700">
+            <p className="mt-6 text-lg leading-8 text-[#F4E7E7]">
               We are a community of students, alumni, and mentors who share
               ideas and create media of any variety. Our goal is to make media
               more accessible, help others improve their work, and connect
@@ -28,7 +28,7 @@ export default function Home() {
 
           <div className="flex flex-col gap-3 sm:flex-row">
             <a
-              className="inline-flex h-11 items-center justify-center rounded-md bg-zinc-950 px-5 text-sm font-semibold text-white hover:bg-zinc-800"
+              className="font-primary inline-flex h-11 items-center justify-center rounded-md bg-[#F85259] px-5 text-sm text-white hover:bg-[#A335E6]"
               href={discordInvite}
               target="_blank"
               rel="noopener noreferrer"
@@ -36,7 +36,7 @@ export default function Home() {
               Join the Discord
             </a>
             <a
-              className="inline-flex h-11 items-center justify-center rounded-md border border-zinc-300 bg-white px-5 text-sm font-semibold text-zinc-950 hover:bg-zinc-100"
+              className="font-primary inline-flex h-11 items-center justify-center rounded-md border border-[#A335E6] bg-transparent px-5 text-sm text-white hover:bg-[#72007E]"
               href={iceDriveFolder}
               target="_blank"
               rel="noopener noreferrer"
@@ -48,23 +48,23 @@ export default function Home() {
       </section>
 
       <section className="mx-auto grid w-full max-w-6xl gap-6 px-6 py-12 md:grid-cols-3">
-        <div className="rounded-lg border border-zinc-200 bg-white p-6">
-          <h2 className="text-lg font-semibold text-zinc-950">Share Work</h2>
-          <p className="mt-3 text-sm leading-6 text-zinc-600">
+        <div className="rounded-lg border border-[#72007E]/20 bg-white p-6">
+          <h2 className="text-lg text-[#17001C]">Share Work</h2>
+          <p className="mt-3 text-sm leading-6 text-[#17001C]/75">
             Post photos, videos, graphics, reels, recaps, and resources from
             events or team projects.
           </p>
         </div>
-        <div className="rounded-lg border border-zinc-200 bg-white p-6">
-          <h2 className="text-lg font-semibold text-zinc-950">Learn Together</h2>
-          <p className="mt-3 text-sm leading-6 text-zinc-600">
+        <div className="rounded-lg border border-[#72007E]/20 bg-white p-6">
+          <h2 className="text-lg text-[#17001C]">Learn Together</h2>
+          <p className="mt-3 text-sm leading-6 text-[#17001C]/75">
             Ask questions, get feedback, trade editing tips, and build skills
             with creatives who understand FIRST.
           </p>
         </div>
-        <div className="rounded-lg border border-zinc-200 bg-white p-6">
-          <h2 className="text-lg font-semibold text-zinc-950">Collaborate</h2>
-          <p className="mt-3 text-sm leading-6 text-zinc-600">
+        <div className="rounded-lg border border-[#72007E]/20 bg-white p-6">
+          <h2 className="text-lg text-[#17001C]">Collaborate</h2>
+          <p className="mt-3 text-sm leading-6 text-[#17001C]/75">
             Find people for event coverage, team branding, social projects, and
             commission work.
           </p>
@@ -75,12 +75,12 @@ export default function Home() {
         <div className="max-w-3xl">
           <div className="mb-4 flex items-end justify-between gap-4">
             <div>
-              <p className="text-sm font-medium text-zinc-500">Find media</p>
-              <h2 className="text-2xl font-semibold text-zinc-950">
+              <p className="text-sm text-[#72007E]">Find media</p>
+              <h2 className="text-2xl text-[#17001C]">
                 Search teams and find their clips
               </h2>
             </div>
-            <Link className="text-sm font-semibold text-red-700" href="/teams">
+            <Link className="font-primary text-sm text-[#7137E3]" href="/teams">
               Open teams
             </Link>
           </div>
