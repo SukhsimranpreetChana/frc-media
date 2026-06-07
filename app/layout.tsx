@@ -3,6 +3,7 @@ import { Dela_Gothic_One, Nunito } from "next/font/google";
 import Footer from "@/components/Footer";
 import HalftoneScroll from "@/components/HalftoneScroll";
 import Navbar from "@/components/Navbar";
+import SplashIntro from "@/components/SplashIntro";
 import "./globals.css";
 
 const delaGothicOne = Dela_Gothic_One({
@@ -34,6 +35,7 @@ export default function RootLayout({
       className={`${delaGothicOne.variable} ${nunito.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        <SplashIntro />
         <HalftoneScroll />
         <Navbar />
         {children}

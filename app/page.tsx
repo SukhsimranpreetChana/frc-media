@@ -3,7 +3,6 @@ import Link from "next/link";
 import RandomTeamsPreview from "@/components/RandomTeamsPreview";
 
 const discordInvite = "https://discord.gg/xCqryxThbC";
-const iceDriveFolder = "https://icedrive.net/s/Z4F8bBxaRiFNPZCiz7DXDQPby8Vx";
 
 export default function Home() {
   return (
@@ -35,14 +34,12 @@ export default function Home() {
             >
               Join the Discord
             </a>
-            <a
+            <Link
               className="font-primary fmc-button inline-flex h-11 items-center justify-center bg-[#17001C]/80 px-5 text-sm text-white hover:bg-[#72007E]"
-              href={iceDriveFolder}
-              target="_blank"
-              rel="noopener noreferrer"
+              href="/clips"
             >
               View media drive
-            </a>
+            </Link>
           </div>
         </div>
       </section>

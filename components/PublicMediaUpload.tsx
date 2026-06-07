@@ -86,7 +86,11 @@ export default function PublicMediaUpload({
   }
 
   return (
-    <form className="scrap-card p-5" id="upload-media" onSubmit={handleSubmit}>
+    <form
+      className="scrap-card p-4 sm:p-5"
+      id="upload-media"
+      onSubmit={handleSubmit}
+    >
       <h2 className="text-lg text-[#17001C]">Upload team media</h2>
       <p className="mt-2 text-sm text-[#17001C]/70">
         Upload photos or videos. FMC will save them to Google Drive in a folder
@@ -130,11 +134,12 @@ export default function PublicMediaUpload({
             value={uploadedBy}
           />
         </label>
-        <label className="block text-sm text-[#17001C]/75 md:col-span-2">
-          Media Files
+        <div className="block text-sm text-[#17001C]/75 md:col-span-2">
+          <span>Media Files</span>
           <input
             accept="image/*,video/*"
-            className="mt-2 block h-11 w-full rounded-md border-2 border-[#17001C] bg-[#F4E7E7] px-3 py-2 text-sm text-[#17001C] file:mr-3 file:rounded-md file:border-0 file:bg-[#F85259] file:px-3 file:py-1 file:text-white"
+            className="sr-only"
+            id="media-files"
             multiple
             onChange={(event) => {
               const selectedFiles = Array.from(event.target.files || []);
@@ -151,6 +156,19 @@ export default function PublicMediaUpload({
             }}
             type="file"
           />
+          <div className="mt-2 flex flex-col gap-3 rounded-md border-2 border-[#17001C] bg-[#F4E7E7] p-3 sm:flex-row sm:items-center">
+            <label
+              className="font-primary fmc-file-picker inline-flex h-12 w-full cursor-pointer items-center justify-center rounded-md bg-[#F85259] px-4 text-center text-sm text-white sm:w-auto"
+              htmlFor="media-files"
+            >
+              Choose files
+            </label>
+            <p className="min-w-0 text-sm text-[#17001C]/70">
+              {files.length > 0
+                ? `${files.length} file${files.length === 1 ? "" : "s"} selected`
+                : "No files selected yet"}
+            </p>
+          </div>
           {files.length > 0 ? (
             <div className="mt-3 rounded-md border-2 border-[#17001C]/20 bg-white/70 p-3">
               <p className="text-xs text-[#17001C]/60">
@@ -159,14 +177,14 @@ export default function PublicMediaUpload({
               <ul className="mt-2 grid gap-2">
                 {files.map((file) => (
                   <li
-                    className="flex flex-wrap items-center justify-between gap-3 rounded-md bg-[#F4E7E7] px-3 py-2 text-sm text-[#17001C]"
+                    className="flex flex-col gap-3 rounded-md bg-[#F4E7E7] px-3 py-2 text-sm text-[#17001C] sm:flex-row sm:items-center sm:justify-between"
                     key={getFileKey(file)}
                   >
                     <span className="overflow-wrap-anywhere">
                       {file.name}
                     </span>
                     <button
-                      className="font-primary rounded-md bg-[#17001C] px-3 py-1 text-xs text-white hover:bg-[#72007E]"
+                      className="font-primary rounded-md bg-[#17001C] px-3 py-2 text-xs text-white hover:bg-[#72007E] sm:py-1"
                       onClick={() =>
                         setFiles((currentFiles) =>
                           currentFiles.filter(
@@ -184,10 +202,10 @@ export default function PublicMediaUpload({
               </ul>
             </div>
           ) : null}
-        </label>
+        </div>
       </div>
       <button
-        className="font-primary fmc-button mt-5 h-10 bg-[#F85259] px-4 text-sm text-white hover:bg-[#A335E6] disabled:opacity-60"
+        className="font-primary fmc-button mt-5 h-11 w-full bg-[#F85259] px-4 text-sm text-white hover:bg-[#A335E6] disabled:opacity-60 sm:w-auto"
         disabled={isUploading}
         type="submit"
       >
