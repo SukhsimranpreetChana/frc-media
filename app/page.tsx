@@ -1,7 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import TeamCard from "@/components/TeamCard";
-import { featuredTeams } from "@/lib/search";
+import RandomTeamsPreview from "@/components/RandomTeamsPreview";
 
 const discordInvite = "https://discord.gg/xCqryxThbC";
 const iceDriveFolder = "https://icedrive.net/s/Z4F8bBxaRiFNPZCiz7DXDQPby8Vx";
@@ -16,14 +15,14 @@ export default function Home() {
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-6 py-16">
           <div className="max-w-3xl">
             <h1 className="text-4xl text-white sm:text-5xl">
-              A home base for aspiring FIRST creatives.
+              We are FIRST Media.
             </h1>
             <p className="mt-6 text-lg leading-8 text-[#F4E7E7]">
-              We are a community of students, alumni, and mentors who share
-              ideas and create media of any variety. Our goal is to make media
-              more accessible, help others improve their work, and connect
-              creatives across photography, videography, graphic design, social
-              media, and more.
+              We are a community of aspiring FIRST creatives consisting of students, alumni, and mentors 
+              who share ideas and create media of any variety. Not only to make it more accessible, but also 
+              to help out others with their media. Our goal is to provide a space where aspiring and experienced 
+              creatives can connect, share ideas, develop their skills, and collaborate on projects ranging from 
+              photography and videography to graphic design, social media, and more.
             </p>
           </div>
 
@@ -122,15 +121,11 @@ export default function Home() {
                 Search teams and find their clips
               </h2>
             </div>
-            <Link className="font-primary scrap-chip rounded-md px-3 py-2 text-sm text-[#17001C]" href="/teams">
+            <Link className="font-primary scrap-chip rounded-md px-3 py-2 text-sm text-[#17001C]" href="/clips">
               Open teams
             </Link>
           </div>
-          <div className="grid gap-4 md:grid-cols-2">
-            {featuredTeams.slice(0, 2).map((team) => (
-              <TeamCard key={team.id} team={team} />
-            ))}
-          </div>
+          <RandomTeamsPreview />
         </div>
       </section>
     </main>

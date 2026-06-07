@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import ClipAdmin from "@/components/ClipAdmin";
 import CommissionsAdmin from "@/components/CommissionsAdmin";
 import FooterHandlesAdmin from "@/components/FooterHandlesAdmin";
 
@@ -26,6 +27,7 @@ export default function AdminGate() {
   if (isUnlocked) {
     return (
       <>
+        <ClipAdmin />
         <CommissionsAdmin />
         <FooterHandlesAdmin />
       </>

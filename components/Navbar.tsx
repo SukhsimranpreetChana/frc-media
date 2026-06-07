@@ -3,7 +3,8 @@ import Link from "next/link";
 
 const links = [
   { href: "/", label: "Home" },
-  { href: "/teams", label: "Teams" },
+  { href: "/clips", label: "Teams" },
+  { href: "/teams", label: "Upload" },
   { href: "/commissions", label: "Commissions" },
   { href: "/admin", label: "Admin" },
 ];
@@ -12,7 +13,7 @@ const discordInvite = "https://discord.gg/xCqryxThbC";
 
 export default function Navbar() {
   return (
-    <header className="sticky top-0 z-50 bg-transparent px-4 py-3">
+    <header className="no-route-transition sticky top-0 z-50 bg-transparent px-4 py-3">
       <nav className="fmc-dark-halftone flex w-full flex-col gap-4 rounded-2xl border-2 border-[#F85259]/50 px-6 py-4 shadow-[0_10px_0_rgba(23,0,28,0.22)] sm:flex-row sm:items-end sm:justify-between">
         <Link className="flex items-end gap-3" href="/">
           <Image
@@ -31,11 +32,11 @@ export default function Navbar() {
           <div className="flex flex-wrap gap-3">
             {links.map((link) => (
               <Link
-                className="rounded-md px-2 py-1 underline decoration-[#F85259] decoration-4 underline-offset-8 hover:bg-[#F85259] hover:text-white"
+                className="nav-tab"
                 href={link.href}
                 key={link.href}
               >
-                {link.label}
+                <span className="relative z-10">{link.label}</span>
               </Link>
             ))}
           </div>
