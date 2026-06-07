@@ -1,19 +1,65 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { useEffect, useState } from "react";
 import CommissionCard from "@/components/CommissionCard";
-import {
-  defaultCommissions,
-  readStoredCommissions,
-  subscribeToCommissions,
-} from "@/lib/commissions";
+import type { Commission } from "@/types";
 
 export default function CommissionsBoard() {
-  const commissions = useSyncExternalStore(
-    subscribeToCommissions,
-    readStoredCommissions,
-    () => defaultCommissions,
-  );
+  const [commissions, setCommissions] = useState<Commission[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadCommissions() {
+      try {
+        const response = await fetch("/api/commissions");
+        const data = (await response.json().catch(() => null)) as {
+          commissions?: Commission[];
+          error?: string;
+        } | null;
+
+        if (!response.ok) {
+          throw new Error(data?.error || "Could not load commissions.");
+        }
+
+        if (isMounted) {
+          setCommissions(data?.commissions || []);
+        }
+      } catch {
+        if (isMounted) {
+          setError("Could not load commissions right now.");
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    void loadCommissions();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="scrap-card mt-8 p-6 text-sm text-[#17001C]/75">
+        Loading commissions...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="scrap-card mt-8 p-6 text-sm text-[#17001C]/75">
+        {error}
+      </div>
+    );
+  }
 
   if (commissions.length === 0) {
     return (

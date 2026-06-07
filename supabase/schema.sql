@@ -14,6 +14,22 @@ create table if not exists public.media_clips (
   created_at timestamptz not null default now()
 );
 
+create table if not exists public.commissions (
+  id uuid primary key default gen_random_uuid(),
+  title text not null,
+  link text not null,
+  cost_range text not null,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists public.footer_handles (
+  id uuid primary key default gen_random_uuid(),
+  handle text not null,
+  link text not null,
+  profile_image_url text,
+  created_at timestamptz not null default now()
+);
+
 alter table public.media_clips
   add column if not exists approved boolean not null default false;
 
@@ -47,7 +63,15 @@ create index if not exists media_clips_approved_idx
 create index if not exists media_clips_upload_group_id_idx
   on public.media_clips (upload_group_id);
 
+create index if not exists commissions_created_at_idx
+  on public.commissions (created_at desc);
+
+create index if not exists footer_handles_created_at_idx
+  on public.footer_handles (created_at desc);
+
 alter table public.media_clips enable row level security;
+alter table public.commissions enable row level security;
+alter table public.footer_handles enable row level security;
 
 drop policy if exists "Public can read media clips" on public.media_clips;
 create policy "Public can read media clips"
@@ -59,6 +83,18 @@ drop policy if exists "Prototype admin can read pending media clips" on public.m
 drop policy if exists "Public can submit pending media clips" on public.media_clips;
 drop policy if exists "Prototype admin can update media clips" on public.media_clips;
 drop policy if exists "Prototype admin can delete media clips" on public.media_clips;
+
+drop policy if exists "Public can read commissions" on public.commissions;
+create policy "Public can read commissions"
+  on public.commissions
+  for select
+  using (true);
+
+drop policy if exists "Public can read footer handles" on public.footer_handles;
+create policy "Public can read footer handles"
+  on public.footer_handles
+  for select
+  using (true);
 
 -- Media uploads and admin moderation are performed by server-only routes using
 -- SUPABASE_SERVICE_ROLE_KEY, which bypasses RLS. Do not expose the service-role

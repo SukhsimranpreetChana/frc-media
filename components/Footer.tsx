@@ -1,19 +1,36 @@
 "use client";
 
 import Image from "next/image";
-import { useSyncExternalStore } from "react";
-import {
-  defaultFooterHandles,
-  readStoredFooterHandles,
-  subscribeToFooterHandles,
-} from "@/lib/footerHandles";
+import { useEffect, useState } from "react";
+import type { FooterHandle } from "@/types";
 
 export default function Footer() {
-  const handles = useSyncExternalStore(
-    subscribeToFooterHandles,
-    readStoredFooterHandles,
-    () => defaultFooterHandles,
-  );
+  const [handles, setHandles] = useState<FooterHandle[]>([]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadFooterHandles() {
+      try {
+        const response = await fetch("/api/footer-handles");
+        const data = (await response.json().catch(() => null)) as {
+          handles?: FooterHandle[];
+        } | null;
+
+        if (response.ok && isMounted) {
+          setHandles(data?.handles || []);
+        }
+      } catch {
+        // The footer sponsor block still renders without profile links.
+      }
+    }
+
+    void loadFooterHandles();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   return (
     <footer className="mt-8 bg-[#17001C] text-white">

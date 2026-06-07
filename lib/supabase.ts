@@ -1,5 +1,12 @@
 import { createClient } from "@supabase/supabase-js";
-import type { MediaClip, MediaClipRecord } from "@/types";
+import type {
+  Commission,
+  CommissionRecord,
+  FooterHandle,
+  FooterHandleRecord,
+  MediaClip,
+  MediaClipRecord,
+} from "@/types";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -223,5 +230,127 @@ export async function deleteMediaClipForAdmin(id: string) {
 
   if (error) {
     throw new Error("Unable to remove media clip.");
+  }
+}
+
+function mapCommissionRecord(record: CommissionRecord): Commission {
+  return {
+    id: record.id,
+    title: record.title,
+    link: record.link,
+    costRange: record.cost_range,
+    createdAt: record.created_at,
+  };
+}
+
+function mapFooterHandleRecord(record: FooterHandleRecord): FooterHandle {
+  return {
+    id: record.id,
+    handle: record.handle,
+    link: record.link,
+    profileImageUrl: record.profile_image_url ?? undefined,
+    createdAt: record.created_at,
+  };
+}
+
+export async function getCommissions() {
+  const { data, error } = await getSupabaseAdminClient()
+    .from("commissions")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .returns<CommissionRecord[]>();
+
+  if (error) {
+    throw new Error(`Unable to load commissions: ${error.message}`);
+  }
+
+  return (data || []).map(mapCommissionRecord);
+}
+
+export async function createCommissionForAdmin(input: {
+  title: string;
+  link: string;
+  costRange: string;
+}) {
+  const { data, error } = await getSupabaseAdminClient()
+    .from("commissions")
+    .insert({
+      title: input.title,
+      link: input.link,
+      cost_range: input.costRange,
+    })
+    .select()
+    .single<CommissionRecord>();
+
+  if (error) {
+    throw new Error(`Unable to create commission: ${error.message}`);
+  }
+
+  if (!data) {
+    throw new Error("Unable to create commission: no record returned.");
+  }
+
+  return mapCommissionRecord(data);
+}
+
+export async function deleteCommissionForAdmin(id: string) {
+  const { error } = await getSupabaseAdminClient()
+    .from("commissions")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    throw new Error(`Unable to remove commission: ${error.message}`);
+  }
+}
+
+export async function getFooterHandles() {
+  const { data, error } = await getSupabaseAdminClient()
+    .from("footer_handles")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .returns<FooterHandleRecord[]>();
+
+  if (error) {
+    throw new Error(`Unable to load footer handles: ${error.message}`);
+  }
+
+  return (data || []).map(mapFooterHandleRecord);
+}
+
+export async function createFooterHandleForAdmin(input: {
+  handle: string;
+  link: string;
+  profileImageUrl?: string;
+}) {
+  const { data, error } = await getSupabaseAdminClient()
+    .from("footer_handles")
+    .insert({
+      handle: input.handle,
+      link: input.link,
+      profile_image_url: input.profileImageUrl ?? null,
+    })
+    .select()
+    .single<FooterHandleRecord>();
+
+  if (error) {
+    throw new Error(`Unable to create footer handle: ${error.message}`);
+  }
+
+  if (!data) {
+    throw new Error("Unable to create footer handle: no record returned.");
+  }
+
+  return mapFooterHandleRecord(data);
+}
+
+export async function deleteFooterHandleForAdmin(id: string) {
+  const { error } = await getSupabaseAdminClient()
+    .from("footer_handles")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    throw new Error(`Unable to remove footer handle: ${error.message}`);
   }
 }

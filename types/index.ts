@@ -78,6 +78,7 @@ export type Commission = {
   title: string;
   link: string;
   costRange: string;
+  createdAt?: string;
 };
 
 export type FooterHandle = {
@@ -85,4 +86,21 @@ export type FooterHandle = {
   handle: string;
   link: string;
   profileImageUrl?: string;
+  createdAt?: string;
+};
+
+export type CommissionRecord = {
+  id: string;
+  title: string;
+  link: string;
+  cost_range: string;
+  created_at: string;
+};
+
+export type FooterHandleRecord = {
+  id: string;
+  handle: string;
+  link: string;
+  profile_image_url: string | null;
+  created_at: string;
 };

@@ -1,30 +1,63 @@
 "use client";
 
-import { FormEvent, useState, useSyncExternalStore } from "react";
-import {
-  defaultFooterHandles,
-  readStoredFooterHandles,
-  subscribeToFooterHandles,
-  writeStoredFooterHandles,
-} from "@/lib/footerHandles";
+import { FormEvent, useEffect, useState } from "react";
+import { downloadCsv, toCsv } from "@/lib/csvExport";
 import type { FooterHandle } from "@/types";
 
 export default function FooterHandlesAdmin() {
-  const handles = useSyncExternalStore(
-    subscribeToFooterHandles,
-    readStoredFooterHandles,
-    () => defaultFooterHandles,
-  );
+  const [handles, setHandles] = useState<FooterHandle[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [activeHandleId, setActiveHandleId] = useState("");
+  const [message, setMessage] = useState("");
   const [handle, setHandle] = useState("");
   const [link, setLink] = useState("");
   const [profileImageUrl, setProfileImageUrl] = useState("");
 
-  function saveHandles(nextHandles: FooterHandle[]) {
-    writeStoredFooterHandles(nextHandles);
+  async function fetchFooterHandles() {
+    const response = await fetch("/api/footer-handles");
+    const data = (await response.json().catch(() => null)) as {
+      handles?: FooterHandle[];
+      error?: string;
+    } | null;
+
+    if (!response.ok) {
+      throw new Error(data?.error || "Could not load footer profiles.");
+    }
+
+    return data?.handles || [];
   }
 
-  function handleAddFooterLink(event: FormEvent<HTMLFormElement>) {
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadFooterHandles() {
+      try {
+        const nextHandles = await fetchFooterHandles();
+
+        if (isMounted) {
+          setHandles(nextHandles);
+        }
+      } catch {
+        if (isMounted) {
+          setMessage("Could not load footer profiles from Supabase.");
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    void loadFooterHandles();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  async function handleAddFooterLink(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setMessage("");
 
     const trimmedHandle = handle.trim();
     const trimmedLink = link.trim();
@@ -34,22 +67,93 @@ export default function FooterHandlesAdmin() {
       return;
     }
 
-    saveHandles([
-      {
-        id: crypto.randomUUID(),
-        handle: trimmedHandle,
-        link: trimmedLink,
-        profileImageUrl: trimmedProfileImageUrl || undefined,
-      },
-      ...handles,
-    ]);
-    setHandle("");
-    setLink("");
-    setProfileImageUrl("");
+    setActiveHandleId("new");
+
+    try {
+      const response = await fetch("/api/footer-handles", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          handle: trimmedHandle,
+          link: trimmedLink,
+          profileImageUrl: trimmedProfileImageUrl,
+        }),
+      });
+      const data = (await response.json().catch(() => null)) as {
+        handle?: FooterHandle;
+        error?: string;
+      } | null;
+
+      if (!response.ok || !data?.handle) {
+        throw new Error(data?.error || "Could not add footer profile.");
+      }
+
+      setHandles((currentHandles) => [
+        data.handle as FooterHandle,
+        ...currentHandles,
+      ]);
+      setHandle("");
+      setLink("");
+      setProfileImageUrl("");
+      setMessage("Footer profile added.");
+    } catch (error) {
+      setMessage(
+        error instanceof Error ? error.message : "Could not add footer profile.",
+      );
+    } finally {
+      setActiveHandleId("");
+    }
   }
 
-  function handleRemoveFooterLink(id: string) {
-    saveHandles(handles.filter((item) => item.id !== id));
+  async function handleRemoveFooterLink(id: string) {
+    setActiveHandleId(id);
+    setMessage("");
+
+    try {
+      const response = await fetch("/api/footer-handles", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id }),
+      });
+      const data = (await response.json().catch(() => null)) as {
+        error?: string;
+      } | null;
+
+      if (!response.ok) {
+        throw new Error(data?.error || "Could not remove footer profile.");
+      }
+
+      setHandles((currentHandles) =>
+        currentHandles.filter((item) => item.id !== id),
+      );
+      setMessage("Footer profile removed.");
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "Could not remove footer profile.",
+      );
+    } finally {
+      setActiveHandleId("");
+    }
+  }
+
+  function handleExportFooterHandles() {
+    const csv = toCsv(handles, [
+      { header: "id", value: (item) => item.id },
+      { header: "handle", value: (item) => item.handle },
+      { header: "link", value: (item) => item.link },
+      {
+        header: "profile_image_url",
+        value: (item) => item.profileImageUrl,
+      },
+    ]);
+
+    downloadCsv("fmc-footer-handles.csv", csv);
   }
 
   return (
@@ -87,15 +191,34 @@ export default function FooterHandlesAdmin() {
           </label>
         </div>
         <button
-          className="font-primary fmc-button mt-5 h-10 bg-[#F85259] px-4 text-sm text-white hover:bg-[#A335E6]"
+          className="font-primary fmc-button mt-5 h-10 bg-[#F85259] px-4 text-sm text-white hover:bg-[#A335E6] disabled:opacity-60"
+          disabled={activeHandleId === "new"}
           type="submit"
         >
-          Add profile
+          {activeHandleId === "new" ? "Adding..." : "Add profile"}
         </button>
+        {message ? (
+          <p className="mt-3 text-sm text-[#17001C]/70">{message}</p>
+        ) : null}
       </form>
 
       <div>
-        <h2 className="text-lg text-[#17001C]">Footer profiles</h2>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <h2 className="text-lg text-[#17001C]">Footer profiles</h2>
+          <button
+            className="font-primary fmc-button h-10 bg-[#17001C] px-4 text-sm text-white hover:bg-[#72007E] disabled:cursor-not-allowed disabled:opacity-50"
+            disabled={handles.length === 0}
+            onClick={handleExportFooterHandles}
+            type="button"
+          >
+            Export CSV
+          </button>
+        </div>
+        {isLoading ? (
+          <p className="scrap-card mt-5 p-5 text-sm text-[#17001C]/75">
+            Loading footer profiles...
+          </p>
+        ) : null}
         <div className="mt-5 grid gap-3">
           {handles.map((item) => (
             <div
@@ -127,16 +250,17 @@ export default function FooterHandlesAdmin() {
                 </a>
               </div>
               <button
-                className="font-primary fmc-button bg-[#17001C] px-3 py-2 text-xs text-white hover:bg-[#72007E]"
-                onClick={() => handleRemoveFooterLink(item.id)}
+                className="font-primary fmc-button bg-[#17001C] px-3 py-2 text-xs text-white hover:bg-[#72007E] disabled:opacity-60"
+                disabled={activeHandleId === item.id}
+                onClick={() => void handleRemoveFooterLink(item.id)}
                 type="button"
               >
-                Remove
+                {activeHandleId === item.id ? "Removing..." : "Remove"}
               </button>
             </div>
           ))}
         </div>
-        {handles.length === 0 ? (
+        {!isLoading && handles.length === 0 ? (
           <p className="scrap-card mt-5 p-5 text-sm text-[#17001C]/75">
             No footer profiles added yet.
           </p>
