@@ -17,6 +17,8 @@ export type MediaClip = {
   approved: boolean;
   title?: string;
   uploadedBy?: string;
+  uploadGroupId?: string;
+  driveFolderUrl?: string;
   createdAt?: string;
 };
 
@@ -29,6 +31,8 @@ export type MediaClipRecord = {
   approved: boolean;
   title: string | null;
   uploaded_by: string | null;
+  upload_group_id: string | null;
+  drive_folder_url: string | null;
   created_at: string;
 };
 

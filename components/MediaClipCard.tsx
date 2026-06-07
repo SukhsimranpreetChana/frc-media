@@ -5,6 +5,8 @@ type MediaClipCardProps = {
 };
 
 export default function MediaClipCard({ clip }: MediaClipCardProps) {
+  const thumbnailUrl = `/api/media/thumbnail?fileUrl=${encodeURIComponent(clip.videoUrl)}`;
+
   return (
     <article className="fmc-dark-halftone flex flex-col overflow-hidden rounded-2xl border-2 border-[#F85259]/50 text-white shadow-[8px_8px_0_#17001C]">
       <a
@@ -18,7 +20,7 @@ export default function MediaClipCard({ clip }: MediaClipCardProps) {
           <img
             alt=""
             className="h-full w-full object-cover transition duration-300 hover:scale-105"
-            src={clip.thumbnailUrl}
+            src={thumbnailUrl || clip.thumbnailUrl}
           />
         </div>
       </a>

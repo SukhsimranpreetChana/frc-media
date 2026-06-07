@@ -9,9 +9,9 @@ export default function TeamsPage() {
           <p className="text-sm text-[#72007E]">Public uploads</p>
           <h1 className="mt-2 text-3xl text-[#17001C]">Upload</h1>
           <p className="mt-4 text-[#17001C]/75">
-            Submit team media with a team number, year, clip link, and
-            thumbnail. Approved clips show up in team search from newest to
-            oldest year.
+            Submit team media with a team number, year, and media file. FMC
+            saves uploads to Google Drive, then approved clips show up in team
+            search from newest to oldest year.
           </p>
         </div>
         <figure className="scrap-card mb-10 rotate-[-0.5deg] overflow-hidden p-3">

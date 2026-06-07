@@ -1,3 +1,4 @@
+import CollaborationsShowcase from "@/components/CollaborationsShowcase";
 import CommissionsBoard from "@/components/CommissionsBoard";
 
 export default function CommissionsPage() {
@@ -14,6 +15,12 @@ export default function CommissionsPage() {
           </p>
         </div>
 
+        <CollaborationsShowcase />
+        <div className="mb-6 mt-12 border-b-4 border-[#F85259] pb-3">
+          <h2 className="text-2xl text-[#17001C]">
+            Request an individual commission
+          </h2>
+        </div>
         <CommissionsBoard />
       </section>
     </main>

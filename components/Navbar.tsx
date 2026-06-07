@@ -6,6 +6,7 @@ const links = [
   { href: "/clips", label: "Teams" },
   { href: "/teams", label: "Upload" },
   { href: "/commissions", label: "Commissions" },
+  { href: "/contact", label: "Contact" },
   { href: "/admin", label: "Admin" },
 ];
 

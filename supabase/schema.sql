@@ -9,6 +9,8 @@ create table if not exists public.media_clips (
   approved boolean not null default false,
   title text,
   uploaded_by text,
+  upload_group_id text,
+  drive_folder_url text,
   created_at timestamptz not null default now()
 );
 
@@ -17,6 +19,12 @@ alter table public.media_clips
 
 alter table public.media_clips
   add column if not exists uploaded_by text;
+
+alter table public.media_clips
+  add column if not exists upload_group_id text;
+
+alter table public.media_clips
+  add column if not exists drive_folder_url text;
 
 alter table public.media_clips
   alter column approved set default false;
@@ -35,6 +43,9 @@ create index if not exists media_clips_year_idx
 
 create index if not exists media_clips_approved_idx
   on public.media_clips (approved);
+
+create index if not exists media_clips_upload_group_id_idx
+  on public.media_clips (upload_group_id);
 
 alter table public.media_clips enable row level security;
 

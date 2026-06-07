@@ -1,10 +1,73 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import type { Team } from "@/types";
 
 type TeamCardProps = {
   team: Team;
 };
 
+type TeamFolderResponse = {
+  hasFolder: boolean;
+  folderUrl?: string;
+  uploadUrl?: string;
+  year?: number;
+};
+
 export default function TeamCard({ team }: TeamCardProps) {
+  const [folderLink, setFolderLink] = useState("/teams#upload-media");
+  const [buttonLabel, setButtonLabel] = useState("Upload media");
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function loadTeamFolder() {
+      setFolderLink("/teams#upload-media");
+      setButtonLabel("Upload media");
+
+      try {
+        const response = await fetch(
+          `/api/media/team-folder?teamNumber=${encodeURIComponent(team.number)}`,
+          {
+            signal: controller.signal,
+          },
+        );
+
+        if (!response.ok) {
+          return;
+        }
+
+        const data = (await response.json()) as TeamFolderResponse;
+
+        if (controller.signal.aborted) {
+          return;
+        }
+
+        if (data.hasFolder && data.folderUrl) {
+          setFolderLink(data.folderUrl);
+          setButtonLabel(data.year ? `Find ${data.year} clips` : "Find clips");
+          return;
+        }
+
+        setFolderLink(data.uploadUrl || "/teams#upload-media");
+        setButtonLabel("Upload media");
+      } catch {
+        if (!controller.signal.aborted) {
+          setFolderLink("/teams#upload-media");
+          setButtonLabel("Upload media");
+        }
+      }
+    }
+
+    void loadTeamFolder();
+
+    return () => {
+      controller.abort();
+    };
+  }, [team.number]);
+
+  const opensExternally = folderLink.startsWith("http");
+
   return (
     <article className="scrap-card flex h-full flex-col p-5">
       <div className="flex items-center gap-4">
@@ -39,11 +102,11 @@ export default function TeamCard({ team }: TeamCardProps) {
       </div>
       <a
         className="font-primary fmc-button mt-auto inline-flex h-10 items-center justify-center bg-[#7137E3] px-4 text-sm text-white hover:bg-[#A335E6]"
-        href={team.driveUrl}
-        target="_blank"
-        rel="noopener noreferrer"
+        href={folderLink}
+        rel={opensExternally ? "noopener noreferrer" : undefined}
+        target={opensExternally ? "_blank" : undefined}
       >
-        Find clips on Icedrive
+        {buttonLabel}
       </a>
     </article>
   );

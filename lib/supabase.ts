@@ -57,6 +57,8 @@ export function mapMediaClipRecord(record: MediaClipRecord): MediaClip {
     approved: record.approved,
     title: record.title ?? undefined,
     uploadedBy: record.uploaded_by ?? undefined,
+    uploadGroupId: record.upload_group_id ?? undefined,
+    driveFolderUrl: record.drive_folder_url ?? undefined,
     createdAt: record.created_at,
   };
 }
@@ -110,6 +112,8 @@ export async function createMediaClip(clip: Omit<MediaClip, "id" | "createdAt">)
     approved: clip.approved,
     title: clip.title ?? null,
     uploaded_by: clip.uploadedBy ?? null,
+    upload_group_id: clip.uploadGroupId ?? null,
+    drive_folder_url: clip.driveFolderUrl ?? null,
   };
 
   const { data, error } = await getSupabaseClient()
@@ -136,6 +140,8 @@ export async function submitPendingClip(input: {
   thumbnailUrl: string;
   title?: string;
   uploadedBy?: string;
+  uploadGroupId?: string;
+  driveFolderUrl?: string;
 }) {
   return createMediaClip({
     title: input.title?.trim() || `FRC ${input.teamNumber} submitted clip`,
@@ -145,6 +151,8 @@ export async function submitPendingClip(input: {
     thumbnailUrl: input.thumbnailUrl,
     approved: false,
     uploadedBy: input.uploadedBy?.trim() || undefined,
+    uploadGroupId: input.uploadGroupId,
+    driveFolderUrl: input.driveFolderUrl,
   });
 }
 

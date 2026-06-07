@@ -3,7 +3,10 @@
 import { useEffect, useMemo, useState } from "react";
 import ExternalMediaCard from "@/components/ExternalMediaCard";
 import MatchVideoCard from "@/components/MatchVideoCard";
-import MediaClipCard from "@/components/MediaClipCard";
+import MediaCollageCard, {
+  getCollageCoverClip,
+  type MediaCollage,
+} from "@/components/MediaCollageCard";
 import TeamCard from "@/components/TeamCard";
 import { getMediaClips } from "@/lib/supabase";
 import { searchTeams } from "@/lib/search";
@@ -54,6 +57,44 @@ function sortMediaClips(clips: MediaClip[]) {
   return [...clips].sort(
     (a, b) => b.year - a.year || getCreatedTime(b) - getCreatedTime(a),
   );
+}
+
+function getMediaCollages(clips: MediaClip[]) {
+  const groups = new Map<string, MediaCollage>();
+
+  sortMediaClips(clips).forEach((clip) => {
+    const uploadedBy = clip.uploadedBy || "Unknown uploader";
+    const groupId =
+      clip.uploadGroupId ||
+      clip.driveFolderUrl ||
+      `${clip.teamNumber}-${clip.year}-${uploadedBy}`;
+    const existingGroup = groups.get(groupId);
+
+    if (existingGroup) {
+      existingGroup.clips.push(clip);
+      existingGroup.folderUrl = existingGroup.folderUrl || clip.driveFolderUrl;
+      return;
+    }
+
+    groups.set(groupId, {
+      id: groupId,
+      title: `${clip.teamNumber} collage by ${uploadedBy}`,
+      clips: [clip],
+      folderUrl: clip.driveFolderUrl,
+      teamNumber: clip.teamNumber,
+      year: clip.year,
+    });
+  });
+
+  return Array.from(groups.values()).sort((a, b) => {
+    const aCover = getCollageCoverClip(a);
+    const bCover = getCollageCoverClip(b);
+
+    return (
+      b.year - a.year ||
+      getCreatedTime(bCover) - getCreatedTime(aCover)
+    );
+  });
 }
 
 function sortExternalMedia(items: ExternalMediaItem[]) {
@@ -148,6 +189,7 @@ export default function TeamsFilter({ teams }: TeamsFilterProps) {
   const [tbaPage, setTbaPage] = useState(1);
   const [youtubePage, setYoutubePage] = useState(1);
   const [matchPage, setMatchPage] = useState(1);
+  const [resolvedCollageFolderUrls, setResolvedCollageFolderUrls] = useState<Record<string, string>>({});
 
   const selectedPreviewTeams = useMemo(() => pickRandomTeams(), []);
   const searchableTeams = previewTeams.length > 0 ? previewTeams : teams;
@@ -162,14 +204,17 @@ export default function TeamsFilter({ teams }: TeamsFilterProps) {
     : undefined;
   const isTeamNumberSearch = /^\d{1,5}$/.test(normalizedQuery);
   const shouldLookupTeam = isTeamNumberSearch;
-  const sortedTeamClips = useMemo(
+  const sortedTeamCollages = useMemo(
     () =>
-      sortMediaClips(
+      getMediaCollages(
         selectedYear
           ? teamClips.filter((clip) => clip.year === selectedYear)
           : teamClips,
-      ),
-    [selectedYear, teamClips],
+      ).map((collage) => ({
+        ...collage,
+        folderUrl: collage.folderUrl || resolvedCollageFolderUrls[collage.id],
+      })),
+    [resolvedCollageFolderUrls, selectedYear, teamClips],
   );
   const sortedTbaMedia = useMemo(
     () =>
@@ -198,9 +243,9 @@ export default function TeamsFilter({ teams }: TeamsFilterProps) {
       ),
     [matchVideos, selectedYear],
   );
-  const visibleTeamClips = useMemo(
-    () => paginateItems(sortedTeamClips, fmcPage),
-    [fmcPage, sortedTeamClips],
+  const visibleTeamCollages = useMemo(
+    () => paginateItems(sortedTeamCollages, fmcPage),
+    [fmcPage, sortedTeamCollages],
   );
   const visibleTbaMedia = useMemo(
     () => paginateItems(sortedTbaMedia, tbaPage),
@@ -221,6 +266,53 @@ export default function TeamsFilter({ teams }: TeamsFilterProps) {
     setYoutubePage(1);
     setMatchPage(1);
   }, [normalizedQuery, normalizedYearFilter]);
+
+  useEffect(() => {
+    async function resolveCollageFolderUrl(collage: MediaCollage) {
+      const coverClip = getCollageCoverClip(collage);
+
+      if (
+        collage.folderUrl ||
+        resolvedCollageFolderUrls[collage.id] ||
+        !coverClip?.videoUrl
+      ) {
+        return;
+      }
+
+      try {
+        const response = await fetch("/api/media/folder-url", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            fileUrl: coverClip.videoUrl,
+          }),
+        });
+
+        if (!response.ok) {
+          return;
+        }
+
+        const data = (await response.json()) as {
+          folderUrl?: string;
+        };
+
+        if (data.folderUrl) {
+          setResolvedCollageFolderUrls((currentUrls) => ({
+            ...currentUrls,
+            [collage.id]: data.folderUrl || "",
+          }));
+        }
+      } catch {
+        // The card still falls back to the individual file link.
+      }
+    }
+
+    sortedTeamCollages.forEach((collage) => {
+      void resolveCollageFolderUrl(collage);
+    });
+  }, [resolvedCollageFolderUrls, sortedTeamCollages]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -522,12 +614,6 @@ export default function TeamsFilter({ teams }: TeamsFilterProps) {
         </div>
       </label>
 
-      {normalizedQuery ? (
-        <p className="mt-4 inline-flex rotate-[-1deg] rounded-md bg-[#F85259] px-3 py-1 text-sm text-white">
-          Showing {filteredTeams.length} of {searchableTeams.length} teams
-        </p>
-      ) : null}
-
       {!isTeamNumberSearch && isLoadingPreviewTeams && !normalizedQuery ? (
         <div className="mt-6 grid gap-4 md:grid-cols-3">
           {selectedPreviewTeams.map((teamNumber) => (
@@ -583,9 +669,6 @@ export default function TeamsFilter({ teams }: TeamsFilterProps) {
                 FRC {normalizedQuery} community uploads
               </h2>
             </div>
-            <p className="rounded-md bg-[#F85259] px-3 py-1 text-sm text-white">
-              Newest, then popularity
-            </p>
           </div>
 
           {isLoadingClips ? (
@@ -594,23 +677,23 @@ export default function TeamsFilter({ teams }: TeamsFilterProps) {
             </div>
           ) : null}
 
-          {!isLoadingClips && sortedTeamClips.length > 0 ? (
+          {!isLoadingClips && sortedTeamCollages.length > 0 ? (
             <>
               <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-                {visibleTeamClips.map((clip) => (
-                  <MediaClipCard clip={clip} key={clip.id} />
+                {visibleTeamCollages.map((collage) => (
+                  <MediaCollageCard collage={collage} key={collage.id} />
                 ))}
               </div>
               <PaginationControls
                 currentPage={fmcPage}
-                itemCount={sortedTeamClips.length}
+                itemCount={sortedTeamCollages.length}
                 label="FMC Approved Media"
                 onPageChange={setFmcPage}
               />
             </>
           ) : null}
 
-          {!isLoadingClips && sortedTeamClips.length === 0 ? (
+          {!isLoadingClips && sortedTeamCollages.length === 0 ? (
             <div className="rounded-lg border-2 border-dashed border-[#72007E] bg-[#F4E7E7] p-6 text-sm text-[#17001C]/70">
               Sorry there is no media for this team right now :/{" "}
               <a
@@ -633,9 +716,6 @@ export default function TeamsFilter({ teams }: TeamsFilterProps) {
                 TBA media for FRC {normalizedQuery}
               </h2>
             </div>
-            <p className="rounded-md bg-[#7137E3] px-3 py-1 text-sm text-white">
-              Newest, then preferred
-            </p>
           </div>
 
           {isLoadingTbaMedia ? (
@@ -679,9 +759,6 @@ export default function TeamsFilter({ teams }: TeamsFilterProps) {
                 Search results for FRC {normalizedQuery}
               </h2>
             </div>
-            <p className="rounded-md bg-[#A335E6] px-3 py-1 text-sm text-white">
-              Newest, then views
-            </p>
           </div>
 
           {isLoadingYoutubeResults ? (
@@ -725,9 +802,6 @@ export default function TeamsFilter({ teams }: TeamsFilterProps) {
                 YouTube matches featuring FRC {normalizedQuery}
               </h2>
             </div>
-            <p className="rounded-md bg-[#F85259] px-3 py-1 text-sm text-white">
-              Newest, then views
-            </p>
           </div>
 
           {isLoadingMatchVideos ? (

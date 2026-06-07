@@ -58,8 +58,7 @@ export default function Home() {
         <div className="scrap-card rotate-[1deg] p-6">
           <h2 className="text-lg text-[#17001C]">Learn Together</h2>
           <p className="mt-3 text-sm leading-6 text-[#17001C]/75">
-            Ask questions, get feedback, trade editing tips, and build skills
-            with creatives who understand FIRST.
+            Ask questions, get feedback, trade editing tips, and build skills.
           </p>
         </div>
         <div className="scrap-card rotate-[-0.5deg] p-6">
@@ -79,8 +78,9 @@ export default function Home() {
               Media lives where the action is.
             </h2>
             <p className="mt-4 text-[#F4E7E7]">
-              Event coverage, team stories, field-side moments, and the creative
-              people who make FIRST feel alive online.
+              Team stories, field-side moments, and the creative
+              people who make FIRST feel alive online. Get all the helpful, inspiring, 
+              and behind-the-scenes content from the community.
             </p>
           </div>
 
