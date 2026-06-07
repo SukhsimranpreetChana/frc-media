@@ -7,7 +7,7 @@ const links = [
   { href: "/teams", label: "Upload" },
   { href: "/commissions", label: "Commissions" },
   { href: "/contact", label: "Contact" },
-  { href: "/admin", label: "Admin" },
+  { href: "/admin", label: "⚙️" },
 ];
 
 const discordInvite = "https://discord.gg/xCqryxThbC";

@@ -22,7 +22,6 @@ export async function POST(request: Request) {
   const year = Number(formData.get("year"));
   const uploadedBy = String(formData.get("uploadedBy") || "").trim();
   const title = String(formData.get("title") || "").trim();
-  const uploaderName = uploadedBy || "Unknown uploader";
   const uploadGroupId = crypto.randomUUID();
 
   if (files.length === 0) {
@@ -35,6 +34,13 @@ export async function POST(request: Request) {
   if (!isValidTeamNumber(teamNumber) || !isValidYear(year)) {
     return NextResponse.json(
       { error: "Please add a valid team number and year." },
+      { status: 400 },
+    );
+  }
+
+  if (!uploadedBy) {
+    return NextResponse.json(
+      { error: "Please add your name or handle before uploading." },
       { status: 400 },
     );
   }
@@ -52,7 +58,10 @@ export async function POST(request: Request) {
 
   try {
     const uploads = [];
-    const collageTitle = `${teamNumber} collage by ${uploaderName}`;
+    const defaultTitle =
+      files.length > 1
+        ? `${teamNumber} collage by ${uploadedBy}`
+        : `${teamNumber} media by ${uploadedBy}`;
     const uploadFolder = await createGoogleDriveUploadFolderForSubmission({
       teamNumber,
       year,
@@ -68,13 +77,13 @@ export async function POST(request: Request) {
         uploadFolder,
       });
       const clip = await createMediaClip({
-        title: title || collageTitle,
+        title: title || defaultTitle,
         teamNumber,
         year,
         videoUrl: driveFile.viewUrl,
         thumbnailUrl: driveFile.thumbnailUrl,
         approved: false,
-        uploadedBy: uploadedBy || undefined,
+        uploadedBy,
         uploadGroupId,
         driveFolderUrl: driveFile.folderUrl,
       });

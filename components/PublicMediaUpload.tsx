@@ -33,10 +33,11 @@ export default function PublicMediaUpload({
     setMessage("");
 
     const trimmedTeamNumber = teamNumber.trim();
+    const trimmedUploadedBy = uploadedBy.trim();
     const numericYear = Number(year);
 
-    if (!trimmedTeamNumber || !numericYear || files.length === 0) {
-      setMessage("Add a team number, year, and at least one media file.");
+    if (!trimmedTeamNumber || !numericYear || !trimmedUploadedBy || files.length === 0) {
+      setMessage("Add a team number, year, your name, and at least one media file.");
       return;
     }
 
@@ -46,7 +47,7 @@ export default function PublicMediaUpload({
       const uploadData = new FormData();
       uploadData.set("teamNumber", trimmedTeamNumber);
       uploadData.set("year", String(numericYear));
-      uploadData.set("uploadedBy", uploadedBy);
+      uploadData.set("uploadedBy", trimmedUploadedBy);
       uploadData.set("title", title);
       files.forEach((file) => {
         uploadData.append("files", file);
@@ -131,6 +132,7 @@ export default function PublicMediaUpload({
             className="mt-2 h-11 w-full rounded-md border-2 border-[#17001C] bg-[#F4E7E7] px-4 text-sm text-[#17001C] outline-none ring-[#A335E6]/20 focus:border-[#7137E3] focus:ring-4"
             onChange={(event) => setUploadedBy(event.target.value)}
             placeholder="@handle or name, used for your Drive folder"
+            required
             value={uploadedBy}
           />
         </label>

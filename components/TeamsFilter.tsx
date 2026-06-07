@@ -78,7 +78,7 @@ function getMediaCollages(clips: MediaClip[]) {
 
     groups.set(groupId, {
       id: groupId,
-      title: `${clip.teamNumber} collage by ${uploadedBy}`,
+      title: clip.title || `${clip.teamNumber} media by ${uploadedBy}`,
       clips: [clip],
       folderUrl: clip.driveFolderUrl,
       teamNumber: clip.teamNumber,
