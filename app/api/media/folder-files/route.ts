@@ -1,7 +1,18 @@
 import { NextResponse } from "next/server";
+import { hasAdminSession } from "@/lib/adminAuth";
 import { listGoogleDriveFolderFiles } from "@/lib/googleDrive";
+import { getMediaClips } from "@/lib/supabase";
 
 export const runtime = "nodejs";
+
+async function canListFolder(folderUrl: string) {
+  if (await hasAdminSession()) {
+    return true;
+  }
+
+  const approvedClips = await getMediaClips({ approved: true });
+  return approvedClips.some((clip) => clip.driveFolderUrl === folderUrl);
+}
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -15,14 +26,16 @@ export async function GET(request: Request) {
   }
 
   try {
+    if (!(await canListFolder(folderUrl))) {
+      return NextResponse.json({ error: "Forbidden." }, { status: 403 });
+    }
+
     const files = await listGoogleDriveFolderFiles(folderUrl);
     return NextResponse.json({ files });
-  } catch (error) {
-    const message =
-      error instanceof Error
-        ? error.message
-        : "Unable to load Google Drive folder files.";
-
-    return NextResponse.json({ error: message }, { status: 500 });
+  } catch {
+    return NextResponse.json(
+      { error: "Unable to load Google Drive folder files." },
+      { status: 500 },
+    );
   }
 }

@@ -11,6 +11,10 @@ const contactInbox = "firstmediacommunity@gmail.com";
 const resendApiKey = process.env.RESEND_API_KEY;
 const resendFromEmail =
   process.env.RESEND_FROM_EMAIL || "FIRST Media Community <onboarding@resend.dev>";
+const maxNameLength = 120;
+const maxEmailLength = 254;
+const maxSubjectLength = 160;
+const maxMessageLength = 5000;
 
 function isValidEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -45,6 +49,18 @@ export async function POST(request: Request) {
   if (!name || !email || !message) {
     return NextResponse.json(
       { error: "Please add your name, email, and message." },
+      { status: 400 },
+    );
+  }
+
+  if (
+    name.length > maxNameLength ||
+    email.length > maxEmailLength ||
+    subject.length > maxSubjectLength ||
+    message.length > maxMessageLength
+  ) {
+    return NextResponse.json(
+      { error: "Please shorten your contact form message." },
       { status: 400 },
     );
   }

@@ -4,6 +4,7 @@ import Footer from "@/components/Footer";
 import HalftoneScroll from "@/components/HalftoneScroll";
 import Navbar from "@/components/Navbar";
 import SplashIntro from "@/components/SplashIntro";
+import TermsPrompt from "@/components/TermsPrompt";
 import "./globals.css";
 
 const delaGothicOne = Dela_Gothic_One({
@@ -40,6 +41,7 @@ export default function RootLayout({
         <Navbar />
         {children}
         <Footer />
+        <TermsPrompt />
       </body>
     </html>
   );

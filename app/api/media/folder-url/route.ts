@@ -1,13 +1,24 @@
 import { NextResponse } from "next/server";
+import { hasAdminSession } from "@/lib/adminAuth";
 import { getGoogleDriveParentFolderUrl } from "@/lib/googleDrive";
+import { getMediaClips } from "@/lib/supabase";
 
 export const runtime = "nodejs";
 
+async function canResolveFileUrl(fileUrl: string) {
+  if (await hasAdminSession()) {
+    return true;
+  }
+
+  const approvedClips = await getMediaClips({ approved: true });
+  return approvedClips.some((clip) => clip.videoUrl === fileUrl);
+}
+
 export async function POST(request: Request) {
-  const payload = (await request.json()) as {
+  const payload = (await request.json().catch(() => null)) as {
     fileUrl?: string;
-  };
-  const fileUrl = payload.fileUrl?.trim();
+  } | null;
+  const fileUrl = payload?.fileUrl?.trim();
 
   if (!fileUrl) {
     return NextResponse.json(
@@ -17,15 +28,17 @@ export async function POST(request: Request) {
   }
 
   try {
+    if (!(await canResolveFileUrl(fileUrl))) {
+      return NextResponse.json({ error: "Forbidden." }, { status: 403 });
+    }
+
     return NextResponse.json({
       folderUrl: await getGoogleDriveParentFolderUrl(fileUrl),
     });
-  } catch (error) {
-    const message =
-      error instanceof Error
-        ? error.message
-        : "Unable to resolve Google Drive folder.";
-
-    return NextResponse.json({ error: message }, { status: 500 });
+  } catch {
+    return NextResponse.json(
+      { error: "Unable to resolve Google Drive folder." },
+      { status: 500 },
+    );
   }
 }

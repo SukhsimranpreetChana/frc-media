@@ -1,10 +1,24 @@
 import { NextResponse } from "next/server";
+import { hasAdminSession } from "@/lib/adminAuth";
 import {
   getGoogleDriveFileIdFromUrl,
   getGoogleDrivePreviewImage,
 } from "@/lib/googleDrive";
+import { getMediaClips } from "@/lib/supabase";
 
 export const runtime = "nodejs";
+
+async function canPreviewFile(fileId: string) {
+  if (await hasAdminSession()) {
+    return true;
+  }
+
+  const approvedClips = await getMediaClips({ approved: true });
+
+  return approvedClips.some(
+    (clip) => getGoogleDriveFileIdFromUrl(clip.videoUrl) === fileId,
+  );
+}
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -20,6 +34,10 @@ export async function GET(request: Request) {
   }
 
   try {
+    if (!(await canPreviewFile(fileId))) {
+      return NextResponse.json({ error: "Forbidden." }, { status: 403 });
+    }
+
     const preview = await getGoogleDrivePreviewImage(fileId);
 
     return new NextResponse(new Uint8Array(preview.bytes), {
@@ -29,10 +47,10 @@ export async function GET(request: Request) {
         "Content-Type": preview.contentType,
       },
     });
-  } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Unable to load media thumbnail.";
-
-    return NextResponse.json({ error: message }, { status: 500 });
+  } catch {
+    return NextResponse.json(
+      { error: "Unable to load media thumbnail." },
+      { status: 500 },
+    );
   }
 }

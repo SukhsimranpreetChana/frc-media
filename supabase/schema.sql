@@ -56,32 +56,10 @@ create policy "Public can read media clips"
   using (approved = true);
 
 drop policy if exists "Prototype admin can read pending media clips" on public.media_clips;
-create policy "Prototype admin can read pending media clips"
-  on public.media_clips
-  for select
-  using (true);
-
 drop policy if exists "Public can submit pending media clips" on public.media_clips;
-create policy "Public can submit pending media clips"
-  on public.media_clips
-  for insert
-  with check (approved = false);
-
 drop policy if exists "Prototype admin can update media clips" on public.media_clips;
-create policy "Prototype admin can update media clips"
-  on public.media_clips
-  for update
-  using (true)
-  with check (true);
-
 drop policy if exists "Prototype admin can delete media clips" on public.media_clips;
-create policy "Prototype admin can delete media clips"
-  on public.media_clips
-  for delete
-  using (true);
 
--- Prototype note:
--- Public users submit metadata with approved=false. The password-gated admin
--- review UI can approve/delete because of the prototype update/delete policies.
--- Replace these policies with real Supabase auth or service-role routes before
--- using this in production.
+-- Media uploads and admin moderation are performed by server-only routes using
+-- SUPABASE_SERVICE_ROLE_KEY, which bypasses RLS. Do not expose the service-role
+-- key to client-side code or NEXT_PUBLIC_ variables.

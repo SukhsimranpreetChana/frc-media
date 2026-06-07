@@ -7,6 +7,12 @@ import { createMediaClip } from "@/lib/supabase";
 
 export const runtime = "nodejs";
 
+const maxFileCount = 6;
+const maxFileSizeBytes = 100 * 1024 * 1024;
+const maxTotalUploadBytes = 250 * 1024 * 1024;
+const maxUploadedByLength = 80;
+const maxTitleLength = 120;
+
 function isValidTeamNumber(teamNumber: string) {
   return /^\d{1,5}$/.test(teamNumber);
 }
@@ -23,10 +29,28 @@ export async function POST(request: Request) {
   const uploadedBy = String(formData.get("uploadedBy") || "").trim();
   const title = String(formData.get("title") || "").trim();
   const uploadGroupId = crypto.randomUUID();
+  const totalUploadBytes = files.reduce((total, file) => total + file.size, 0);
 
   if (files.length === 0) {
     return NextResponse.json(
       { error: "Please choose at least one file to upload." },
+      { status: 400 },
+    );
+  }
+
+  if (files.length > maxFileCount) {
+    return NextResponse.json(
+      { error: `Please upload ${maxFileCount} files or fewer at a time.` },
+      { status: 400 },
+    );
+  }
+
+  if (
+    files.some((file) => file.size <= 0 || file.size > maxFileSizeBytes) ||
+    totalUploadBytes > maxTotalUploadBytes
+  ) {
+    return NextResponse.json(
+      { error: "One or more files are too large for this upload." },
       { status: 400 },
     );
   }
@@ -41,6 +65,13 @@ export async function POST(request: Request) {
   if (!uploadedBy) {
     return NextResponse.json(
       { error: "Please add your name or handle before uploading." },
+      { status: 400 },
+    );
+  }
+
+  if (uploadedBy.length > maxUploadedByLength || title.length > maxTitleLength) {
+    return NextResponse.json(
+      { error: "Please shorten the upload name or title." },
       { status: 400 },
     );
   }
@@ -101,12 +132,10 @@ export async function POST(request: Request) {
       driveFolderUrl: uploadFolder.url,
       driveFolderName: uploadFolder.name,
     });
-  } catch (error) {
-    const message =
-      error instanceof Error
-        ? error.message
-        : "Unable to upload media to Google Drive.";
-
-    return NextResponse.json({ error: message }, { status: 500 });
+  } catch {
+    return NextResponse.json(
+      { error: "Unable to upload media to Google Drive." },
+      { status: 500 },
+    );
   }
 }

@@ -1,11 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  deleteMediaClip,
-  getPendingMediaClips,
-  updateMediaClipApproval,
-} from "@/lib/supabase";
 import type { MediaClip } from "@/types";
 
 type ClipReviewGroup = {
@@ -76,21 +71,59 @@ export default function ClipAdmin() {
   const [message, setMessage] = useState("");
   const reviewGroups = getReviewGroups(pendingClips);
 
+  async function fetchPendingClips() {
+    const response = await fetch("/api/admin/media");
+    const data = (await response.json().catch(() => null)) as {
+      clips?: MediaClip[];
+      error?: string;
+    } | null;
+
+    if (!response.ok) {
+      throw new Error(data?.error || "Could not load pending clips.");
+    }
+
+    return data?.clips || [];
+  }
+
   async function loadPendingClips() {
     setIsLoading(true);
     setMessage("");
 
     try {
-      setPendingClips(await getPendingMediaClips());
+      setPendingClips(await fetchPendingClips());
     } catch {
-      setMessage("Could not load pending clips. Check Supabase policies.");
+      setMessage("Could not load pending clips. Check admin access.");
     } finally {
       setIsLoading(false);
     }
   }
 
   useEffect(() => {
-    void loadPendingClips();
+    let isMounted = true;
+
+    async function loadInitialPendingClips() {
+      try {
+        const clips = await fetchPendingClips();
+
+        if (isMounted) {
+          setPendingClips(clips);
+        }
+      } catch {
+        if (isMounted) {
+          setMessage("Could not load pending clips. Check admin access.");
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    void loadInitialPendingClips();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   useEffect(() => {
@@ -141,9 +174,21 @@ export default function ClipAdmin() {
     setMessage("");
 
     try {
-      await Promise.all(
-        group.clips.map((clip) => updateMediaClipApproval(clip.id, true)),
-      );
+      const response = await fetch("/api/admin/media", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          clipIds: group.clips.map((clip) => clip.id),
+          approved: true,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Could not approve upload.");
+      }
+
       setPendingClips((clips) =>
         clips.filter(
           (clip) => !group.clips.some((groupClip) => groupClip.id === clip.id),
@@ -164,26 +209,25 @@ export default function ClipAdmin() {
 
     try {
       const folderUrl = group.folderUrl || resolvedFolderUrls[group.id];
+      const response = await fetch("/api/admin/media", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          clipIds: group.clips.map((clip) => clip.id),
+          folderUrl,
+        }),
+      });
 
-      if (folderUrl) {
-        const response = await fetch("/api/media/drive-folder", {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ folderUrl }),
-        });
+      if (!response.ok) {
+        const data = (await response.json().catch(() => null)) as {
+          error?: string;
+        } | null;
 
-        if (!response.ok) {
-          const data = (await response.json().catch(() => null)) as {
-            error?: string;
-          } | null;
-
-          throw new Error(data?.error || "Could not delete Drive folder.");
-        }
+        throw new Error(data?.error || "Could not remove upload.");
       }
 
-      await Promise.all(group.clips.map((clip) => deleteMediaClip(clip.id)));
       setPendingClips((clips) =>
         clips.filter(
           (clip) => !group.clips.some((groupClip) => groupClip.id === clip.id),

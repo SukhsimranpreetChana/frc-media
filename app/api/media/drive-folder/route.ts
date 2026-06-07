@@ -1,9 +1,16 @@
 import { NextResponse } from "next/server";
+import { requireAdmin } from "@/lib/adminAuth";
 import { deleteGoogleDriveFileOrFolder } from "@/lib/googleDrive";
 
 export const runtime = "nodejs";
 
 export async function DELETE(request: Request) {
+  const unauthorized = await requireAdmin(request);
+
+  if (unauthorized) {
+    return unauthorized;
+  }
+
   const body = (await request.json().catch(() => null)) as {
     folderUrl?: string;
   } | null;
@@ -19,12 +26,10 @@ export async function DELETE(request: Request) {
   try {
     await deleteGoogleDriveFileOrFolder(folderUrl);
     return NextResponse.json({ ok: true });
-  } catch (error) {
-    const message =
-      error instanceof Error
-        ? error.message
-        : "Unable to delete Google Drive folder.";
-
-    return NextResponse.json({ error: message }, { status: 500 });
+  } catch {
+    return NextResponse.json(
+      { error: "Unable to delete Google Drive folder." },
+      { status: 500 },
+    );
   }
 }

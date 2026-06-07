@@ -3,17 +3,26 @@ import type { MediaClip, MediaClipRecord } from "@/types";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-function getSupabaseClient() {
+function getSupabaseClient(key = supabaseAnonKey) {
   if (!supabaseUrl) {
     throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL.");
   }
 
-  if (!supabaseAnonKey) {
-    throw new Error("Missing NEXT_PUBLIC_SUPABASE_ANON_KEY.");
+  if (!key) {
+    throw new Error("Missing Supabase API key.");
   }
 
-  return createClient(supabaseUrl, supabaseAnonKey);
+  return createClient(supabaseUrl, key);
+}
+
+function getSupabaseAdminClient() {
+  if (!supabaseServiceRoleKey) {
+    throw new Error("Missing SUPABASE_SERVICE_ROLE_KEY.");
+  }
+
+  return getSupabaseClient(supabaseServiceRoleKey);
 }
 
 export function getSupabaseStatus() {
@@ -116,7 +125,7 @@ export async function createMediaClip(clip: Omit<MediaClip, "id" | "createdAt">)
     drive_folder_url: clip.driveFolderUrl ?? null,
   };
 
-  const { data, error } = await getSupabaseClient()
+  const { data, error } = await getSupabaseAdminClient()
     .from("media_clips")
     .insert(record)
     .select()
@@ -157,11 +166,27 @@ export async function submitPendingClip(input: {
 }
 
 export async function getPendingMediaClips() {
-  return getMediaClips({ approved: false });
+  return getPendingMediaClipsForAdmin();
+}
+
+export async function getPendingMediaClipsForAdmin() {
+  const { data, error } = await getSupabaseAdminClient()
+    .from("media_clips")
+    .select("*")
+    .eq("approved", false)
+    .order("year", { ascending: false })
+    .order("created_at", { ascending: false })
+    .returns<MediaClipRecord[]>();
+
+  if (error) {
+    throw new Error("Unable to load pending media clips.");
+  }
+
+  return (data || []).map(mapMediaClipRecord);
 }
 
 export async function updateMediaClipApproval(id: string, approved: boolean) {
-  const { data, error } = await getSupabaseClient()
+  const { data, error } = await getSupabaseAdminClient()
     .from("media_clips")
     .update({ approved })
     .eq("id", id)
@@ -180,12 +205,23 @@ export async function updateMediaClipApproval(id: string, approved: boolean) {
 }
 
 export async function deleteMediaClip(id: string) {
-  const { error } = await getSupabaseClient()
+  const { error } = await getSupabaseAdminClient()
     .from("media_clips")
     .delete()
     .eq("id", id);
 
   if (error) {
     throw new Error(`Unable to remove media clip: ${error.message}`);
+  }
+}
+
+export async function deleteMediaClipForAdmin(id: string) {
+  const { error } = await getSupabaseAdminClient()
+    .from("media_clips")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    throw new Error("Unable to remove media clip.");
   }
 }
