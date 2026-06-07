@@ -11,26 +11,100 @@
   --fmc-plum: #72007e;
   --fmc-violet: #a335e6;
   --fmc-indigo: #7137e3;
+  --halftone-offset: 0px;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-nunito);
-  --font-primary: var(--font-montserrat);
+  --font-primary: var(--font-dela-gothic-one);
   --font-secondary: var(--font-nunito);
 }
 
 body {
-  background: var(--background);
+  background:
+    radial-gradient(circle at 1px 1px, rgba(113, 55, 227, 0.18) 1px, transparent 1.6px),
+    linear-gradient(135deg, #f4e7e7 0%, #ffffff 46%, #f4e7e7 100%);
+  background-position:
+    var(--halftone-offset) var(--halftone-offset),
+    center;
+  background-size: 18px 18px, 100% 100%;
   color: var(--foreground);
-  font-family: var(--font-nunito), Arial, Helvetica, sans-serif;
+  font-family: var(--font-nunito);
 }
 
 h1,
 h2,
 h3,
 .font-primary {
-  font-family: var(--font-montserrat), Arial, Helvetica, sans-serif;
-  font-weight: 900;
+  font-family: var(--font-dela-gothic-one);
+  font-weight: 400;
+}
+
+.fmc-surface {
+  background:
+    radial-gradient(circle at 1px 1px, rgba(113, 55, 227, 0.18) 1px, transparent 1.6px),
+    linear-gradient(135deg, #f4e7e7 0%, #ffffff 46%, #f4e7e7 100%);
+  background-position:
+    var(--halftone-offset) var(--halftone-offset),
+    center;
+  background-size: 18px 18px, 100% 100%;
+}
+
+.fmc-dark-halftone {
+  background:
+    radial-gradient(circle at 1px 1px, rgba(248, 82, 89, 0.35) 1px, transparent 1.7px),
+    linear-gradient(135deg, #17001c 0%, #000000 52%, #17001c 100%);
+  background-position:
+    calc(var(--halftone-offset) * -1) var(--halftone-offset),
+    center;
+  background-size: 16px 16px, 100% 100%;
+}
+
+.scrap-card {
+  position: relative;
+  border: 2px solid rgba(23, 0, 28, 0.9);
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 8px 8px 0 #17001c;
+}
+
+.scrap-card::before {
+  content: "";
+  position: absolute;
+  top: -13px;
+  left: 22px;
+  width: 72px;
+  height: 22px;
+  rotate: -4deg;
+  border: 1px solid rgba(23, 0, 28, 0.2);
+  background: rgba(244, 231, 231, 0.85);
+}
+
+.scrap-card:nth-child(2n)::before {
+  left: auto;
+  right: 28px;
+  rotate: 5deg;
+}
+
+.scrap-chip {
+  border: 1px solid rgba(23, 0, 28, 0.88);
+  background: #f4e7e7;
+  box-shadow: 3px 3px 0 #f85259;
+}
+
+.fmc-button {
+  border: 2px solid #17001c;
+  border-radius: 8px;
+  box-shadow: 4px 4px 0 #72007e;
+  transition:
+    transform 150ms ease,
+    box-shadow 150ms ease,
+    background-color 150ms ease;
+}
+
+.fmc-button:hover {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 #72007e;
 }

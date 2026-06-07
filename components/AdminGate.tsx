@@ -1,6 +1,8 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import CommissionsAdmin from "@/components/CommissionsAdmin";
+import FooterHandlesAdmin from "@/components/FooterHandlesAdmin";
 
 const adminPassword = "fmc2026";
 
@@ -23,25 +25,22 @@ export default function AdminGate() {
 
   if (isUnlocked) {
     return (
-      <div className="mt-8 rounded-lg border border-[#72007E]/20 bg-white p-6">
-        <h2 className="text-lg text-[#17001C]">Admin unlocked</h2>
-        <p className="mt-3 text-sm leading-6 text-[#17001C]/75">
-          Admin tools are not connected yet. This area can later manage teams,
-          Icedrive links, commissions, and uploaded media.
-        </p>
-      </div>
+      <>
+        <CommissionsAdmin />
+        <FooterHandlesAdmin />
+      </>
     );
   }
 
   return (
     <form
-      className="mt-8 max-w-md rounded-lg border border-[#72007E]/20 bg-white p-6"
+      className="scrap-card mt-8 max-w-md p-6"
       onSubmit={handleSubmit}
     >
       <label className="block text-sm text-[#17001C]/75">
         Password
         <input
-          className="mt-2 h-11 w-full rounded-md border border-[#72007E]/30 px-4 text-sm text-[#17001C] outline-none ring-[#A335E6]/20 focus:border-[#7137E3] focus:ring-4"
+          className="mt-2 h-11 w-full rounded-md border-2 border-[#17001C] bg-[#F4E7E7] px-4 text-sm text-[#17001C] outline-none ring-[#A335E6]/20 focus:border-[#7137E3] focus:ring-4"
           onChange={(event) => setPassword(event.target.value)}
           type="password"
           value={password}
@@ -49,7 +48,7 @@ export default function AdminGate() {
       </label>
       {error ? <p className="mt-3 text-sm text-[#F85259]">{error}</p> : null}
       <button
-        className="font-primary mt-5 h-10 rounded-md bg-[#F85259] px-4 text-sm text-white hover:bg-[#A335E6]"
+        className="font-primary fmc-button mt-5 h-10 bg-[#F85259] px-4 text-sm text-white hover:bg-[#A335E6]"
         type="submit"
       >
         Unlock admin

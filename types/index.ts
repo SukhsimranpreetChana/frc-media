@@ -18,3 +18,17 @@ export type Team = {
   tags: string[];
   description: string;
 };
+
+export type Commission = {
+  id: string;
+  title: string;
+  link: string;
+  costRange: string;
+};
+
+export type FooterHandle = {
+  id: string;
+  handle: string;
+  link: string;
+  profileImageUrl?: string;
+};

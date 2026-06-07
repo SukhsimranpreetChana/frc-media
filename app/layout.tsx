@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
-import { Montserrat, Nunito } from "next/font/google";
+import { Dela_Gothic_One, Nunito } from "next/font/google";
+import Footer from "@/components/Footer";
+import HalftoneScroll from "@/components/HalftoneScroll";
 import Navbar from "@/components/Navbar";
 import "./globals.css";
 
-const montserrat = Montserrat({
-  variable: "--font-montserrat",
+const delaGothicOne = Dela_Gothic_One({
+  variable: "--font-dela-gothic-one",
   subsets: ["latin"],
-  weight: "900",
+  weight: "400",
 });
 
 const nunito = Nunito({
@@ -29,11 +31,13 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${montserrat.variable} ${nunito.variable} h-full antialiased`}
+      className={`${delaGothicOne.variable} ${nunito.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        <HalftoneScroll />
         <Navbar />
         {children}
+        <Footer />
       </body>
     </html>
   );
