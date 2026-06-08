@@ -255,7 +255,7 @@ input:focus-visible + div .fmc-file-picker {
   overflow: hidden;
   background:
     linear-gradient(90deg, rgba(0, 0, 0, 0.52), rgba(0, 0, 0, 0.18) 58%, rgba(0, 0, 0, 0.48)),
-    url("/mission-texture.jpg");
+    url("/mission-background.jpg");
   background-color: #000000;
   background-position:
     center,
@@ -471,6 +471,52 @@ input:focus-visible + div .fmc-file-picker {
   outline-offset: 3px;
 }
 
+.nav-menu-toggle {
+  position: relative;
+  display: inline-flex;
+  height: 2.35rem;
+  width: 2.35rem;
+  shrink: 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.22rem;
+  border: 2px solid #f85259;
+  border-radius: 8px;
+  background: rgba(244, 231, 231, 0.12);
+  box-shadow: 3px 3px 0 #72007e;
+  transition:
+    transform 170ms ease,
+    box-shadow 170ms ease,
+    background-color 170ms ease;
+}
+
+.nav-menu-toggle span {
+  display: block;
+  height: 0.16rem;
+  width: 1.1rem;
+  border-radius: 999px;
+  background: #ffffff;
+}
+
+.nav-menu-toggle:hover,
+.nav-menu-toggle:focus-visible {
+  background: rgba(248, 82, 89, 0.3);
+  transform: translate(1px, 1px);
+  box-shadow: 2px 2px 0 #72007e;
+}
+
+.nav-menu-toggle:focus-visible {
+  outline: 2px solid #a335e6;
+  outline-offset: 3px;
+}
+
+@media (min-width: 1024px) {
+  .nav-menu-toggle {
+    display: none !important;
+  }
+}
+
 .page-transition-shell {
   animation:
     240ms ease-out both fmc-page-fade-in,
@@ -662,6 +708,78 @@ input:focus-visible + div .fmc-file-picker {
   .theme-toggle__track,
   .theme-toggle__knob {
     transition: none;
+  }
+
+  .nav-menu-panel,
+  .nav-menu-toggle {
+    transition: none;
+  }
+}
+
+@media (max-width: 1023px) {
+  .nav-brand-row {
+    display: grid;
+    grid-template-columns: 2.35rem minmax(0, 1fr) 2.35rem;
+    align-items: center;
+    width: 100%;
+  }
+
+  .nav-brand-row::before {
+    content: "";
+    display: block;
+    width: 2.35rem;
+  }
+
+  .nav-brand-link {
+    grid-column: 2;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .nav-menu-toggle {
+    grid-column: 3;
+  }
+
+  .nav-brand-name {
+    max-width: 12.5rem;
+    padding-bottom: 0;
+  }
+
+  .nav-menu-panel {
+    align-items: center;
+    justify-content: center;
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    padding-bottom: 0;
+    transition:
+      max-height 220ms cubic-bezier(0.16, 1, 0.3, 1),
+      opacity 170ms ease,
+      padding-bottom 220ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .nav-menu-panel--open {
+    max-height: 22rem;
+    opacity: 1;
+    padding-bottom: 0.5rem;
+  }
+
+  .nav-menu-panel .nav-tab {
+    min-width: min(13rem, 74vw);
+    justify-content: center;
+    text-align: center;
+  }
+
+  .nav-menu-panel .fmc-button {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .nav-menu-panel > div {
+    width: 100%;
+    justify-content: center;
   }
 }
 

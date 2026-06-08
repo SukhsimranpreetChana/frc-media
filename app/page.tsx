@@ -13,10 +13,10 @@ export default function Home() {
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-6 py-16">
           <div className="max-w-3xl">
             <h1 className="text-4xl text-white sm:text-5xl">
-              We are FIRST Media.
+              What is FMC?
             </h1>
             <p className="mt-6 text-lg leading-8 text-[#F4E7E7]">
-              We are a community of aspiring FIRST creatives consisting of students, alumni, and mentors 
+              We are the First Media Community; a community of aspiring FIRST creatives consisting of students, alumni, and mentors 
               who share ideas and create media of any variety. Not only to make it more accessible, but also 
               to help out others with their media. Our goal is to provide a space where aspiring and experienced 
               creatives can connect, share ideas, develop their skills, and collaborate on projects ranging from 
