@@ -20,9 +20,9 @@ export default function Navbar() {
 
   return (
     <header className="no-route-transition sticky top-0 z-50 bg-transparent px-4 py-3">
-      <nav className="fmc-dark-halftone flex w-full flex-col gap-4 rounded-2xl border-2 border-[#F85259]/50 px-6 py-4 shadow-[0_10px_0_rgba(23,0,28,0.22)] lg:flex-row lg:items-end lg:justify-between">
-        <div className="nav-brand-row flex items-end justify-between gap-3">
-          <Link className="nav-brand-link flex min-w-0 items-end gap-3" href="/">
+      <nav className="fmc-dark-halftone flex w-full flex-col gap-4 rounded-2xl border-2 border-[#F85259]/50 px-6 py-4 shadow-[0_10px_0_rgba(23,0,28,0.22)] lg:flex-row lg:items-start lg:justify-between">
+        <div className="nav-brand-row flex items-start justify-between gap-3">
+          <Link className="nav-brand-link flex min-w-0 items-start gap-3 text-left" href="/">
             <Image
               alt="FIRST Media Community logo"
               className="h-auto w-20 shrink-0 object-contain lg:w-32"
