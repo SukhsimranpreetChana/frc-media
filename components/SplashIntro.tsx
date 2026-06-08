@@ -4,8 +4,8 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 
 const splashStorageKey = "fmc-splash-intro-seen";
-const splashHoldMs = 5000;
-const splashFadeMs = 900;
+const splashHoldMs = 1100;
+const splashFadeMs = 320;
 
 export default function SplashIntro() {
   const [shouldRender, setShouldRender] = useState(true);

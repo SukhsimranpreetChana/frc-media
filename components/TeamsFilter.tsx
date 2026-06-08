@@ -16,7 +16,7 @@ type TeamsFilterProps = {
   teams: Team[];
 };
 
-const uploadLink = "/teams#upload-media";
+const uploadLink = "/upload#upload-media";
 
 type MatchVideosResponse = {
   configured: boolean;

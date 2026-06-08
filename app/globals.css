@@ -253,9 +253,10 @@ input:focus-visible + div .fmc-file-picker {
 .home-mission-section {
   position: relative;
   overflow: hidden;
+  contain: paint;
   background:
     linear-gradient(90deg, rgba(0, 0, 0, 0.52), rgba(0, 0, 0, 0.18) 58%, rgba(0, 0, 0, 0.48)),
-    url("/mission-background.jpg");
+    url("/mission-background-crop.jpg");
   background-color: #000000;
   background-position:
     center,

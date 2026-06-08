@@ -36,7 +36,7 @@ export default function RootLayout({
       lang="en"
       className={`${delaGothicOne.variable} ${nunito.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="flex min-h-dvh flex-col">
         <SplashIntro />
         <HalftoneScroll />
         <DarkModeToggle />

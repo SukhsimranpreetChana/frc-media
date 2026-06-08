@@ -13,10 +13,10 @@ export default function Home() {
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-6 py-16">
           <div className="max-w-3xl">
             <h1 className="text-4xl text-white sm:text-5xl">
-              What is FMC?
+              Who are we?
             </h1>
             <p className="mt-6 text-lg leading-8 text-[#F4E7E7]">
-              We are the First Media Community; a community of aspiring FIRST creatives consisting of students, alumni, and mentors 
+              We are the First Media Community (FMC); a community of aspiring FIRST creatives consisting of students, alumni, and mentors 
               who share ideas and create media of any variety. Not only to make it more accessible, but also 
               to help out others with their media. Our goal is to provide a space where aspiring and experienced 
               creatives can connect, share ideas, develop their skills, and collaborate on projects ranging from 
@@ -35,7 +35,7 @@ export default function Home() {
             </a>
             <Link
               className="font-primary fmc-button inline-flex h-11 items-center justify-center bg-[#17001C]/80 px-5 text-sm text-white hover:bg-[#72007E]"
-              href="/clips"
+              href="/teams"
             >
               View media drive
             </Link>
@@ -117,7 +117,7 @@ export default function Home() {
                 Search teams and find their clips
               </h2>
             </div>
-            <Link className="font-primary scrap-chip rounded-md px-3 py-2 text-sm text-[#17001C]" href="/clips">
+            <Link className="font-primary scrap-chip rounded-md px-3 py-2 text-sm text-[#17001C]" href="/teams">
               Open teams
             </Link>
           </div>

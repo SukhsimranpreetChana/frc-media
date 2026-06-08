@@ -45,7 +45,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({
       hasFolder: false,
-      uploadUrl: "/teams#upload-media",
+      uploadUrl: "/upload#upload-media",
     });
   } catch (error) {
     const message =

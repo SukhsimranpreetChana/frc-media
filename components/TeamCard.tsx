@@ -15,14 +15,14 @@ type TeamFolderResponse = {
 };
 
 export default function TeamCard({ team }: TeamCardProps) {
-  const [folderLink, setFolderLink] = useState("/teams#upload-media");
+  const [folderLink, setFolderLink] = useState("/upload#upload-media");
   const [buttonLabel, setButtonLabel] = useState("Upload media");
 
   useEffect(() => {
     const controller = new AbortController();
 
     async function loadTeamFolder() {
-      setFolderLink("/teams#upload-media");
+      setFolderLink("/upload#upload-media");
       setButtonLabel("Upload media");
 
       try {
@@ -49,11 +49,11 @@ export default function TeamCard({ team }: TeamCardProps) {
           return;
         }
 
-        setFolderLink(data.uploadUrl || "/teams#upload-media");
+        setFolderLink(data.uploadUrl || "/upload#upload-media");
         setButtonLabel("Upload media");
       } catch {
         if (!controller.signal.aborted) {
-          setFolderLink("/teams#upload-media");
+          setFolderLink("/upload#upload-media");
           setButtonLabel("Upload media");
         }
       }
