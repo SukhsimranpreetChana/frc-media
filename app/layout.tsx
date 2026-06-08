@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Dela_Gothic_One, Nunito } from "next/font/google";
 import Footer from "@/components/Footer";
+import DarkModeToggle from "@/components/DarkModeToggle";
 import HalftoneScroll from "@/components/HalftoneScroll";
 import Navbar from "@/components/Navbar";
 import SplashIntro from "@/components/SplashIntro";
@@ -38,6 +39,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <SplashIntro />
         <HalftoneScroll />
+        <DarkModeToggle />
         <Navbar />
         {children}
         <Footer />

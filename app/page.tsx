@@ -8,8 +8,7 @@ export default function Home() {
   return (
     <main className="fmc-surface flex-1">
       <section
-        className="-mt-44 border-b border-[#72007E]/30 bg-black bg-contain bg-center bg-no-repeat pt-44 text-white sm:-mt-32 sm:pt-32"
-        style={{ backgroundImage: "url('/blackboard.jpg')" }}
+        className="home-mission-section -mt-44 border-b border-[#72007E]/30 bg-black pt-44 text-white sm:-mt-32 sm:pt-32"
       >
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-6 py-16">
           <div className="max-w-3xl">
