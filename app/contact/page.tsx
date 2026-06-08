@@ -1,4 +1,22 @@
+import type { Metadata } from "next";
 import ContactForm from "@/components/ContactForm";
+
+export const metadata: Metadata = {
+  title: "Contact | FIRST Media Community",
+  description:
+    "Contact FIRST Media Community about business inquiries, partnerships, and media questions.",
+  keywords: [
+    "contact FIRST Media Community",
+    "FIRST Media Community business inquiries",
+    "FRC media partnership",
+    "FIRST media partnership",
+    "robotics media contact",
+    "FRC creative community contact",
+    "FIRST Robotics media questions",
+    "FRC media collaboration",
+    "robotics media collaboration",
+  ],
+};
 
 export default function ContactPage() {
   return (

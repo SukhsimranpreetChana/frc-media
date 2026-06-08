@@ -6,6 +6,19 @@ export const metadata: Metadata = {
   title: "Upload | FIRST Media Community",
   description:
     "Submit team media with a team number, year, and media file for admin review.",
+  keywords: [
+    "upload FRC media",
+    "submit FRC photos",
+    "submit FRC videos",
+    "FIRST media upload",
+    "FRC media submission",
+    "robotics media upload",
+    "FIRST Robotics photos upload",
+    "FIRST Robotics videos upload",
+    "team media submission",
+    "FRC photo archive upload",
+    "FRC video archive upload",
+  ],
 };
 
 export default function UploadPage() {

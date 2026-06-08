@@ -1,5 +1,26 @@
+import type { Metadata } from "next";
 import CollaborationsShowcase from "@/components/CollaborationsShowcase";
 import CommissionsBoard from "@/components/CommissionsBoard";
+
+export const metadata: Metadata = {
+  title: "Commissions | FIRST Media Community",
+  description:
+    "Browse FIRST and FRC media commission options from community creators.",
+  keywords: [
+    "FRC media commissions",
+    "FIRST media commissions",
+    "robotics photography commissions",
+    "robotics videography commissions",
+    "FRC graphic design",
+    "FRC social media design",
+    "FIRST Robotics media services",
+    "team branding commissions",
+    "robotics team branding",
+    "FRC video editing",
+    "FRC photo editing",
+    "FIRST creative services",
+  ],
+};
 
 export default function CommissionsPage() {
   return (

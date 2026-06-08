@@ -24,6 +24,33 @@ export const metadata: Metadata = {
   title: "FIRST Media Community",
   description:
     "A community for FIRST creatives to share media, collaborate, and grow their skills.",
+  keywords: [
+    "FIRST Media Community",
+    "FRC media",
+    "FIRST Robotics media",
+    "FIRST Robotics Competition",
+    "FRC photography",
+    "FRC videography",
+    "FRC photos",
+    "FRC videos",
+    "robotics media",
+    "robotics photography",
+    "robotics videography",
+    "FIRST creatives",
+    "student media team",
+    "robotics content creators",
+    "FRC content creators",
+    "FIRST event coverage",
+    "robotics event coverage",
+    "FRC social media",
+    "team branding",
+    "graphic design for robotics",
+    "robotics reels",
+    "FRC clips",
+    "team media library",
+    "FIRST community",
+    "FRC community",
+  ],
 };
 
 export default function RootLayout({
