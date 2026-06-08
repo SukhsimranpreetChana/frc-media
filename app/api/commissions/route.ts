@@ -4,6 +4,7 @@ import {
   createCommissionForAdmin,
   deleteCommissionForAdmin,
   getCommissions,
+  isSupabaseAdminConfigured,
 } from "@/lib/supabase";
 
 export const runtime = "nodejs";
@@ -42,6 +43,13 @@ export async function POST(request: Request) {
 
   if (unauthorized) {
     return unauthorized;
+  }
+
+  if (!isSupabaseAdminConfigured()) {
+    return NextResponse.json(
+      { error: "Missing SUPABASE_SERVICE_ROLE_KEY on the server." },
+      { status: 503 },
+    );
   }
 
   const payload = (await request.json().catch(() => null)) as {
@@ -90,6 +98,13 @@ export async function DELETE(request: Request) {
 
   if (unauthorized) {
     return unauthorized;
+  }
+
+  if (!isSupabaseAdminConfigured()) {
+    return NextResponse.json(
+      { error: "Missing SUPABASE_SERVICE_ROLE_KEY on the server." },
+      { status: 503 },
+    );
   }
 
   const payload = (await request.json().catch(() => null)) as {

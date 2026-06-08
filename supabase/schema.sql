@@ -30,6 +30,24 @@ create table if not exists public.footer_handles (
   created_at timestamptz not null default now()
 );
 
+alter table public.commissions
+  add column if not exists title text,
+  add column if not exists link text,
+  add column if not exists cost_range text,
+  add column if not exists created_at timestamptz not null default now();
+
+alter table public.commissions
+  alter column created_at set default now();
+
+alter table public.footer_handles
+  add column if not exists handle text,
+  add column if not exists link text,
+  add column if not exists profile_image_url text,
+  add column if not exists created_at timestamptz not null default now();
+
+alter table public.footer_handles
+  alter column created_at set default now();
+
 alter table public.media_clips
   add column if not exists approved boolean not null default false;
 

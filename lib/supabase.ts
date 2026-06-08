@@ -43,6 +43,10 @@ export function getSupabaseStatus() {
   };
 }
 
+export function isSupabaseAdminConfigured() {
+  return Boolean(supabaseUrl && supabaseServiceRoleKey);
+}
+
 function getSupabaseRestUrl(table: string) {
   if (!supabaseUrl) {
     throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL.");
@@ -254,17 +258,23 @@ function mapFooterHandleRecord(record: FooterHandleRecord): FooterHandle {
 }
 
 export async function getCommissions() {
-  const { data, error } = await getSupabaseAdminClient()
-    .from("commissions")
-    .select("*")
-    .order("created_at", { ascending: false })
-    .returns<CommissionRecord[]>();
+  const params = new URLSearchParams({
+    select: "*",
+    order: "created_at.desc",
+  });
+  const response = await fetch(
+    `${getSupabaseRestUrl("commissions")}?${params.toString()}`,
+    {
+      headers: getSupabaseHeaders(),
+    },
+  );
 
-  if (error) {
-    throw new Error(`Unable to load commissions: ${error.message}`);
+  if (!response.ok) {
+    throw new Error("Unable to load commissions from Supabase.");
   }
 
-  return (data || []).map(mapCommissionRecord);
+  const records = (await response.json()) as CommissionRecord[];
+  return records.map(mapCommissionRecord);
 }
 
 export async function createCommissionForAdmin(input: {
@@ -305,17 +315,23 @@ export async function deleteCommissionForAdmin(id: string) {
 }
 
 export async function getFooterHandles() {
-  const { data, error } = await getSupabaseAdminClient()
-    .from("footer_handles")
-    .select("*")
-    .order("created_at", { ascending: false })
-    .returns<FooterHandleRecord[]>();
+  const params = new URLSearchParams({
+    select: "*",
+    order: "created_at.desc",
+  });
+  const response = await fetch(
+    `${getSupabaseRestUrl("footer_handles")}?${params.toString()}`,
+    {
+      headers: getSupabaseHeaders(),
+    },
+  );
 
-  if (error) {
-    throw new Error(`Unable to load footer handles: ${error.message}`);
+  if (!response.ok) {
+    throw new Error("Unable to load footer handles from Supabase.");
   }
 
-  return (data || []).map(mapFooterHandleRecord);
+  const records = (await response.json()) as FooterHandleRecord[];
+  return records.map(mapFooterHandleRecord);
 }
 
 export async function createFooterHandleForAdmin(input: {
