@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import PublicMediaUpload from "@/components/PublicMediaUpload";
 
+const alexCredit = "Photo taken by FMC Member Alex on 5193.";
+
 type UploadPageProps = {
   searchParams: Promise<{
     team?: string | string[];
@@ -51,16 +53,17 @@ export default async function UploadPage({ searchParams }: UploadPageProps) {
             search from newest to oldest year.
           </p>
         </div>
-        <figure className="scrap-card mb-10 rotate-[-0.5deg] overflow-hidden p-3">
+        <figure className="scrap-card group mb-10 rotate-[-0.5deg] overflow-hidden p-3">
           <div className="relative aspect-[16/7] overflow-hidden rounded-md border-2 border-[#17001C]">
             <Image
-              alt="FIRST Championship field and audience"
+              alt="Robot detail seen through clear polycarbonate"
               className="object-cover"
               fill
               priority
               sizes="100vw"
-              src="/media/championship-field.png"
+              src="/media/alex-5193-detail.jpg"
             />
+            <span className="photo-credit">{alexCredit}</span>
           </div>
         </figure>
         <PublicMediaUpload initialTeamNumber={initialTeamNumber} />

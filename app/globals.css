@@ -255,16 +255,11 @@ input:focus-visible + div .fmc-file-picker {
   overflow: hidden;
   contain: paint;
   background:
-    linear-gradient(90deg, rgba(0, 0, 0, 0.52), rgba(0, 0, 0, 0.18) 58%, rgba(0, 0, 0, 0.48)),
-    url("/mission-background-crop.jpg");
+    linear-gradient(90deg, rgba(0, 0, 0, 0.52), rgba(0, 0, 0, 0.18) 58%, rgba(0, 0, 0, 0.48));
   background-color: #000000;
-  background-position:
-    center,
-    center;
-  background-repeat: no-repeat, no-repeat;
-  background-size:
-    100% 100%,
-    cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
 }
 
 .home-mission-section::before {
@@ -289,6 +284,32 @@ input:focus-visible + div .fmc-file-picker {
 .home-mission-section > * {
   position: relative;
   z-index: 1;
+}
+
+.photo-credit {
+  position: absolute;
+  right: 0.75rem;
+  bottom: 0.75rem;
+  z-index: 4;
+  max-width: min(22rem, calc(100% - 1.5rem));
+  border-radius: 8px;
+  background: rgba(23, 0, 28, 0.84);
+  padding: 0.45rem 0.6rem;
+  color: #ffffff;
+  font-size: 0.72rem;
+  line-height: 1.2;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(0.25rem);
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease;
+}
+
+.group:hover .photo-credit,
+.group:focus-within .photo-credit {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .theme-toggle {

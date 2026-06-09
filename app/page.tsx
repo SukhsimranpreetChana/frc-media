@@ -3,6 +3,8 @@ import Link from "next/link";
 import RandomTeamsPreview from "@/components/RandomTeamsPreview";
 
 const discordInvite = "https://discord.gg/xCqryxThbC";
+const alexCredit = "Photo taken by FMC Member Alex on 5193.";
+const sukhCredit = "Photo taken by FMC Member Sukh on 2056.";
 
 export default function Home() {
   return (
@@ -10,13 +12,24 @@ export default function Home() {
       <section
         className="home-mission-section -mt-44 border-b border-[#72007E]/30 bg-black pt-44 text-white sm:-mt-32 sm:pt-32"
       >
+        <div className="home-mission-media group">
+          <Image
+            alt="Robot detail seen through clear polycarbonate"
+            className="object-cover"
+            fill
+            priority
+            sizes="100vw"
+            src="/media/alex-5193-detail.jpg"
+          />
+          <span className="photo-credit">{alexCredit}</span>
+        </div>
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-6 py-16">
           <div className="max-w-3xl">
             <h1 className="text-4xl text-white sm:text-5xl">
               Who are we?
             </h1>
             <p className="mt-6 text-lg leading-8 text-[#F4E7E7]">
-              We are the First Media Community (FMC); a community of aspiring FIRST creatives consisting of students, alumni, and mentors 
+              We are the FIRST Media Community (FMC); a community of aspiring FIRST creatives consisting of students, alumni, and mentors 
               who share ideas and create media of any variety. Not only to make it more accessible, but also 
               to help out others with their media. Our goal is to provide a space where aspiring and experienced 
               creatives can connect, share ideas, develop their skills, and collaborate on projects ranging from 
@@ -81,7 +94,7 @@ export default function Home() {
           </div>
 
           <div className="grid gap-4 sm:grid-cols-[1.15fr_0.85fr]">
-            <figure className="overflow-hidden rounded-2xl border-2 border-[#F85259]/60 bg-black shadow-[8px_8px_0_#F85259]">
+            <figure className="group relative overflow-hidden rounded-2xl border-2 border-[#F85259]/60 bg-black shadow-[8px_8px_0_#F85259]">
               <div className="relative aspect-[17/9] overflow-hidden">
                 <Image
                   alt="FIRST event floor with teams and spectators"
@@ -90,18 +103,20 @@ export default function Home() {
                   sizes="(min-width: 1024px) 48vw, 100vw"
                   src="/media/event-overview.png"
                 />
+                <span className="photo-credit">{sukhCredit}</span>
               </div>
             </figure>
 
-            <figure className="overflow-hidden rounded-2xl border-2 border-[#A335E6]/70 bg-black shadow-[8px_8px_0_#7137E3]">
+            <figure className="group relative overflow-hidden rounded-2xl border-2 border-[#A335E6]/70 bg-black shadow-[8px_8px_0_#7137E3]">
               <div className="relative aspect-[17/9] h-full min-h-48 overflow-hidden sm:aspect-auto">
                 <Image
-                  alt="FIRST Championship field and audience"
+                  alt="FIRST Robotics field with game pieces in motion"
                   className="object-cover"
                   fill
                   sizes="(min-width: 1024px) 34vw, 100vw"
-                  src="/media/championship-field.png"
+                  src="/media/alex-5193-field.jpg"
                 />
+                <span className="photo-credit">{alexCredit}</span>
               </div>
             </figure>
           </div>
