@@ -79,6 +79,10 @@ function formatDuration(seconds: number) {
   return `${remainingSeconds}s`;
 }
 
+function getDigitsOnly(value: string) {
+  return value.replace(/\D/g, "");
+}
+
 async function readJsonResponse<T>(response: Response): Promise<T | null> {
   const text = await response.text();
 
@@ -199,7 +203,7 @@ async function finishUploadedFile(payload: {
 export default function PublicMediaUpload({
   initialTeamNumber = "",
 }: PublicMediaUploadProps) {
-  const [teamNumber, setTeamNumber] = useState(initialTeamNumber);
+  const [teamNumber, setTeamNumber] = useState(getDigitsOnly(initialTeamNumber));
   const [year, setYear] = useState("");
   const [title, setTitle] = useState("");
   const [uploadedBy, setUploadedBy] = useState("");
@@ -348,7 +352,7 @@ export default function PublicMediaUpload({
       setMessage(
         `${uploadedFiles.length} file${uploadedFiles.length === 1 ? "" : "s"} submitted for review. Approved clips will show up on the Teams tab.`,
       );
-      setTeamNumber(initialTeamNumber);
+      setTeamNumber(getDigitsOnly(initialTeamNumber));
       setYear("");
       setTitle("");
       setUploadedBy("");
@@ -384,8 +388,14 @@ export default function PublicMediaUpload({
           Team Number
           <input
             className="mt-2 h-11 w-full rounded-md border-2 border-[#17001C] bg-[#F4E7E7] px-4 text-sm text-[#17001C] outline-none ring-[#A335E6]/20 focus:border-[#7137E3] focus:ring-4"
-            onChange={(event) => setTeamNumber(event.target.value)}
+            inputMode="numeric"
+            maxLength={5}
+            onChange={(event) =>
+              setTeamNumber(getDigitsOnly(event.target.value))
+            }
+            pattern="[0-9]*"
             required
+            type="text"
             value={teamNumber}
           />
         </label>

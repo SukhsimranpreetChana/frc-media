@@ -1,77 +1,17 @@
-"use client";
-
-import { useEffect, useState } from "react";
+import Link from "next/link";
 import type { Team } from "@/types";
 
 type TeamCardProps = {
   team: Team;
 };
 
-type TeamFolderResponse = {
-  hasFolder: boolean;
-  folderUrl?: string;
-  uploadUrl?: string;
-  year?: number;
-};
-
 export default function TeamCard({ team }: TeamCardProps) {
-  const [folderLink, setFolderLink] = useState("/upload#upload-media");
-  const [buttonLabel, setButtonLabel] = useState("Upload media");
-
-  useEffect(() => {
-    const controller = new AbortController();
-
-    async function loadTeamFolder() {
-      setFolderLink("/upload#upload-media");
-      setButtonLabel("Upload media");
-
-      try {
-        const response = await fetch(
-          `/api/media/team-folder?teamNumber=${encodeURIComponent(team.number)}`,
-          {
-            signal: controller.signal,
-          },
-        );
-
-        if (!response.ok) {
-          return;
-        }
-
-        const data = (await response.json()) as TeamFolderResponse;
-
-        if (controller.signal.aborted) {
-          return;
-        }
-
-        if (data.hasFolder && data.folderUrl) {
-          setFolderLink(data.folderUrl);
-          setButtonLabel(data.year ? `Find ${data.year} clips` : "Find clips");
-          return;
-        }
-
-        setFolderLink(data.uploadUrl || "/upload#upload-media");
-        setButtonLabel("Upload media");
-      } catch {
-        if (!controller.signal.aborted) {
-          setFolderLink("/upload#upload-media");
-          setButtonLabel("Upload media");
-        }
-      }
-    }
-
-    void loadTeamFolder();
-
-    return () => {
-      controller.abort();
-    };
-  }, [team.number]);
-
-  const opensExternally = folderLink.startsWith("http");
+  const encodedTeamNumber = encodeURIComponent(team.number);
 
   return (
     <article className="scrap-card flex h-full flex-col p-5">
       <div className="flex items-center gap-4">
-        <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-[#17001C] bg-[#F4E7E7] text-center text-sm text-[#17001C] shadow-[4px_4px_0_#F85259]">
+        <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg border-2 border-[#17001C] bg-[#F4E7E7] text-center text-sm text-[#17001C] shadow-[4px_4px_0_#F85259]">
           {team.logoUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -100,14 +40,20 @@ export default function TeamCard({ team }: TeamCardProps) {
         <span aria-hidden="true">/</span>
         <span>{team.mediaFocus}</span>
       </div>
-      <a
-        className="font-primary fmc-button mt-auto inline-flex h-10 items-center justify-center bg-[#7137E3] px-4 text-sm text-white hover:bg-[#A335E6]"
-        href={folderLink}
-        rel={opensExternally ? "noopener noreferrer" : undefined}
-        target={opensExternally ? "_blank" : undefined}
-      >
-        {buttonLabel}
-      </a>
+      <div className="mt-auto grid gap-3 pt-5 sm:grid-cols-2">
+        <Link
+          className="font-primary fmc-button inline-flex h-10 items-center justify-center bg-[#7137E3] px-4 text-sm text-white hover:bg-[#A335E6]"
+          href={`/upload?team=${encodedTeamNumber}#upload-media`}
+        >
+          Upload
+        </Link>
+        <Link
+          className="font-primary fmc-button inline-flex h-10 items-center justify-center bg-[#17001C] px-4 text-sm text-white hover:bg-[#72007E]"
+          href={`/teams?team=${encodedTeamNumber}`}
+        >
+          Find clips
+        </Link>
+      </div>
     </article>
   );
 }

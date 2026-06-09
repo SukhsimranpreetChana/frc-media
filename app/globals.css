@@ -528,7 +528,7 @@ input:focus-visible + div .fmc-file-picker {
   outline-offset: 3px;
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 1536px) {
   .nav-menu-toggle {
     display: none !important;
   }
@@ -743,7 +743,7 @@ input:focus-visible + div .fmc-file-picker {
   }
 }
 
-@media (max-width: 1023px) {
+@media (max-width: 1535px) {
   .nav-brand-row {
     display: grid;
     grid-template-columns: minmax(0, 1fr) 2.35rem;
@@ -799,6 +799,8 @@ input:focus-visible + div .fmc-file-picker {
   }
 
   .nav-menu-panel .fmc-button {
+    max-width: 100%;
+    min-width: 0;
     width: 100%;
     justify-content: center;
     text-align: center;
@@ -811,6 +813,14 @@ input:focus-visible + div .fmc-file-picker {
 }
 
 @media (max-width: 640px) {
+  header.no-route-transition {
+    padding-inline: 0.75rem;
+  }
+
+  header.no-route-transition nav {
+    padding-inline: 1rem;
+  }
+
   .scrap-card {
     box-shadow: 5px 5px 0 #17001c;
   }

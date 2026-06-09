@@ -40,13 +40,20 @@ export default function Footer() {
             <span className="font-primary text-xl uppercase text-[#F4E7E7]">
               SPONSORED BY
             </span>
-            <Image
-              alt="FRCtees logo"
-              className="h-auto w-24 object-contain sm:w-32"
-              height={86}
-              src="/frctees-logo.png"
-              width={260}
-            />
+            <a
+              aria-label="Visit FRCtees"
+              href="https://frctees.com/"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              <Image
+                alt="FRCtees logo"
+                className="h-auto w-24 object-contain sm:w-32"
+                height={86}
+                src="/frctees-logo.png"
+                width={260}
+              />
+            </a>
           </div>
 
           {handles.length > 0 ? (

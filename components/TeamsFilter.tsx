@@ -13,6 +13,7 @@ import { searchTeams } from "@/lib/search";
 import type { ExternalMediaItem, MatchVideo, MediaClip, Team } from "@/types";
 
 type TeamsFilterProps = {
+  initialTeamNumber?: string;
   teams: Team[];
 };
 
@@ -121,6 +122,10 @@ function getPageCount(totalItems: number) {
   return Math.max(1, Math.ceil(totalItems / mediaPageSize));
 }
 
+function getDigitsOnly(value: string) {
+  return value.replace(/\D/g, "");
+}
+
 type PaginationControlsProps = {
   currentPage: number;
   itemCount: number;
@@ -167,8 +172,11 @@ function PaginationControls({
   );
 }
 
-export default function TeamsFilter({ teams }: TeamsFilterProps) {
-  const [query, setQuery] = useState("");
+export default function TeamsFilter({
+  initialTeamNumber = "",
+  teams,
+}: TeamsFilterProps) {
+  const [query, setQuery] = useState(getDigitsOnly(initialTeamNumber));
   const [yearFilter, setYearFilter] = useState("");
   const [remoteTeam, setRemoteTeam] = useState<Team | null>(null);
   const [isLoadingTeam, setIsLoadingTeam] = useState(false);
@@ -190,6 +198,10 @@ export default function TeamsFilter({ teams }: TeamsFilterProps) {
   const [youtubePage, setYoutubePage] = useState(1);
   const [matchPage, setMatchPage] = useState(1);
   const [resolvedCollageFolderUrls, setResolvedCollageFolderUrls] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    setQuery(getDigitsOnly(initialTeamNumber));
+  }, [initialTeamNumber]);
 
   const selectedPreviewTeams = useMemo(() => pickRandomTeams(), []);
   const searchableTeams = previewTeams.length > 0 ? previewTeams : teams;
@@ -597,9 +609,12 @@ export default function TeamsFilter({ teams }: TeamsFilterProps) {
         <div className="grid gap-3 md:grid-cols-[1fr_9rem]">
           <input
             className="h-12 w-full rounded-md border-2 border-[#17001C] bg-[#F4E7E7] px-4 text-sm text-[#17001C] outline-none ring-[#A335E6]/20 placeholder:text-[#17001C]/45 focus:border-[#7137E3] focus:ring-4"
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search teams by number, name, location, or media focus"
-            type="search"
+            inputMode="numeric"
+            maxLength={5}
+            onChange={(event) => setQuery(getDigitsOnly(event.target.value))}
+            pattern="[0-9]*"
+            placeholder="Search teams by number"
+            type="text"
             value={query}
           />
           <input
@@ -621,7 +636,7 @@ export default function TeamsFilter({ teams }: TeamsFilterProps) {
               className="scrap-card min-h-64 animate-pulse p-5"
               key={teamNumber}
             >
-              <div className="h-16 w-16 rounded-full bg-[#F4E7E7]" />
+              <div className="h-16 w-16 rounded-lg bg-[#F4E7E7]" />
               <div className="mt-5 h-5 w-28 rounded-md bg-[#F4E7E7]" />
               <div className="mt-4 h-4 w-full rounded-md bg-[#F4E7E7]" />
               <div className="mt-3 h-4 w-3/4 rounded-md bg-[#F4E7E7]" />

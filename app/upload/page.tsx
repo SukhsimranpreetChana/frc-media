@@ -2,6 +2,12 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import PublicMediaUpload from "@/components/PublicMediaUpload";
 
+type UploadPageProps = {
+  searchParams: Promise<{
+    team?: string | string[];
+  }>;
+};
+
 export const metadata: Metadata = {
   title: "Upload | FIRST Media Community",
   description:
@@ -21,7 +27,18 @@ export const metadata: Metadata = {
   ],
 };
 
-export default function UploadPage() {
+function getSearchParamValue(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] || "" : value || "";
+}
+
+function getDigitsOnly(value: string) {
+  return value.replace(/\D/g, "");
+}
+
+export default async function UploadPage({ searchParams }: UploadPageProps) {
+  const params = await searchParams;
+  const initialTeamNumber = getDigitsOnly(getSearchParamValue(params.team));
+
   return (
     <main className="fmc-surface flex-1">
       <section className="mx-auto w-full max-w-6xl px-6 py-12">
@@ -46,7 +63,7 @@ export default function UploadPage() {
             />
           </div>
         </figure>
-        <PublicMediaUpload />
+        <PublicMediaUpload initialTeamNumber={initialTeamNumber} />
       </section>
     </main>
   );

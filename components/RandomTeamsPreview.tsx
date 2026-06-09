@@ -78,7 +78,7 @@ export default function RandomTeamsPreview() {
             className="scrap-card min-h-64 animate-pulse p-5"
             key={teamNumber}
           >
-            <div className="h-16 w-16 rounded-full bg-[#F4E7E7]" />
+            <div className="h-16 w-16 rounded-lg bg-[#F4E7E7]" />
             <div className="mt-5 h-5 w-28 rounded-md bg-[#F4E7E7]" />
             <div className="mt-4 h-4 w-full rounded-md bg-[#F4E7E7]" />
             <div className="mt-3 h-4 w-3/4 rounded-md bg-[#F4E7E7]" />

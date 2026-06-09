@@ -2,6 +2,12 @@ import type { Metadata } from "next";
 import TeamsFilter from "@/components/TeamsFilter";
 import { featuredTeams } from "@/lib/search";
 
+type TeamsPageProps = {
+  searchParams: Promise<{
+    team?: string | string[];
+  }>;
+};
+
 export const metadata: Metadata = {
   title: "Teams | FIRST Media Community",
   description: "Search teams and uploaded team media by team number.",
@@ -22,7 +28,18 @@ export const metadata: Metadata = {
   ],
 };
 
-export default async function TeamsPage() {
+function getSearchParamValue(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] || "" : value || "";
+}
+
+function getDigitsOnly(value: string) {
+  return value.replace(/\D/g, "");
+}
+
+export default async function TeamsPage({ searchParams }: TeamsPageProps) {
+  const params = await searchParams;
+  const initialTeamNumber = getDigitsOnly(getSearchParamValue(params.team));
+
   return (
     <main className="fmc-surface flex-1">
       <section className="mx-auto w-full max-w-6xl px-6 py-12">
@@ -34,7 +51,7 @@ export default async function TeamsPage() {
           </p>
         </div>
 
-        <TeamsFilter teams={featuredTeams} />
+        <TeamsFilter initialTeamNumber={initialTeamNumber} teams={featuredTeams} />
       </section>
     </main>
   );
