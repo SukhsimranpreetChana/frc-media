@@ -23,6 +23,7 @@ export async function POST(request: Request) {
     uploadedBy?: unknown;
     title?: unknown;
     uploadGroupId?: unknown;
+    fileCount?: unknown;
     uploadFolder?: {
       id?: unknown;
       name?: unknown;
@@ -35,6 +36,7 @@ export async function POST(request: Request) {
   const uploadedBy = String(payload?.uploadedBy || "").trim();
   const title = String(payload?.title || "").trim();
   const uploadGroupId = String(payload?.uploadGroupId || "").trim();
+  const fileCount = Number(payload?.fileCount || 1);
   const uploadFolder =
     typeof payload?.uploadFolder?.id === "string" &&
     typeof payload.uploadFolder.name === "string" &&
@@ -79,8 +81,11 @@ export async function POST(request: Request) {
       fileId,
       uploadFolder,
     });
+    const defaultTitle = fileCount > 1
+      ? `${teamNumber} collage by ${uploadedBy}`
+      : `${teamNumber} media by ${uploadedBy}`;
     const clip = await createMediaClip({
-      title: title || `${teamNumber} media by ${uploadedBy}`,
+      title: title || defaultTitle,
       teamNumber,
       year,
       videoUrl: driveFile.viewUrl,
@@ -96,9 +101,16 @@ export async function POST(request: Request) {
       clip,
       driveFile,
     });
-  } catch {
+  } catch (error) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Unable to finish Google Drive upload.";
+
+    console.error("Unable to finish Google Drive upload:", message);
+
     return NextResponse.json(
-      { error: "Unable to finish Google Drive upload." },
+      { error: message },
       { status: 500 },
     );
   }

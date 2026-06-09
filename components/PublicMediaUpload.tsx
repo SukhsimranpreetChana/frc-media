@@ -276,6 +276,7 @@ export default function PublicMediaUpload({
             title,
             uploadGroupId: sessionData.uploadGroupId,
             uploadFolder: sessionData.uploadFolder,
+            fileCount: files.length,
           }),
         });
         const completeData =

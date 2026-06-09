@@ -20,7 +20,22 @@ export async function GET(request: Request) {
   }
 
   if (!code || !state || (!hasCookieState && !hasStoredState)) {
-    return new NextResponse("Invalid Google OAuth callback.", { status: 400 });
+    return new NextResponse(
+      [
+        "Invalid Google OAuth callback.",
+        "",
+        "Most likely causes:",
+        "- You opened /api/google/callback directly instead of starting at /api/google/connect.",
+        "- GOOGLE_OAUTH_REDIRECT_URI does not exactly match this deployed site URL.",
+        "- Google OAuth redirected to a different domain than the one that started /api/google/connect, so the state cookie was not sent back.",
+      ].join("\n"),
+      {
+        status: 400,
+        headers: {
+          "Content-Type": "text/plain; charset=utf-8",
+        },
+      },
+    );
   }
 
   try {
