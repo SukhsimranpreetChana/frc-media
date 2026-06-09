@@ -4,6 +4,50 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import type { FooterHandle } from "@/types";
 
+function getHandleInitials(handle: string) {
+  const cleanedHandle = handle.replace("@", "").trim();
+  const parts = cleanedHandle.split(/[\s._-]+/).filter(Boolean);
+  const initials = parts
+    .slice(0, 2)
+    .map((part) => part.slice(0, 1))
+    .join("");
+
+  return initials || cleanedHandle.slice(0, 1) || "?";
+}
+
+function FooterProfileLink({ item }: { item: FooterHandle }) {
+  const [imageFailed, setImageFailed] = useState(false);
+  const shouldShowImage = item.profileImageUrl && !imageFailed;
+
+  return (
+    <a
+      aria-label={item.handle}
+      className="group relative flex h-11 w-11 items-center justify-center rounded-full border-2 border-[#F85259] bg-[#F4E7E7] text-sm text-[#17001C] shadow-[3px_3px_0_#F85259] transition hover:-translate-y-1 hover:shadow-[5px_5px_0_#A335E6]"
+      href={item.link}
+      target="_blank"
+      rel="noopener noreferrer"
+      title={item.handle}
+    >
+      {shouldShowImage ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          alt=""
+          className="h-full w-full rounded-full object-cover"
+          onError={() => setImageFailed(true)}
+          src={item.profileImageUrl}
+        />
+      ) : (
+        <span className="font-primary uppercase">
+          {getHandleInitials(item.handle)}
+        </span>
+      )}
+      <span className="pointer-events-none absolute bottom-full left-1/2 mb-2 -translate-x-1/2 rounded-md bg-[#17001C] px-2 py-1 text-xs text-white opacity-0 shadow-md transition group-hover:opacity-100">
+        {item.handle}
+      </span>
+    </a>
+  );
+}
+
 export default function Footer() {
   const [handles, setHandles] = useState<FooterHandle[]>([]);
 
@@ -59,31 +103,7 @@ export default function Footer() {
           {handles.length > 0 ? (
             <nav className="flex flex-wrap gap-3">
               {handles.map((item) => (
-                <a
-                  aria-label={item.handle}
-                  className="group relative flex h-11 w-11 items-center justify-center rounded-full border-2 border-[#F85259] bg-[#F4E7E7] text-sm text-[#17001C] shadow-[3px_3px_0_#F85259] transition hover:-translate-y-1 hover:shadow-[5px_5px_0_#A335E6]"
-                  href={item.link}
-                  key={item.id}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  title={item.handle}
-                >
-                  {item.profileImageUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      alt=""
-                      className="h-full w-full rounded-full object-cover"
-                      src={item.profileImageUrl}
-                    />
-                  ) : (
-                    <span className="font-primary uppercase">
-                      {item.handle.replace("@", "").slice(0, 1) || "?"}
-                    </span>
-                  )}
-                  <span className="pointer-events-none absolute bottom-full left-1/2 mb-2 -translate-x-1/2 rounded-md bg-[#17001C] px-2 py-1 text-xs text-white opacity-0 shadow-md transition group-hover:opacity-100">
-                    {item.handle}
-                  </span>
-                </a>
+                <FooterProfileLink item={item} key={item.id} />
               ))}
             </nav>
           ) : null}
