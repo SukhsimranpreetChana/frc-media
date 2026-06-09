@@ -126,9 +126,16 @@ export async function POST(request: Request) {
       uploadFolder,
       sessions,
     });
-  } catch {
+  } catch (error) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Unable to start Google Drive upload.";
+
+    console.error("Unable to start Google Drive upload session:", message);
+
     return NextResponse.json(
-      { error: "Unable to start Google Drive upload." },
+      { error: message },
       { status: 500 },
     );
   }
