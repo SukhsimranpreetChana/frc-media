@@ -12,6 +12,8 @@ type ClipReviewGroup = {
   year: number;
 };
 
+const adminUploadPageSize = 6;
+
 function getCreatedTime(clip: MediaClip) {
   return clip.createdAt ? new Date(clip.createdAt).getTime() : 0;
 }
@@ -62,39 +64,111 @@ function getReviewGroups(clips: MediaClip[]) {
   );
 }
 
+function getPageCount(totalItems: number) {
+  return Math.max(1, Math.ceil(totalItems / adminUploadPageSize));
+}
+
+function getVisibleGroups(groups: ClipReviewGroup[], page: number) {
+  return groups.slice(
+    (page - 1) * adminUploadPageSize,
+    page * adminUploadPageSize,
+  );
+}
+
+function AdminPaginationControls({
+  currentPage,
+  itemCount,
+  label,
+  onPageChange,
+}: {
+  currentPage: number;
+  itemCount: number;
+  label: string;
+  onPageChange: (page: number) => void;
+}) {
+  const pageCount = getPageCount(itemCount);
+
+  if (pageCount <= 1) {
+    return null;
+  }
+
+  return (
+    <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
+      <p className="text-sm text-[#17001C]/65">
+        Page {currentPage} of {pageCount} for {label}
+      </p>
+      <div className="flex gap-3">
+        <button
+          className="font-primary fmc-button h-10 bg-[#17001C] px-4 text-sm text-white hover:bg-[#72007E] disabled:opacity-45"
+          disabled={currentPage === 1}
+          onClick={() => onPageChange(Math.max(1, currentPage - 1))}
+          type="button"
+        >
+          Previous
+        </button>
+        <button
+          className="font-primary fmc-button h-10 bg-[#7137E3] px-4 text-sm text-white hover:bg-[#A335E6] disabled:opacity-45"
+          disabled={currentPage === pageCount}
+          onClick={() => onPageChange(Math.min(pageCount, currentPage + 1))}
+          type="button"
+        >
+          Next
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function ClipAdmin() {
   const [pendingClips, setPendingClips] = useState<MediaClip[]>([]);
+  const [approvedClips, setApprovedClips] = useState<MediaClip[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingApproved, setIsLoadingApproved] = useState(true);
   const [activeGroupId, setActiveGroupId] = useState("");
   const [resolvedFolderUrls, setResolvedFolderUrls] = useState<Record<string, string>>({});
   const [brokenThumbnailGroupIds, setBrokenThumbnailGroupIds] = useState<Record<string, boolean>>({});
   const [message, setMessage] = useState("");
+  const [pendingPage, setPendingPage] = useState(1);
+  const [approvedPage, setApprovedPage] = useState(1);
   const reviewGroups = getReviewGroups(pendingClips);
+  const approvedGroups = getReviewGroups(approvedClips);
+  const visibleReviewGroups = getVisibleGroups(reviewGroups, pendingPage);
+  const visibleApprovedGroups = getVisibleGroups(approvedGroups, approvedPage);
 
-  async function fetchPendingClips() {
-    const response = await fetch("/api/admin/media");
+  async function fetchAdminClips(approved = false) {
+    const response = await fetch(
+      approved ? "/api/admin/media?approved=true" : "/api/admin/media",
+    );
     const data = (await response.json().catch(() => null)) as {
       clips?: MediaClip[];
       error?: string;
     } | null;
 
     if (!response.ok) {
-      throw new Error(data?.error || "Could not load pending clips.");
+      throw new Error(data?.error || "Could not load media clips.");
     }
 
     return data?.clips || [];
   }
 
-  async function loadPendingClips() {
+  async function loadAdminClips() {
     setIsLoading(true);
+    setIsLoadingApproved(true);
     setMessage("");
 
     try {
-      setPendingClips(await fetchPendingClips());
+      const [pending, approved] = await Promise.all([
+        fetchAdminClips(),
+        fetchAdminClips(true),
+      ]);
+
+      setPendingClips(pending);
+      setApprovedClips(approved);
     } catch {
-      setMessage("Could not load pending clips. Check admin access.");
+      setMessage("Could not load admin clips. Check admin access.");
     } finally {
       setIsLoading(false);
+      setIsLoadingApproved(false);
     }
   }
 
@@ -103,18 +177,23 @@ export default function ClipAdmin() {
 
     async function loadInitialPendingClips() {
       try {
-        const clips = await fetchPendingClips();
+        const [pending, approved] = await Promise.all([
+          fetchAdminClips(),
+          fetchAdminClips(true),
+        ]);
 
         if (isMounted) {
-          setPendingClips(clips);
+          setPendingClips(pending);
+          setApprovedClips(approved);
         }
       } catch {
         if (isMounted) {
-          setMessage("Could not load pending clips. Check admin access.");
+          setMessage("Could not load admin clips. Check admin access.");
         }
       } finally {
         if (isMounted) {
           setIsLoading(false);
+          setIsLoadingApproved(false);
         }
       }
     }
@@ -125,6 +204,14 @@ export default function ClipAdmin() {
       isMounted = false;
     };
   }, []);
+
+  useEffect(() => {
+    setPendingPage((page) => Math.min(page, getPageCount(reviewGroups.length)));
+  }, [reviewGroups.length]);
+
+  useEffect(() => {
+    setApprovedPage((page) => Math.min(page, getPageCount(approvedGroups.length)));
+  }, [approvedGroups.length]);
 
   useEffect(() => {
     async function resolveFolderUrl(group: ClipReviewGroup) {
@@ -164,10 +251,10 @@ export default function ClipAdmin() {
       }
     }
 
-    reviewGroups.forEach((group) => {
+    [...reviewGroups, ...approvedGroups].forEach((group) => {
       void resolveFolderUrl(group);
     });
-  }, [resolvedFolderUrls, reviewGroups]);
+  }, [approvedGroups, resolvedFolderUrls, reviewGroups]);
 
   async function handleApproveGroup(group: ClipReviewGroup) {
     setActiveGroupId(group.id);
@@ -194,6 +281,10 @@ export default function ClipAdmin() {
           (clip) => !group.clips.some((groupClip) => groupClip.id === clip.id),
         ),
       );
+      setApprovedClips((clips) => [
+        ...group.clips.map((clip) => ({ ...clip, approved: true })),
+        ...clips,
+      ]);
       setMessage("Upload approved. All files will now appear in public team searches.");
       window.dispatchEvent(new Event("fmc-media-uploaded"));
     } catch {
@@ -203,7 +294,7 @@ export default function ClipAdmin() {
     }
   }
 
-  async function handleRemoveGroup(group: ClipReviewGroup) {
+  async function handleRemoveGroup(group: ClipReviewGroup, approved = false) {
     setActiveGroupId(group.id);
     setMessage("");
 
@@ -228,12 +319,19 @@ export default function ClipAdmin() {
         throw new Error(data?.error || "Could not remove upload.");
       }
 
-      setPendingClips((clips) =>
+      const removeGroupClips = (clips: MediaClip[]) =>
         clips.filter(
           (clip) => !group.clips.some((groupClip) => groupClip.id === clip.id),
-        ),
-      );
-      setMessage("Pending upload removed from Google Drive and Supabase.");
+        );
+
+      if (approved) {
+        setApprovedClips(removeGroupClips);
+      } else {
+        setPendingClips(removeGroupClips);
+      }
+
+      setMessage("Upload removed from Google Drive and Supabase.");
+      window.dispatchEvent(new Event("fmc-media-uploaded"));
     } catch (error) {
       setMessage(
         error instanceof Error
@@ -256,8 +354,8 @@ export default function ClipAdmin() {
         </div>
         <button
           className="font-primary fmc-button h-10 bg-[#7137E3] px-4 text-sm text-white hover:bg-[#A335E6] disabled:opacity-60"
-          disabled={isLoading}
-          onClick={() => void loadPendingClips()}
+          disabled={isLoading || isLoadingApproved}
+          onClick={() => void loadAdminClips()}
           type="button"
         >
           Refresh
@@ -279,8 +377,9 @@ export default function ClipAdmin() {
       ) : null}
 
       {!isLoading && reviewGroups.length > 0 ? (
-        <div className="mt-6 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-          {reviewGroups.map((group) => {
+        <>
+          <div className="mt-6 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+            {visibleReviewGroups.map((group) => {
             const coverClip = getCoverClip(group);
             const viewUrl =
               group.folderUrl ||
@@ -340,7 +439,7 @@ export default function ClipAdmin() {
                         rel="noopener noreferrer"
                         target="_blank"
                       >
-                        View Clips
+                        View
                       </a>
                       <span className="font-primary inline-flex h-10 items-center justify-center rounded-md bg-white/10 px-4 text-sm text-[#F4E7E7]">
                         Pending
@@ -369,8 +468,130 @@ export default function ClipAdmin() {
                 </div>
               </div>
             );
-          })}
+            })}
+          </div>
+          <AdminPaginationControls
+            currentPage={pendingPage}
+            itemCount={reviewGroups.length}
+            label="pending uploads"
+            onPageChange={setPendingPage}
+          />
+        </>
+      ) : null}
+
+      <div className="mt-10 flex flex-wrap items-end justify-between gap-4 border-t-4 border-[#7137E3] pt-6">
+        <div>
+          <h2 className="text-lg text-[#17001C]">Reviewed uploads</h2>
+          <p className="mt-2 text-sm text-[#17001C]/70">
+            Approved submissions are public. Removing one deletes it from Drive
+            and the public media library.
+          </p>
         </div>
+      </div>
+
+      {isLoadingApproved ? (
+        <div className="mt-6 rounded-lg border-2 border-dashed border-[#72007E] bg-[#F4E7E7] p-6 text-sm text-[#17001C]/70">
+          Loading reviewed uploads...
+        </div>
+      ) : null}
+
+      {!isLoadingApproved && approvedGroups.length === 0 ? (
+        <div className="mt-6 rounded-lg border-2 border-dashed border-[#72007E] bg-[#F4E7E7] p-6 text-sm text-[#17001C]/70">
+          No reviewed uploads yet.
+        </div>
+      ) : null}
+
+      {!isLoadingApproved && approvedGroups.length > 0 ? (
+        <>
+          <div className="mt-6 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+            {visibleApprovedGroups.map((group) => {
+            const coverClip = getCoverClip(group);
+            const viewUrl =
+              group.folderUrl ||
+              resolvedFolderUrls[group.id] ||
+              coverClip?.videoUrl ||
+              "#";
+            const coverUrl = getThumbnailProxyUrl(
+              coverClip?.videoUrl,
+              coverClip?.thumbnailUrl,
+            );
+            const hasBrokenThumbnail = brokenThumbnailGroupIds[group.id];
+
+            return (
+              <div className="flex flex-col gap-4" key={group.id}>
+                <article className="fmc-dark-halftone flex flex-col overflow-hidden rounded-2xl border-2 border-[#F85259]/50 text-white shadow-[8px_8px_0_#17001C]">
+                  <a
+                    className="block"
+                    href={viewUrl}
+                    rel="noopener noreferrer"
+                    target="_blank"
+                  >
+                    <div className="aspect-video overflow-hidden bg-[#17001C]">
+                      {coverUrl && !hasBrokenThumbnail ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          alt=""
+                          className="h-full w-full object-cover transition duration-300 hover:scale-105"
+                          onError={() =>
+                            setBrokenThumbnailGroupIds((groupIds) => ({
+                              ...groupIds,
+                              [group.id]: true,
+                            }))
+                          }
+                          src={coverUrl}
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center bg-[#17001C] text-sm uppercase tracking-wide text-[#F4E7E7]/70">
+                          Media preview loading
+                        </div>
+                      )}
+                    </div>
+                  </a>
+                  <div className="flex flex-1 flex-col gap-4 p-5">
+                    <div>
+                      <p className="scrap-chip inline-flex rounded-md px-2 py-1 text-sm text-[#17001C]">
+                        FRC {group.teamNumber}
+                      </p>
+                      <h3 className="mt-3 text-xl text-white">{group.title}</h3>
+                      <p className="mt-2 text-sm text-[#F4E7E7]">
+                        {group.year} / {group.clips.length} file{group.clips.length === 1 ? "" : "s"} approved
+                      </p>
+                    </div>
+                    <div className="mt-auto flex flex-col gap-2 sm:flex-row">
+                      <a
+                        className="font-primary fmc-button inline-flex h-10 items-center justify-center bg-[#F85259] px-4 text-sm text-white hover:bg-[#A335E6]"
+                        href={viewUrl}
+                        rel="noopener noreferrer"
+                        target="_blank"
+                      >
+                        View
+                      </a>
+                      <span className="font-primary inline-flex h-10 items-center justify-center rounded-md bg-white/10 px-4 text-sm text-[#F4E7E7]">
+                        Approved
+                      </span>
+                    </div>
+                  </div>
+                </article>
+
+                <button
+                  className="font-primary fmc-button h-10 bg-[#17001C] px-4 text-sm text-white hover:bg-[#72007E] disabled:opacity-60"
+                  disabled={activeGroupId === group.id}
+                  onClick={() => void handleRemoveGroup(group, true)}
+                  type="button"
+                >
+                  Remove
+                </button>
+              </div>
+            );
+            })}
+          </div>
+          <AdminPaginationControls
+            currentPage={approvedPage}
+            itemCount={approvedGroups.length}
+            label="reviewed uploads"
+            onPageChange={setApprovedPage}
+          />
+        </>
       ) : null}
     </section>
   );

@@ -196,6 +196,22 @@ export async function getPendingMediaClipsForAdmin() {
   return (data || []).map(mapMediaClipRecord);
 }
 
+export async function getApprovedMediaClipsForAdmin() {
+  const { data, error } = await getSupabaseAdminClient()
+    .from("media_clips")
+    .select("*")
+    .eq("approved", true)
+    .order("year", { ascending: false })
+    .order("created_at", { ascending: false })
+    .returns<MediaClipRecord[]>();
+
+  if (error) {
+    throw new Error("Unable to load approved media clips.");
+  }
+
+  return (data || []).map(mapMediaClipRecord);
+}
+
 export async function updateMediaClipApproval(id: string, approved: boolean) {
   const { data, error } = await getSupabaseAdminClient()
     .from("media_clips")

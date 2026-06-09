@@ -141,7 +141,7 @@ export default function MediaCollageCard({
           rel="noopener noreferrer"
           target="_blank"
         >
-          View Clips
+          View
         </a>
       </div>
     </article>

@@ -3,6 +3,7 @@ import { requireAdmin } from "@/lib/adminAuth";
 import { deleteGoogleDriveFileOrFolder } from "@/lib/googleDrive";
 import {
   deleteMediaClipForAdmin,
+  getApprovedMediaClipsForAdmin,
   getPendingMediaClipsForAdmin,
   updateMediaClipApproval,
 } from "@/lib/supabase";
@@ -27,10 +28,17 @@ export async function GET(request: Request) {
   }
 
   try {
-    return NextResponse.json({ clips: await getPendingMediaClipsForAdmin() });
+    const { searchParams } = new URL(request.url);
+    const approved = searchParams.get("approved") === "true";
+
+    return NextResponse.json({
+      clips: approved
+        ? await getApprovedMediaClipsForAdmin()
+        : await getPendingMediaClipsForAdmin(),
+    });
   } catch {
     return NextResponse.json(
-      { error: "Unable to load pending clips." },
+      { error: "Unable to load media clips." },
       { status: 500 },
     );
   }
@@ -96,7 +104,7 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ ok: true });
   } catch {
     return NextResponse.json(
-      { error: "Unable to remove pending upload." },
+      { error: "Unable to remove upload." },
       { status: 500 },
     );
   }

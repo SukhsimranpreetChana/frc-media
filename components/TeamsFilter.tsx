@@ -198,10 +198,40 @@ export default function TeamsFilter({
   const [youtubePage, setYoutubePage] = useState(1);
   const [matchPage, setMatchPage] = useState(1);
   const [resolvedCollageFolderUrls, setResolvedCollageFolderUrls] = useState<Record<string, string>>({});
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [removingCollageId, setRemovingCollageId] = useState("");
+  const [adminMessage, setAdminMessage] = useState("");
 
   useEffect(() => {
     setQuery(getDigitsOnly(initialTeamNumber));
   }, [initialTeamNumber]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadAdminSession() {
+      try {
+        const response = await fetch("/api/admin/session");
+        const data = (await response.json().catch(() => null)) as {
+          authenticated?: boolean;
+        } | null;
+
+        if (isMounted) {
+          setIsAdmin(Boolean(data?.authenticated));
+        }
+      } catch {
+        if (isMounted) {
+          setIsAdmin(false);
+        }
+      }
+    }
+
+    void loadAdminSession();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const selectedPreviewTeams = useMemo(() => pickRandomTeams(), []);
   const searchableTeams = previewTeams.length > 0 ? previewTeams : teams;
@@ -602,6 +632,56 @@ export default function TeamsFilter({
     };
   }, [isTeamNumberSearch, normalizedQuery]);
 
+  async function handleRemoveCollage(collage: MediaCollage) {
+    const confirmed = window.confirm(
+      `Remove ${collage.title}? This will delete the upload from Google Drive and the public media library.`,
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setRemovingCollageId(collage.id);
+    setAdminMessage("");
+
+    try {
+      const response = await fetch("/api/admin/media", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          clipIds: collage.clips.map((clip) => clip.id),
+          folderUrl: collage.folderUrl || resolvedCollageFolderUrls[collage.id],
+        }),
+      });
+
+      if (!response.ok) {
+        const data = (await response.json().catch(() => null)) as {
+          error?: string;
+        } | null;
+
+        throw new Error(data?.error || "Could not remove upload.");
+      }
+
+      setTeamClips((clips) =>
+        clips.filter(
+          (clip) => !collage.clips.some((collageClip) => collageClip.id === clip.id),
+        ),
+      );
+      setAdminMessage("Upload removed.");
+      window.dispatchEvent(new Event("fmc-media-uploaded"));
+    } catch (error) {
+      setAdminMessage(
+        error instanceof Error
+          ? error.message
+          : "Could not remove upload. Check admin access.",
+      );
+    } finally {
+      setRemovingCollageId("");
+    }
+  }
+
   return (
     <div className="scrap-card p-5">
       <label className="block">
@@ -692,11 +772,27 @@ export default function TeamsFilter({
             </div>
           ) : null}
 
+          {isAdmin && adminMessage ? (
+            <p className="mb-4 text-sm text-[#17001C]/75">{adminMessage}</p>
+          ) : null}
+
           {!isLoadingClips && sortedTeamCollages.length > 0 ? (
             <>
               <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
                 {visibleTeamCollages.map((collage) => (
-                  <MediaCollageCard collage={collage} key={collage.id} />
+                  <div className="flex flex-col gap-3" key={collage.id}>
+                    <MediaCollageCard collage={collage} />
+                    {isAdmin ? (
+                      <button
+                        className="font-primary fmc-button h-10 bg-[#17001C] px-4 text-sm text-white hover:bg-[#72007E] disabled:opacity-60"
+                        disabled={removingCollageId === collage.id}
+                        onClick={() => void handleRemoveCollage(collage)}
+                        type="button"
+                      >
+                        {removingCollageId === collage.id ? "Removing..." : "Remove"}
+                      </button>
+                    ) : null}
+                  </div>
                 ))}
               </div>
               <PaginationControls
