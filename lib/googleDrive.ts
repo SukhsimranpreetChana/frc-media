@@ -70,6 +70,7 @@ const folderMimeType = "application/vnd.google-apps.folder";
 const tokenUrl = "https://oauth2.googleapis.com/token";
 const googleOAuthScope = "https://www.googleapis.com/auth/drive";
 const tokenStorePath = path.join(process.cwd(), ".google-oauth-token.json");
+let runtimeRefreshToken: string | undefined;
 
 function getRequiredEnv(name: string) {
   const value = process.env[name];
@@ -114,6 +115,10 @@ async function readStoredRefreshToken() {
     return process.env.GOOGLE_REFRESH_TOKEN;
   }
 
+  if (runtimeRefreshToken) {
+    return runtimeRefreshToken;
+  }
+
   try {
     const tokenJson = await readFile(tokenStorePath, "utf8");
     const token = JSON.parse(tokenJson) as StoredGoogleToken;
@@ -124,12 +129,32 @@ async function readStoredRefreshToken() {
 }
 
 export async function saveGoogleRefreshToken(refreshToken: string) {
+  runtimeRefreshToken = refreshToken;
+
   const token: StoredGoogleToken = {
     refreshToken,
     updatedAt: new Date().toISOString(),
   };
 
-  await writeFile(tokenStorePath, JSON.stringify(token, null, 2), "utf8");
+  try {
+    await writeFile(tokenStorePath, JSON.stringify(token, null, 2), "utf8");
+
+    return {
+      persisted: true,
+      message: "Google OAuth token saved locally.",
+    };
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Unable to save Google token.";
+
+    console.error("Unable to save Google OAuth token to disk:", message);
+
+    return {
+      persisted: false,
+      message:
+        "Google OAuth token is only available for this running server instance. Set GOOGLE_REFRESH_TOKEN in production environment variables for persistent uploads.",
+    };
+  }
 }
 
 export async function exchangeGoogleOAuthCode(code: string) {
@@ -157,8 +182,11 @@ export async function exchangeGoogleOAuthCode(code: string) {
     );
   }
 
-  await saveGoogleRefreshToken(data.refresh_token);
-  return data;
+  const tokenStorage = await saveGoogleRefreshToken(data.refresh_token);
+  return {
+    ...data,
+    tokenStorage,
+  };
 }
 
 async function getGoogleAccessToken() {

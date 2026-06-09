@@ -24,10 +24,14 @@ export async function GET(request: Request) {
   }
 
   try {
-    await exchangeGoogleOAuthCode(code);
+    const result = await exchangeGoogleOAuthCode(code);
+    const tokenStorageMessage = result.tokenStorage?.persisted
+      ? "The refresh token was saved locally."
+      : "Production note: this host is read-only, so set GOOGLE_REFRESH_TOKEN in your deployment environment for persistent uploads.";
     const response = new NextResponse(
       [
         "Google Drive is connected for FMC uploads.",
+        tokenStorageMessage,
         "",
         "You can close this tab and try an upload again.",
       ].join("\n"),
