@@ -46,7 +46,7 @@ export default function DarkModeToggle() {
       title={isDark ? "Light mode" : "Dark mode"}
       type="button"
     >
-      <span className="theme-toggle__track">
+      <span aria-hidden="true" className="theme-toggle__track">
         <span className="theme-toggle__knob" />
       </span>
     </button>
