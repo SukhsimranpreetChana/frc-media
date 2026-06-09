@@ -106,14 +106,26 @@ async function uploadFileToGoogleDrive(input: {
       Math.min(uploadedBytes + chunkSizeBytes, input.file.size),
     );
     const chunkEnd = uploadedBytes + chunk.size - 1;
-    const response = await fetch(input.uploadUrl, {
-      method: "PUT",
-      headers: {
-        "Content-Range": `bytes ${uploadedBytes}-${chunkEnd}/${input.file.size}`,
-        "Content-Type": input.file.type || "application/octet-stream",
-      },
-      body: chunk,
-    });
+    const isFinalChunk = chunkEnd + 1 >= input.file.size;
+    let response: Response;
+
+    try {
+      response = await fetch(input.uploadUrl, {
+        method: "PUT",
+        headers: {
+          "Content-Range": `bytes ${uploadedBytes}-${chunkEnd}/${input.file.size}`,
+          "Content-Type": input.file.type || "application/octet-stream",
+        },
+        body: chunk,
+      });
+    } catch (error) {
+      if (isFinalChunk) {
+        input.onProgress(input.file.size);
+        return undefined;
+      }
+
+      throw error;
+    }
 
     uploadedBytes += chunk.size;
     input.onProgress(uploadedBytes);
@@ -135,6 +147,53 @@ async function uploadFileToGoogleDrive(input: {
   }
 
   throw new Error("Google Drive upload did not finish.");
+}
+
+async function finishUploadedFile(payload: {
+  fileId?: string;
+  fileName: string;
+  teamNumber: string;
+  year: number;
+  uploadedBy: string;
+  title: string;
+  uploadGroupId: string;
+  uploadFolder: NonNullable<UploadSessionResponse["uploadFolder"]>;
+  fileCount: number;
+}) {
+  let lastError: Error | undefined;
+
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    try {
+      const completeResponse = await fetch("/api/media/upload-complete", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+      const completeData =
+        await readJsonResponse<UploadCompleteResponse>(completeResponse);
+
+      if (!completeResponse.ok) {
+        throw new Error(completeData?.error || "Unable to finish upload.");
+      }
+
+      return;
+    } catch (error) {
+      lastError =
+        error instanceof Error
+          ? error
+          : new Error("Unable to finish upload.");
+
+      if (attempt < 4) {
+        await new Promise((resolve) =>
+          setTimeout(resolve, 1000 * (attempt + 1)),
+        );
+      }
+    }
+  }
+
+  throw lastError || new Error("Unable to finish upload.");
 }
 
 export default function PublicMediaUpload({
@@ -263,28 +322,17 @@ export default function PublicMediaUpload({
           },
         });
         completedUploadBytes += file.size;
-        const completeResponse = await fetch("/api/media/upload-complete", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            fileId,
-            teamNumber: trimmedTeamNumber,
-            year: numericYear,
-            uploadedBy: trimmedUploadedBy,
-            title,
-            uploadGroupId: sessionData.uploadGroupId,
-            uploadFolder: sessionData.uploadFolder,
-            fileCount: files.length,
-          }),
+        await finishUploadedFile({
+          fileId,
+          fileName: session.fileName,
+          teamNumber: trimmedTeamNumber,
+          year: numericYear,
+          uploadedBy: trimmedUploadedBy,
+          title,
+          uploadGroupId: sessionData.uploadGroupId,
+          uploadFolder: sessionData.uploadFolder,
+          fileCount: files.length,
         });
-        const completeData =
-          await readJsonResponse<UploadCompleteResponse>(completeResponse);
-
-        if (!completeResponse.ok) {
-          throw new Error(completeData?.error || `Unable to finish ${file.name}.`);
-        }
 
         uploadedFiles.push(file);
       }

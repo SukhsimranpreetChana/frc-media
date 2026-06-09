@@ -18,6 +18,7 @@ function isValidYear(year: number) {
 export async function POST(request: Request) {
   const payload = (await request.json().catch(() => null)) as {
     fileId?: unknown;
+    fileName?: unknown;
     teamNumber?: unknown;
     year?: unknown;
     uploadedBy?: unknown;
@@ -31,6 +32,7 @@ export async function POST(request: Request) {
     };
   } | null;
   const fileId = String(payload?.fileId || "").trim();
+  const fileName = String(payload?.fileName || "").trim();
   const teamNumber = String(payload?.teamNumber || "").trim();
   const year = Number(payload?.year);
   const uploadedBy = String(payload?.uploadedBy || "").trim();
@@ -48,7 +50,7 @@ export async function POST(request: Request) {
         }
       : undefined;
 
-  if (!fileId) {
+  if (!fileId && !fileName) {
     return NextResponse.json(
       { error: "Missing uploaded Google Drive file." },
       { status: 400 },
@@ -78,7 +80,8 @@ export async function POST(request: Request) {
 
   try {
     const driveFile = await completeGoogleDriveResumableUpload({
-      fileId,
+      fileId: fileId || undefined,
+      fileName: fileName || undefined,
       uploadFolder,
     });
     const defaultTitle = fileCount > 1

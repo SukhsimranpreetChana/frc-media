@@ -1,44 +1,65 @@
-import { readFile, writeFile } from "fs/promises";
-import path from "path";
+import { createHmac, randomUUID, timingSafeEqual } from "crypto";
 
-type StoredOAuthState = {
-  state: string;
-  createdAt: number;
-};
-
-const stateStorePath = path.join(process.cwd(), ".google-oauth-state.json");
 const maxStateAgeMs = 10 * 60 * 1000;
 
-async function readStates() {
-  try {
-    const stateJson = await readFile(stateStorePath, "utf8");
-    const states = JSON.parse(stateJson) as StoredOAuthState[];
-    const now = Date.now();
+function getStateSecret() {
+  return (
+    process.env.GOOGLE_OAUTH_STATE_SECRET ||
+    process.env.ADMIN_SESSION_SECRET ||
+    process.env.FMC_ADMIN_PASSWORD ||
+    process.env.GOOGLE_CLIENT_SECRET
+  );
+}
 
-    return states.filter((state) => now - state.createdAt < maxStateAgeMs);
-  } catch {
-    return [];
+function signState(nonce: string, createdAt: number) {
+  const secret = getStateSecret();
+
+  if (!secret) {
+    throw new Error("Missing OAuth state secret.");
   }
+
+  return createHmac("sha256", secret)
+    .update(`${nonce}.${createdAt}`)
+    .digest("base64url");
 }
 
-async function writeStates(states: StoredOAuthState[]) {
-  await writeFile(stateStorePath, JSON.stringify(states, null, 2), "utf8");
+export function createGoogleOAuthState() {
+  const nonce = randomUUID();
+  const createdAt = Date.now();
+  const signature = signState(nonce, createdAt);
+
+  return `${nonce}.${createdAt}.${signature}`;
 }
 
-export async function saveGoogleOAuthState(state: string) {
-  const states = await readStates();
-  await writeStates([...states, { state, createdAt: Date.now() }]);
+export async function saveGoogleOAuthState(_state: string) {
+  // OAuth state is signed and self-contained so it works on read-only hosts.
 }
 
 export async function consumeGoogleOAuthState(state: string) {
-  const states = await readStates();
-  const stateExists = states.some((storedState) => storedState.state === state);
+  const [nonce, createdAtValue, signature] = state.split(".");
+  const createdAt = Number(createdAtValue);
 
-  if (stateExists) {
-    await writeStates(
-      states.filter((storedState) => storedState.state !== state),
-    );
+  if (!nonce || !createdAt || !signature) {
+    return false;
   }
 
-  return stateExists;
+  if (Date.now() - createdAt > maxStateAgeMs) {
+    return false;
+  }
+
+  let expectedSignature: string;
+
+  try {
+    expectedSignature = signState(nonce, createdAt);
+  } catch {
+    return false;
+  }
+
+  const provided = Buffer.from(signature);
+  const expected = Buffer.from(expectedSignature);
+
+  return (
+    provided.byteLength === expected.byteLength &&
+    timingSafeEqual(provided, expected)
+  );
 }

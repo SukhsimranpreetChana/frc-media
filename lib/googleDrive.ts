@@ -344,6 +344,19 @@ async function setAnyoneCanView(accessToken: string, fileId: string) {
   }
 }
 
+async function trySetAnyoneCanView(accessToken: string, fileId: string) {
+  try {
+    await setAnyoneCanView(accessToken, fileId);
+  } catch (error) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Unable to set Google Drive sharing permissions.";
+
+    console.error("Google Drive sharing warning:", message);
+  }
+}
+
 function sanitizeFileName(fileName: string) {
   return (
     fileName
@@ -516,6 +529,40 @@ export async function listGoogleDriveFolderFiles(folderUrl: string) {
   }));
 }
 
+async function findGoogleDriveFileInFolder(input: {
+  fileName: string;
+  folderId: string;
+}) {
+  const accessToken = await getGoogleAccessToken();
+  const query = [
+    `name = '${escapeDriveQueryValue(input.fileName)}'`,
+    `'${escapeDriveQueryValue(input.folderId)}' in parents`,
+    "trashed = false",
+    `mimeType != '${folderMimeType}'`,
+  ].join(" and ");
+  const params = new URLSearchParams({
+    q: query,
+    fields: "files(id,name,webViewLink,webContentLink,thumbnailLink,parents)",
+    includeItemsFromAllDrives: "true",
+    supportsAllDrives: "true",
+    orderBy: "createdTime desc",
+    pageSize: "1",
+  });
+  const response = await fetch(`${driveApiBaseUrl}/files?${params.toString()}`, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Unable to find uploaded Google Drive file. ${errorText}`);
+  }
+
+  const data = (await response.json()) as GoogleDriveFilesResponse;
+  return data.files?.[0];
+}
+
 export async function getGoogleDrivePreviewImage(
   fileId: string,
 ): Promise<GoogleDrivePreviewImage> {
@@ -636,7 +683,7 @@ export async function createGoogleDriveUploadFolderForSubmission(input: {
     teamFolderId,
   );
 
-  await setAnyoneCanView(accessToken, uploaderFolderId);
+  await trySetAnyoneCanView(accessToken, uploaderFolderId);
 
   return {
     id: uploaderFolderId,
@@ -708,7 +755,7 @@ export async function uploadMediaToGoogleDrive(input: {
   }
 
   const uploadedFile = (await uploadResponse.json()) as GoogleDriveFile;
-  await setAnyoneCanView(accessToken, uploadedFile.id);
+  await trySetAnyoneCanView(accessToken, uploadedFile.id);
 
   return {
     fileId: uploadedFile.id,
@@ -771,30 +818,47 @@ export async function createGoogleDriveResumableUploadSession(input: {
 }
 
 export async function completeGoogleDriveResumableUpload(input: {
-  fileId: string;
+  fileId?: string;
+  fileName?: string;
   uploadFolder?: GoogleDriveUploadFolder;
 }): Promise<GoogleDriveUploadedMedia> {
   const accessToken = await getGoogleAccessToken();
-  const params = new URLSearchParams({
-    fields: "id,name,webViewLink,webContentLink,thumbnailLink,parents",
-    supportsAllDrives: "true",
-  });
-  const response = await fetch(
-    `${driveApiBaseUrl}/files/${encodeURIComponent(input.fileId)}?${params.toString()}`,
-    {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    },
-  );
+  let uploadedFile: GoogleDriveFile | undefined;
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Unable to load uploaded Google Drive file. ${errorText}`);
+  if (input.fileId) {
+    const params = new URLSearchParams({
+      fields: "id,name,webViewLink,webContentLink,thumbnailLink,parents",
+      supportsAllDrives: "true",
+    });
+    const response = await fetch(
+      `${driveApiBaseUrl}/files/${encodeURIComponent(input.fileId)}?${params.toString()}`,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      },
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Unable to load uploaded Google Drive file. ${errorText}`);
+    }
+
+    uploadedFile = (await response.json()) as GoogleDriveFile;
+  } else if (input.fileName && input.uploadFolder) {
+    uploadedFile = await findGoogleDriveFileInFolder({
+      fileName: input.fileName,
+      folderId: input.uploadFolder.id,
+    });
   }
 
-  const uploadedFile = (await response.json()) as GoogleDriveFile;
-  await setAnyoneCanView(accessToken, uploadedFile.id);
+  if (!uploadedFile?.id) {
+    throw new Error(
+      "Google Drive accepted the upload, but the site could not find the uploaded file to submit it for review.",
+    );
+  }
+
+  await trySetAnyoneCanView(accessToken, uploadedFile.id);
 
   return {
     fileId: uploadedFile.id,

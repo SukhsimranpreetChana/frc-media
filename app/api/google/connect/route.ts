@@ -1,8 +1,10 @@
-import { randomUUID } from "crypto";
 import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/adminAuth";
 import { getGoogleOAuthAuthorizeUrl } from "@/lib/googleDrive";
-import { saveGoogleOAuthState } from "@/lib/googleOAuthState";
+import {
+  createGoogleOAuthState,
+  saveGoogleOAuthState,
+} from "@/lib/googleOAuthState";
 
 export const runtime = "nodejs";
 
@@ -14,7 +16,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    const state = randomUUID();
+    const state = createGoogleOAuthState();
 
     await saveGoogleOAuthState(state).catch((error) => {
       const message =
