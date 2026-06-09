@@ -6,14 +6,105 @@ type PublicMediaUploadProps = {
   initialTeamNumber?: string;
 };
 
-type UploadResponse = {
-  ok?: boolean;
+type UploadSessionResponse = {
   error?: string;
-  uploads?: unknown[];
+  uploadGroupId?: string;
+  uploadFolder?: {
+    id: string;
+    name: string;
+    url: string;
+  };
+  sessions?: {
+    clientId: string;
+    uploadUrl: string;
+    fileName: string;
+  }[];
 };
+
+type GoogleDriveUploadResponse = {
+  id?: string;
+};
+
+type UploadCompleteResponse = {
+  error?: string;
+};
+
+const maxTotalUploadBytes = 2 * 1024 * 1024 * 1024;
+const chunkSizeBytes = 16 * 1024 * 1024;
 
 function getFileKey(file: File) {
   return `${file.name}-${file.size}-${file.lastModified}`;
+}
+
+function formatBytes(bytes: number) {
+  const units = ["B", "KB", "MB", "GB"];
+  let size = bytes;
+  let unitIndex = 0;
+
+  while (size >= 1024 && unitIndex < units.length - 1) {
+    size /= 1024;
+    unitIndex += 1;
+  }
+
+  return `${size.toFixed(unitIndex === 0 ? 0 : 1)} ${units[unitIndex]}`;
+}
+
+async function readJsonResponse<T>(response: Response): Promise<T | null> {
+  const text = await response.text();
+
+  if (!text) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(text) as T;
+  } catch {
+    throw new Error(text);
+  }
+}
+
+async function uploadFileToGoogleDrive(input: {
+  file: File;
+  uploadUrl: string;
+  onProgress: (uploadedBytes: number) => void;
+}) {
+  let uploadedBytes = 0;
+
+  while (uploadedBytes < input.file.size) {
+    const chunk = input.file.slice(
+      uploadedBytes,
+      Math.min(uploadedBytes + chunkSizeBytes, input.file.size),
+    );
+    const chunkEnd = uploadedBytes + chunk.size - 1;
+    const response = await fetch(input.uploadUrl, {
+      method: "PUT",
+      headers: {
+        "Content-Range": `bytes ${uploadedBytes}-${chunkEnd}/${input.file.size}`,
+        "Content-Type": input.file.type || "application/octet-stream",
+      },
+      body: chunk,
+    });
+
+    uploadedBytes += chunk.size;
+    input.onProgress(uploadedBytes);
+
+    if (response.status === 200 || response.status === 201) {
+      const data = await readJsonResponse<GoogleDriveUploadResponse>(response);
+
+      if (!data?.id) {
+        throw new Error("Google Drive did not return an uploaded file id.");
+      }
+
+      return data.id;
+    }
+
+    if (response.status !== 308) {
+      const errorText = await response.text().catch(() => "");
+      throw new Error(errorText || "Google Drive rejected the upload chunk.");
+    }
+  }
+
+  throw new Error("Google Drive upload did not finish.");
 }
 
 export default function PublicMediaUpload({
@@ -41,31 +132,107 @@ export default function PublicMediaUpload({
       return;
     }
 
+    const totalUploadBytes = files.reduce((total, file) => total + file.size, 0);
+
+    if (totalUploadBytes > maxTotalUploadBytes) {
+      setMessage(
+        `Uploads can be up to ${formatBytes(maxTotalUploadBytes)} total. You selected ${formatBytes(totalUploadBytes)}.`,
+      );
+      return;
+    }
+
     setIsUploading(true);
 
     try {
-      const uploadData = new FormData();
-      uploadData.set("teamNumber", trimmedTeamNumber);
-      uploadData.set("year", String(numericYear));
-      uploadData.set("uploadedBy", trimmedUploadedBy);
-      uploadData.set("title", title);
-      files.forEach((file) => {
-        uploadData.append("files", file);
-      });
+      setMessage("Starting Google Drive upload...");
 
-      const response = await fetch("/api/media/upload", {
+      const clientFiles = files.map((file) => ({
+        clientId: getFileKey(file),
+        name: file.name,
+        type: file.type,
+        size: file.size,
+      }));
+      const sessionResponse = await fetch("/api/media/upload-session", {
         method: "POST",
-        body: uploadData,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          teamNumber: trimmedTeamNumber,
+          year: numericYear,
+          uploadedBy: trimmedUploadedBy,
+          title,
+          files: clientFiles,
+        }),
       });
+      const sessionData =
+        await readJsonResponse<UploadSessionResponse>(sessionResponse);
 
-      const data = (await response.json()) as UploadResponse;
+      if (
+        !sessionResponse.ok ||
+        !sessionData?.uploadGroupId ||
+        !sessionData.uploadFolder ||
+        !sessionData.sessions
+      ) {
+        throw new Error(sessionData?.error || "Unable to start upload.");
+      }
 
-      if (!response.ok) {
-        throw new Error(data.error || "Upload failed.");
+      const uploadedFiles = [];
+
+      for (const [fileIndex, file] of files.entries()) {
+        const session = sessionData.sessions.find(
+          (currentSession) => currentSession.clientId === getFileKey(file),
+        );
+
+        if (!session) {
+          throw new Error(`Unable to start upload for ${file.name}.`);
+        }
+
+        setMessage(
+          `Uploading ${file.name} (${fileIndex + 1}/${files.length})... 0%`,
+        );
+
+        const fileId = await uploadFileToGoogleDrive({
+          file,
+          uploadUrl: session.uploadUrl,
+          onProgress: (uploadedBytes) => {
+            const percent = Math.min(
+              100,
+              Math.round((uploadedBytes / file.size) * 100),
+            );
+
+            setMessage(
+              `Uploading ${file.name} (${fileIndex + 1}/${files.length})... ${percent}%`,
+            );
+          },
+        });
+        const completeResponse = await fetch("/api/media/upload-complete", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            fileId,
+            teamNumber: trimmedTeamNumber,
+            year: numericYear,
+            uploadedBy: trimmedUploadedBy,
+            title,
+            uploadGroupId: sessionData.uploadGroupId,
+            uploadFolder: sessionData.uploadFolder,
+          }),
+        });
+        const completeData =
+          await readJsonResponse<UploadCompleteResponse>(completeResponse);
+
+        if (!completeResponse.ok) {
+          throw new Error(completeData?.error || `Unable to finish ${file.name}.`);
+        }
+
+        uploadedFiles.push(file);
       }
 
       setMessage(
-        `${data.uploads?.length || files.length} file${files.length === 1 ? "" : "s"} submitted for review. Approved clips will show up on the Teams tab.`,
+        `${uploadedFiles.length} file${uploadedFiles.length === 1 ? "" : "s"} submitted for review. Approved clips will show up on the Teams tab.`,
       );
       setTeamNumber(initialTeamNumber);
       setYear("");

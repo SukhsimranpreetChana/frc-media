@@ -53,6 +53,17 @@ export type GoogleDrivePreviewImage = {
   fileName: string;
 };
 
+export type GoogleDriveUploadedMedia = {
+  fileId: string;
+  fileName: string;
+  viewUrl: string;
+  downloadUrl: string;
+  thumbnailUrl: string;
+  folderId?: string;
+  folderName?: string;
+  folderUrl?: string;
+};
+
 const driveApiBaseUrl = "https://www.googleapis.com/drive/v3";
 const driveUploadBaseUrl = "https://www.googleapis.com/upload/drive/v3";
 const folderMimeType = "application/vnd.google-apps.folder";
@@ -684,5 +695,91 @@ export async function uploadMediaToGoogleDrive(input: {
     folderId: uploadFolder.id,
     folderName: uploadFolder.name,
     folderUrl: uploadFolder.url,
+  };
+}
+
+export async function createGoogleDriveResumableUploadSession(input: {
+  fileName: string;
+  mimeType: string;
+  size: number;
+  uploadFolder: GoogleDriveUploadFolder;
+}) {
+  const accessToken = await getGoogleAccessToken();
+  const fileName = sanitizeFileName(input.fileName);
+  const mimeType = input.mimeType || "application/octet-stream";
+  const params = new URLSearchParams({
+    uploadType: "resumable",
+    fields: "id,name,webViewLink,webContentLink,thumbnailLink",
+    supportsAllDrives: "true",
+  });
+  const response = await fetch(
+    `${driveUploadBaseUrl}/files?${params.toString()}`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+        "X-Upload-Content-Type": mimeType,
+        "X-Upload-Content-Length": String(input.size),
+      },
+      body: JSON.stringify({
+        name: fileName,
+        mimeType,
+        parents: [input.uploadFolder.id],
+      }),
+    },
+  );
+  const uploadUrl = response.headers.get("Location");
+
+  if (!response.ok || !uploadUrl) {
+    const errorText = await response.text();
+    throw new Error(`Unable to start Google Drive upload. ${errorText}`);
+  }
+
+  return {
+    uploadUrl,
+    fileName,
+  };
+}
+
+export async function completeGoogleDriveResumableUpload(input: {
+  fileId: string;
+  uploadFolder?: GoogleDriveUploadFolder;
+}): Promise<GoogleDriveUploadedMedia> {
+  const accessToken = await getGoogleAccessToken();
+  const params = new URLSearchParams({
+    fields: "id,name,webViewLink,webContentLink,thumbnailLink,parents",
+    supportsAllDrives: "true",
+  });
+  const response = await fetch(
+    `${driveApiBaseUrl}/files/${encodeURIComponent(input.fileId)}?${params.toString()}`,
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    },
+  );
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Unable to load uploaded Google Drive file. ${errorText}`);
+  }
+
+  const uploadedFile = (await response.json()) as GoogleDriveFile;
+  await setAnyoneCanView(accessToken, uploadedFile.id);
+
+  return {
+    fileId: uploadedFile.id,
+    fileName: uploadedFile.name || "fmc-upload",
+    viewUrl:
+      uploadedFile.webViewLink ||
+      `https://drive.google.com/file/d/${uploadedFile.id}/view`,
+    downloadUrl:
+      uploadedFile.webContentLink ||
+      `https://drive.google.com/uc?id=${uploadedFile.id}`,
+    thumbnailUrl: getGoogleDriveThumbnailUrl(uploadedFile.id),
+    folderId: input.uploadFolder?.id,
+    folderName: input.uploadFolder?.name,
+    folderUrl: input.uploadFolder?.url,
   };
 }
