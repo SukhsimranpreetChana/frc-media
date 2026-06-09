@@ -463,6 +463,9 @@ export default function PublicMediaUpload({
                 : "No files selected yet"}
             </p>
           </div>
+          <p className="mt-2 text-xs text-[#17001C]/60">
+            Uploads can be up to 2 GB total.
+          </p>
           {files.length > 0 ? (
             <div className="mt-3 rounded-md border-2 border-[#17001C]/20 bg-white/70 p-3">
               <p className="text-xs text-[#17001C]/60">
