@@ -29,6 +29,15 @@ type UploadCompleteResponse = {
   error?: string;
 };
 
+type UploadProgress = {
+  fileName: string;
+  uploadedBytes: number;
+  totalBytes: number;
+  percent: number;
+  etaLabel: string;
+  speedLabel: string;
+};
+
 const maxTotalUploadBytes = 2 * 1024 * 1024 * 1024;
 const chunkSizeBytes = 16 * 1024 * 1024;
 
@@ -47,6 +56,27 @@ function formatBytes(bytes: number) {
   }
 
   return `${size.toFixed(unitIndex === 0 ? 0 : 1)} ${units[unitIndex]}`;
+}
+
+function formatDuration(seconds: number) {
+  if (!Number.isFinite(seconds) || seconds <= 0) {
+    return "calculating...";
+  }
+
+  const roundedSeconds = Math.ceil(seconds);
+  const hours = Math.floor(roundedSeconds / 3600);
+  const minutes = Math.floor((roundedSeconds % 3600) / 60);
+  const remainingSeconds = roundedSeconds % 60;
+
+  if (hours > 0) {
+    return `${hours}h ${minutes}m`;
+  }
+
+  if (minutes > 0) {
+    return `${minutes}m ${remainingSeconds}s`;
+  }
+
+  return `${remainingSeconds}s`;
 }
 
 async function readJsonResponse<T>(response: Response): Promise<T | null> {
@@ -117,6 +147,9 @@ export default function PublicMediaUpload({
   const [files, setFiles] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [message, setMessage] = useState("");
+  const [uploadProgress, setUploadProgress] = useState<UploadProgress | null>(
+    null,
+  );
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -142,9 +175,19 @@ export default function PublicMediaUpload({
     }
 
     setIsUploading(true);
+    setUploadProgress({
+      fileName: "Preparing upload",
+      uploadedBytes: 0,
+      totalBytes: totalUploadBytes,
+      percent: 0,
+      etaLabel: "calculating...",
+      speedLabel: "0 B/s",
+    });
 
     try {
       setMessage("Starting Google Drive upload...");
+      const uploadStartedAt = Date.now();
+      let completedUploadBytes = 0;
 
       const clientFiles = files.map((file) => ({
         clientId: getFileKey(file),
@@ -196,16 +239,30 @@ export default function PublicMediaUpload({
           file,
           uploadUrl: session.uploadUrl,
           onProgress: (uploadedBytes) => {
+            const totalUploadedBytes = completedUploadBytes + uploadedBytes;
+            const elapsedSeconds = (Date.now() - uploadStartedAt) / 1000;
+            const bytesPerSecond =
+              elapsedSeconds > 0 ? totalUploadedBytes / elapsedSeconds : 0;
+            const remainingBytes = totalUploadBytes - totalUploadedBytes;
             const percent = Math.min(
               100,
-              Math.round((uploadedBytes / file.size) * 100),
+              Math.round((totalUploadedBytes / totalUploadBytes) * 100),
             );
 
             setMessage(
               `Uploading ${file.name} (${fileIndex + 1}/${files.length})... ${percent}%`,
             );
+            setUploadProgress({
+              fileName: file.name,
+              uploadedBytes: totalUploadedBytes,
+              totalBytes: totalUploadBytes,
+              percent,
+              etaLabel: formatDuration(remainingBytes / bytesPerSecond),
+              speedLabel: `${formatBytes(bytesPerSecond)}/s`,
+            });
           },
         });
+        completedUploadBytes += file.size;
         const completeResponse = await fetch("/api/media/upload-complete", {
           method: "POST",
           headers: {
@@ -231,6 +288,14 @@ export default function PublicMediaUpload({
         uploadedFiles.push(file);
       }
 
+      setUploadProgress({
+        fileName: "Upload complete",
+        uploadedBytes: totalUploadBytes,
+        totalBytes: totalUploadBytes,
+        percent: 100,
+        etaLabel: "done",
+        speedLabel: "complete",
+      });
       setMessage(
         `${uploadedFiles.length} file${uploadedFiles.length === 1 ? "" : "s"} submitted for review. Approved clips will show up on the Teams tab.`,
       );
@@ -248,6 +313,7 @@ export default function PublicMediaUpload({
           : "Check Supabase storage policies and try again.";
 
       setMessage(`Upload failed: ${errorMessage}`);
+      setUploadProgress(null);
     } finally {
       setIsUploading(false);
     }
@@ -354,6 +420,7 @@ export default function PublicMediaUpload({
                     </span>
                     <button
                       className="font-primary rounded-md bg-[#17001C] px-3 py-2 text-xs text-white hover:bg-[#72007E] sm:py-1"
+                      disabled={isUploading}
                       onClick={() =>
                         setFiles((currentFiles) =>
                           currentFiles.filter(
@@ -380,6 +447,38 @@ export default function PublicMediaUpload({
       >
         {isUploading ? "Uploading..." : "Upload media"}
       </button>
+      {uploadProgress ? (
+        <div className="mt-5 rounded-md border-2 border-[#17001C]/20 bg-white/75 p-3">
+          <div className="flex flex-col gap-1 text-sm text-[#17001C]/75 sm:flex-row sm:items-center sm:justify-between">
+            <span className="overflow-wrap-anywhere">
+              {uploadProgress.fileName}
+            </span>
+            <span>
+              {uploadProgress.percent}% · {uploadProgress.etaLabel}
+            </span>
+          </div>
+          <div
+            aria-label="Upload progress"
+            aria-valuemax={100}
+            aria-valuemin={0}
+            aria-valuenow={uploadProgress.percent}
+            className="mt-3 h-4 overflow-hidden rounded-md border-2 border-[#17001C] bg-[#F4E7E7]"
+            role="progressbar"
+          >
+            <div
+              className="h-full bg-[#F85259] transition-[width] duration-300"
+              style={{ width: `${uploadProgress.percent}%` }}
+            />
+          </div>
+          <div className="mt-2 flex flex-col gap-1 text-xs text-[#17001C]/60 sm:flex-row sm:items-center sm:justify-between">
+            <span>
+              {formatBytes(uploadProgress.uploadedBytes)} of{" "}
+              {formatBytes(uploadProgress.totalBytes)}
+            </span>
+            <span>{uploadProgress.speedLabel}</span>
+          </div>
+        </div>
+      ) : null}
       {message ? <p className="mt-4 text-sm text-[#17001C]/75">{message}</p> : null}
     </form>
   );
