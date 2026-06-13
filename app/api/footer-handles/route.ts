@@ -8,6 +8,7 @@ import {
 } from "@/lib/supabase";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 const maxHandleLength = 80;
 const maxLinkLength = 500;
@@ -29,12 +30,19 @@ function isValidHttpUrl(value: string) {
 
 export async function GET() {
   try {
-    return NextResponse.json({ handles: await getFooterHandles() });
-  } catch {
     return NextResponse.json(
-      { error: "Unable to load footer handles." },
-      { status: 500 },
+      { handles: await getFooterHandles() },
+      {
+        headers: {
+          "Cache-Control": "no-store",
+        },
+      },
     );
+  } catch {
+    return NextResponse.json({
+      configured: false,
+      handles: [],
+    });
   }
 }
 

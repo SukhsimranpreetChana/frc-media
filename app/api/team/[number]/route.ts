@@ -29,6 +29,11 @@ type RouteContext = {
 const tbaAuthKey = process.env.TBA_AUTH_KEY;
 const currentYear = new Date().getFullYear();
 const yearsToSearch = Array.from({ length: 5 }, (_, index) => currentYear - index);
+const externalFetchTimeoutMs = 8000;
+
+function getExternalFetchSignal() {
+  return AbortSignal.timeout(externalFetchTimeoutMs);
+}
 
 function isValidTeamNumber(teamNumber: string) {
   return /^\d{1,5}$/.test(teamNumber);
@@ -39,20 +44,25 @@ function getLocation(team: StatboticsTeam) {
 }
 
 async function getStatboticsTeam(teamNumber: string) {
-  const response = await fetch(
-    `https://api.statbotics.io/v3/team/${teamNumber}`,
-    {
-      next: {
-        revalidate: 60 * 60 * 24,
+  try {
+    const response = await fetch(
+      `https://api.statbotics.io/v3/team/${teamNumber}`,
+      {
+        next: {
+          revalidate: 60 * 60 * 24,
+        },
+        signal: getExternalFetchSignal(),
       },
-    },
-  );
+    );
 
-  if (!response.ok) {
+    if (!response.ok) {
+      return null;
+    }
+
+    return (await response.json()) as StatboticsTeam;
+  } catch {
     return null;
   }
-
-  return (await response.json()) as StatboticsTeam;
 }
 
 async function getTbaMediaForYear(teamNumber: string, year: number) {
@@ -60,23 +70,28 @@ async function getTbaMediaForYear(teamNumber: string, year: number) {
     return [];
   }
 
-  const response = await fetch(
-    `https://www.thebluealliance.com/api/v3/team/frc${teamNumber}/media/${year}`,
-    {
-      headers: {
-        "X-TBA-Auth-Key": tbaAuthKey,
+  try {
+    const response = await fetch(
+      `https://www.thebluealliance.com/api/v3/team/frc${teamNumber}/media/${year}`,
+      {
+        headers: {
+          "X-TBA-Auth-Key": tbaAuthKey,
+        },
+        next: {
+          revalidate: 60 * 60 * 12,
+        },
+        signal: getExternalFetchSignal(),
       },
-      next: {
-        revalidate: 60 * 60 * 12,
-      },
-    },
-  );
+    );
 
-  if (!response.ok) {
+    if (!response.ok) {
+      return [];
+    }
+
+    return (await response.json()) as TbaMedia[];
+  } catch {
     return [];
   }
-
-  return (await response.json()) as TbaMedia[];
 }
 
 async function getTbaLogoUrl(teamNumber: string) {
@@ -105,11 +120,18 @@ async function getLogoUrl(teamNumber: string) {
     };
   }
 
-  const response = await fetch("https://logos.frc.sh/", {
-    next: {
-      revalidate: 60 * 60 * 24,
-    },
-  });
+  let response: Response;
+
+  try {
+    response = await fetch("https://logos.frc.sh/", {
+      next: {
+        revalidate: 60 * 60 * 24,
+      },
+      signal: getExternalFetchSignal(),
+    });
+  } catch {
+    return undefined;
+  }
 
   if (!response.ok) {
     return undefined;
@@ -145,22 +167,17 @@ export async function GET(_request: Request, context: RouteContext) {
   }
 
   const team = await getStatboticsTeam(teamNumber);
-
-  if (!team) {
-    return NextResponse.json({ error: "Team not found." }, { status: 404 });
-  }
-
-  const logo = await getLogoUrl(teamNumber);
+  const logo = await getLogoUrl(teamNumber).catch(() => undefined);
   const responseTeam: Team = {
     id: `frc-${teamNumber}`,
     number: teamNumber,
-    name: team.name || `Team ${teamNumber}`,
-    location: getLocation(team),
+    name: team?.name || `Team ${teamNumber}`,
+    location: team ? getLocation(team) : "Unknown",
     mediaFocus: "No FMC media posted yet",
     driveUrl: mediaDriveUrl,
     tags: ["api", "statbotics", "team"],
     description:
-      team.rookie_year && team.active !== false
+      team?.rookie_year && team.active !== false
         ? `Active FRC team since ${team.rookie_year}.`
         : "FRC team profile.",
     logoUrl: logo?.url,

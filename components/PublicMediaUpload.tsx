@@ -210,6 +210,7 @@ export default function PublicMediaUpload({
   const [files, setFiles] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [message, setMessage] = useState("");
+  const [hasAcceptedUploadTerms, setHasAcceptedUploadTerms] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<UploadProgress | null>(
     null,
   );
@@ -222,6 +223,11 @@ export default function PublicMediaUpload({
     const trimmedTeamNumber = teamNumber.trim();
     const trimmedUploadedBy = uploadedBy.trim();
     const numericYear = Number(year);
+
+    if (!hasAcceptedUploadTerms) {
+      setMessage("Review and agree to the upload terms before submitting.");
+      return;
+    }
 
     if (!trimmedTeamNumber || !numericYear || !trimmedUploadedBy || files.length === 0) {
       setMessage("Add a team number, year, your name, and at least one media file.");
@@ -357,6 +363,7 @@ export default function PublicMediaUpload({
       setTitle("");
       setUploadedBy("");
       setFiles([]);
+      setHasAcceptedUploadTerms(false);
       form.reset();
       window.dispatchEvent(new Event("fmc-media-uploaded"));
     } catch (error) {
@@ -502,9 +509,38 @@ export default function PublicMediaUpload({
           ) : null}
         </div>
       </div>
+      <section className="mt-5 rounded-md border-2 border-[#F85259] bg-[#F4E7E7] p-4 text-sm text-[#17001C]">
+        <h3 className="text-base text-[#17001C]">Upload terms and warning</h3>
+        <div className="mt-3 grid gap-2 text-sm leading-6 text-[#17001C]/75">
+          <p>
+            Only upload photos or videos that you created, own, or have clear
+            permission to share.
+          </p>
+          <p>
+            Do not upload private, unsafe, hateful, copyrighted, or misleading
+            content. FMC admins may review, approve, organize, or remove uploads.
+          </p>
+          <p>
+            Approved uploads may be publicly visible in team searches and stored
+            in Google Drive.
+          </p>
+        </div>
+        <label className="mt-4 flex items-start gap-3 text-sm font-semibold text-[#17001C]">
+          <input
+            checked={hasAcceptedUploadTerms}
+            className="mt-1 h-4 w-4 accent-[#7137E3]"
+            disabled={isUploading}
+            onChange={(event) => setHasAcceptedUploadTerms(event.target.checked)}
+            type="checkbox"
+          />
+          <span>
+            I understand and agree to these upload terms.
+          </span>
+        </label>
+      </section>
       <button
-        className="font-primary fmc-button mt-5 h-11 w-full bg-[#F85259] px-4 text-sm text-white hover:bg-[#A335E6] disabled:opacity-60 sm:w-auto"
-        disabled={isUploading}
+        className="font-primary fmc-button mt-5 h-11 w-full bg-[#F85259] px-4 text-sm text-white hover:bg-[#A335E6] disabled:cursor-not-allowed disabled:bg-[#6f6673] disabled:opacity-65 disabled:shadow-none sm:w-auto"
+        disabled={isUploading || !hasAcceptedUploadTerms}
         type="submit"
       >
         {isUploading ? "Uploading..." : "Upload media"}
