@@ -2,6 +2,8 @@ import { createClient } from "@supabase/supabase-js";
 import type {
   Commission,
   CommissionRecord,
+  CommissionRequest,
+  CommissionRequestRecord,
   FooterHandle,
   FooterHandleRecord,
   MediaClip,
@@ -263,6 +265,12 @@ function mapCommissionRecord(record: CommissionRecord): Commission {
   };
 }
 
+function mapCommissionRequestRecord(
+  record: CommissionRequestRecord,
+): CommissionRequest {
+  return mapCommissionRecord(record);
+}
+
 function mapFooterHandleRecord(record: FooterHandleRecord): FooterHandle {
   return {
     id: record.id,
@@ -327,6 +335,57 @@ export async function deleteCommissionForAdmin(id: string) {
 
   if (error) {
     throw new Error(`Unable to remove commission: ${error.message}`);
+  }
+}
+
+export async function createCommissionRequest(input: {
+  title: string;
+  link: string;
+  costRange: string;
+}) {
+  const { data, error } = await getSupabaseAdminClient()
+    .from("commission_requests")
+    .insert({
+      title: input.title,
+      link: input.link,
+      cost_range: input.costRange,
+    })
+    .select()
+    .single<CommissionRequestRecord>();
+
+  if (error) {
+    throw new Error(`Unable to create commission request: ${error.message}`);
+  }
+
+  if (!data) {
+    throw new Error("Unable to create commission request: no record returned.");
+  }
+
+  return mapCommissionRequestRecord(data);
+}
+
+export async function getCommissionRequestsForAdmin() {
+  const { data, error } = await getSupabaseAdminClient()
+    .from("commission_requests")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .returns<CommissionRequestRecord[]>();
+
+  if (error) {
+    throw new Error("Unable to load commission requests.");
+  }
+
+  return (data || []).map(mapCommissionRequestRecord);
+}
+
+export async function deleteCommissionRequestForAdmin(id: string) {
+  const { error } = await getSupabaseAdminClient()
+    .from("commission_requests")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    throw new Error(`Unable to remove commission request: ${error.message}`);
   }
 }
 

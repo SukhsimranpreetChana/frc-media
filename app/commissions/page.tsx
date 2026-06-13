@@ -32,7 +32,8 @@ export default function CommissionsPage() {
             Commissions
           </h1>
           <p className="mt-4 text-[#17001C]/75">
-            Browse posted commission options from the community. Ask an admin if you want to post your own commission or have any questions about the process.
+            Browse posted commission options from the community, or request to
+            add your own commission for admin review.
           </p>
         </div>
 

@@ -81,6 +81,8 @@ export type Commission = {
   createdAt?: string;
 };
 
+export type CommissionRequest = Commission;
+
 export type FooterHandle = {
   id: string;
   handle: string;
@@ -96,6 +98,8 @@ export type CommissionRecord = {
   cost_range: string;
   created_at: string;
 };
+
+export type CommissionRequestRecord = CommissionRecord;
 
 export type FooterHandleRecord = {
   id: string;

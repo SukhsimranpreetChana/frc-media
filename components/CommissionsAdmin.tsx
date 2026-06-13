@@ -3,12 +3,15 @@
 import { FormEvent, useEffect, useState } from "react";
 import CommissionCard from "@/components/CommissionCard";
 import { downloadCsv, toCsv } from "@/lib/csvExport";
-import type { Commission } from "@/types";
+import type { Commission, CommissionRequest } from "@/types";
 
 export default function CommissionsAdmin() {
   const [commissions, setCommissions] = useState<Commission[]>([]);
+  const [commissionRequests, setCommissionRequests] = useState<CommissionRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingRequests, setIsLoadingRequests] = useState(true);
   const [activeCommissionId, setActiveCommissionId] = useState("");
+  const [activeRequestId, setActiveRequestId] = useState("");
   const [message, setMessage] = useState("");
   const [title, setTitle] = useState("");
   const [link, setLink] = useState("");
@@ -28,15 +31,33 @@ export default function CommissionsAdmin() {
     return data?.commissions || [];
   }
 
+  async function fetchCommissionRequests() {
+    const response = await fetch("/api/commission-requests");
+    const data = (await response.json().catch(() => null)) as {
+      requests?: CommissionRequest[];
+      error?: string;
+    } | null;
+
+    if (!response.ok) {
+      throw new Error(data?.error || "Could not load commission requests.");
+    }
+
+    return data?.requests || [];
+  }
+
   useEffect(() => {
     let isMounted = true;
 
     async function loadCommissions() {
       try {
-        const nextCommissions = await fetchCommissions();
+        const [nextCommissions, nextRequests] = await Promise.all([
+          fetchCommissions(),
+          fetchCommissionRequests(),
+        ]);
 
         if (isMounted) {
           setCommissions(nextCommissions);
+          setCommissionRequests(nextRequests);
         }
       } catch {
         if (isMounted) {
@@ -45,6 +66,7 @@ export default function CommissionsAdmin() {
       } finally {
         if (isMounted) {
           setIsLoading(false);
+          setIsLoadingRequests(false);
         }
       }
     }
@@ -141,6 +163,86 @@ export default function CommissionsAdmin() {
     }
   }
 
+  async function handleApproveRequest(request: CommissionRequest) {
+    setActiveRequestId(request.id);
+    setMessage("");
+
+    try {
+      const response = await fetch("/api/commission-requests", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: request.id,
+          title: request.title,
+          link: request.link,
+          costRange: request.costRange,
+        }),
+      });
+      const data = (await response.json().catch(() => null)) as {
+        commission?: Commission;
+        error?: string;
+      } | null;
+
+      if (!response.ok || !data?.commission) {
+        throw new Error(data?.error || "Could not approve commission request.");
+      }
+
+      setCommissionRequests((requests) =>
+        requests.filter((currentRequest) => currentRequest.id !== request.id),
+      );
+      setCommissions((currentCommissions) => [
+        data.commission as Commission,
+        ...currentCommissions,
+      ]);
+      setMessage("Commission request approved and posted.");
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "Could not approve commission request.",
+      );
+    } finally {
+      setActiveRequestId("");
+    }
+  }
+
+  async function handleDenyRequest(id: string) {
+    setActiveRequestId(id);
+    setMessage("");
+
+    try {
+      const response = await fetch("/api/commission-requests", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id }),
+      });
+      const data = (await response.json().catch(() => null)) as {
+        error?: string;
+      } | null;
+
+      if (!response.ok) {
+        throw new Error(data?.error || "Could not deny commission request.");
+      }
+
+      setCommissionRequests((requests) =>
+        requests.filter((request) => request.id !== id),
+      );
+      setMessage("Commission request denied.");
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "Could not deny commission request.",
+      );
+    } finally {
+      setActiveRequestId("");
+    }
+  }
+
   function handleExportCommissions() {
     const csv = toCsv(commissions, [
       { header: "id", value: (commission) => commission.id },
@@ -196,6 +298,45 @@ export default function CommissionsAdmin() {
       </form>
 
       <div>
+        <section className="mb-8">
+          <h2 className="text-lg text-[#17001C]">Commission requests</h2>
+          {isLoadingRequests ? (
+            <p className="scrap-card mt-5 p-5 text-sm text-[#17001C]/75">
+              Loading commission requests...
+            </p>
+          ) : null}
+          {!isLoadingRequests && commissionRequests.length === 0 ? (
+            <p className="scrap-card mt-5 p-5 text-sm text-[#17001C]/75">
+              No commission requests waiting for review.
+            </p>
+          ) : null}
+          <div className="mt-5 grid gap-6 md:grid-cols-2">
+            {commissionRequests.map((request) => (
+              <div className="relative flex flex-col gap-3" key={request.id}>
+                <CommissionCard commission={request} />
+                <div className="flex gap-3">
+                  <button
+                    className="font-primary fmc-button h-10 flex-1 bg-[#F85259] px-4 text-sm text-white hover:bg-[#A335E6] disabled:opacity-60"
+                    disabled={activeRequestId === request.id}
+                    onClick={() => void handleApproveRequest(request)}
+                    type="button"
+                  >
+                    Approve
+                  </button>
+                  <button
+                    className="font-primary fmc-button h-10 flex-1 bg-[#17001C] px-4 text-sm text-white hover:bg-[#72007E] disabled:opacity-60"
+                    disabled={activeRequestId === request.id}
+                    onClick={() => void handleDenyRequest(request.id)}
+                    type="button"
+                  >
+                    Deny
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <h2 className="text-lg text-[#17001C]">Posted commissions</h2>
           <button

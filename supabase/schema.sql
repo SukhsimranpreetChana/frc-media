@@ -22,6 +22,14 @@ create table if not exists public.commissions (
   created_at timestamptz not null default now()
 );
 
+create table if not exists public.commission_requests (
+  id uuid primary key default gen_random_uuid(),
+  title text not null,
+  link text not null,
+  cost_range text not null,
+  created_at timestamptz not null default now()
+);
+
 create table if not exists public.footer_handles (
   id uuid primary key default gen_random_uuid(),
   handle text not null,
@@ -37,6 +45,15 @@ alter table public.commissions
   add column if not exists created_at timestamptz not null default now();
 
 alter table public.commissions
+  alter column created_at set default now();
+
+alter table public.commission_requests
+  add column if not exists title text,
+  add column if not exists link text,
+  add column if not exists cost_range text,
+  add column if not exists created_at timestamptz not null default now();
+
+alter table public.commission_requests
   alter column created_at set default now();
 
 alter table public.footer_handles
@@ -84,11 +101,15 @@ create index if not exists media_clips_upload_group_id_idx
 create index if not exists commissions_created_at_idx
   on public.commissions (created_at desc);
 
+create index if not exists commission_requests_created_at_idx
+  on public.commission_requests (created_at desc);
+
 create index if not exists footer_handles_created_at_idx
   on public.footer_handles (created_at desc);
 
 alter table public.media_clips enable row level security;
 alter table public.commissions enable row level security;
+alter table public.commission_requests enable row level security;
 alter table public.footer_handles enable row level security;
 
 drop policy if exists "Public can read media clips" on public.media_clips;
@@ -107,6 +128,14 @@ create policy "Public can read commissions"
   on public.commissions
   for select
   using (true);
+
+drop policy if exists "Public can submit commission requests" on public.commission_requests;
+create policy "Public can submit commission requests"
+  on public.commission_requests
+  for insert
+  with check (true);
+
+drop policy if exists "Public cannot read commission requests" on public.commission_requests;
 
 drop policy if exists "Public can read footer handles" on public.footer_handles;
 create policy "Public can read footer handles"
