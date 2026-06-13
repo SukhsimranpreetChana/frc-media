@@ -20,11 +20,29 @@ type TbaMedia = {
   };
 };
 
+type TbaTeam = {
+  nickname?: string;
+  city?: string;
+  state_prov?: string;
+  country?: string;
+  rookie_year?: number;
+};
+
+type TeamProfile = {
+  name?: string;
+  location: string;
+  rookieYear?: number;
+  active?: boolean;
+  source: "statbotics" | "tba" | "fallback";
+};
+
 type RouteContext = {
   params: Promise<{
     number: string;
   }>;
 };
+
+export const dynamic = "force-dynamic";
 
 const tbaAuthKey = process.env.TBA_AUTH_KEY;
 const currentYear = new Date().getFullYear();
@@ -41,6 +59,10 @@ function isValidTeamNumber(teamNumber: string) {
 
 function getLocation(team: StatboticsTeam) {
   return [team.state, team.country].filter(Boolean).join(", ") || "Unknown";
+}
+
+function getTbaLocation(team: TbaTeam) {
+  return [team.state_prov, team.country].filter(Boolean).join(", ") || "Unknown";
 }
 
 async function getStatboticsTeam(teamNumber: string) {
@@ -63,6 +85,66 @@ async function getStatboticsTeam(teamNumber: string) {
   } catch {
     return null;
   }
+}
+
+async function getTbaTeam(teamNumber: string) {
+  if (!tbaAuthKey) {
+    return null;
+  }
+
+  try {
+    const response = await fetch(
+      `https://www.thebluealliance.com/api/v3/team/frc${teamNumber}`,
+      {
+        headers: {
+          "X-TBA-Auth-Key": tbaAuthKey,
+        },
+        next: {
+          revalidate: 60 * 60 * 24,
+        },
+        signal: getExternalFetchSignal(),
+      },
+    );
+
+    if (!response.ok) {
+      return null;
+    }
+
+    return (await response.json()) as TbaTeam;
+  } catch {
+    return null;
+  }
+}
+
+async function getTeamProfile(teamNumber: string): Promise<TeamProfile> {
+  const statboticsTeam = await getStatboticsTeam(teamNumber);
+
+  if (statboticsTeam) {
+    return {
+      name: statboticsTeam.name,
+      location: getLocation(statboticsTeam),
+      rookieYear: statboticsTeam.rookie_year,
+      active: statboticsTeam.active,
+      source: "statbotics",
+    };
+  }
+
+  const tbaTeam = await getTbaTeam(teamNumber);
+
+  if (tbaTeam) {
+    return {
+      name: tbaTeam.nickname,
+      location: getTbaLocation(tbaTeam),
+      rookieYear: tbaTeam.rookie_year,
+      active: true,
+      source: "tba",
+    };
+  }
+
+  return {
+    location: "Unknown",
+    source: "fallback",
+  };
 }
 
 async function getTbaMediaForYear(teamNumber: string, year: number) {
@@ -166,24 +248,30 @@ export async function GET(_request: Request, context: RouteContext) {
     );
   }
 
-  const team = await getStatboticsTeam(teamNumber);
-  const logo = await getLogoUrl(teamNumber).catch(() => undefined);
+  const [team, logo] = await Promise.all([
+    getTeamProfile(teamNumber),
+    getLogoUrl(teamNumber).catch(() => undefined),
+  ]);
   const responseTeam: Team = {
     id: `frc-${teamNumber}`,
     number: teamNumber,
-    name: team?.name || `Team ${teamNumber}`,
-    location: team ? getLocation(team) : "Unknown",
+    name: team.name || `Team ${teamNumber}`,
+    location: team.location,
     mediaFocus: "No FMC media posted yet",
     driveUrl: mediaDriveUrl,
-    tags: ["api", "statbotics", "team"],
+    tags: ["api", team.source, "team"],
     description:
-      team?.rookie_year && team.active !== false
-        ? `Active FRC team since ${team.rookie_year}.`
+      team.rookieYear && team.active !== false
+        ? `Active FRC team since ${team.rookieYear}.`
         : "FRC team profile.",
     logoUrl: logo?.url,
     logoSource: logo?.source,
     hasMedia: false,
   };
 
-  return NextResponse.json(responseTeam);
+  return NextResponse.json(responseTeam, {
+    headers: {
+      "Cache-Control": "no-store",
+    },
+  });
 }
