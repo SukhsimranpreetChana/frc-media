@@ -1,36 +1,41 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# FIRST Media Community
 
-## Getting Started
+We are the FIRST Media Community (FMC); a community of aspiring FIRST creatives consisting of students, alumni, and mentors who share ideas and create media of any variety. Not only to make it more accessible, but also to help out others with their media. Our goal is to provide a space where aspiring and experienced creatives can connect, share ideas, develop their skills, and collaborate on projects ranging from photography and videography to graphic design, social media, and more.
 
-First, run the development server:
+The FIRST Media Community web app is for sharing, reviewing, and discovering FRC team media. Users can upload photos and videos for a team, and approved submissions appear in searchable team media pages.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Features
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- Search FRC teams by team number
+- View approved team media, TBA media, YouTube results, and match videos
+- Upload team photos/videos with uploader info and year
+- Admin review flow for approving or removing submissions
+- Google Drive-backed upload storage
+- Footer profile/social link management
+- Commission link management
+- Light/dark mode support
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## This Website uses the follwoing:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- Next.js
+- React
+- TypeScript
+- Tailwind CSS
+- Supabase
+- Google Drive API
+- The Blue Alliance API
+- Statbotics API
 
-## Learn More
+## Upload Rules
 
-To learn more about Next.js, take a look at the following resources:
+Uploads are limited to 2 GB total per submission. Users must agree to the upload terms before submitting media. Uploaded content is reviewed by admins before it appears publicly.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Admin Tools
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Admins can:
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Review pending uploads
+- Approve or remove submissions
+- Remove approved media
+- Manage footer profile links
+- Manage commission links
