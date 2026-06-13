@@ -99,9 +99,17 @@ export async function POST(request: Request) {
     title?: unknown;
     link?: unknown;
     costRange?: unknown;
+    acceptedTerms?: unknown;
   } | null;
   const input = parseCommissionPayload(payload);
   const validationError = validateCommissionInput(input);
+
+  if (payload?.acceptedTerms !== true) {
+    return NextResponse.json(
+      { error: "Please agree to the commission request terms." },
+      { status: 400 },
+    );
+  }
 
   if (validationError) {
     return NextResponse.json({ error: validationError }, { status: 400 });

@@ -14,6 +14,7 @@ export default function CommissionsBoard() {
   const [requestTitle, setRequestTitle] = useState("");
   const [requestLink, setRequestLink] = useState("");
   const [requestCostRange, setRequestCostRange] = useState("");
+  const [hasAcceptedRequestTerms, setHasAcceptedRequestTerms] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -59,6 +60,11 @@ export default function CommissionsBoard() {
     const link = requestLink.trim();
     const costRange = requestCostRange.trim();
 
+    if (!hasAcceptedRequestTerms) {
+      setRequestMessage("Review and agree to the request terms before submitting.");
+      return;
+    }
+
     if (!title || !link || !costRange) {
       setRequestMessage("Add a title, link, and cost range.");
       return;
@@ -72,7 +78,12 @@ export default function CommissionsBoard() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ title, link, costRange }),
+        body: JSON.stringify({
+          title,
+          link,
+          costRange,
+          acceptedTerms: hasAcceptedRequestTerms,
+        }),
       });
       const data = (await response.json().catch(() => null)) as {
         error?: string;
@@ -85,6 +96,7 @@ export default function CommissionsBoard() {
       setRequestTitle("");
       setRequestLink("");
       setRequestCostRange("");
+      setHasAcceptedRequestTerms(false);
       setIsRequestFormOpen(false);
       setRequestMessage("Request submitted. An admin will review it soon.");
     } catch (error) {
@@ -147,9 +159,34 @@ export default function CommissionsBoard() {
               value={requestCostRange}
             />
           </label>
+          <section className="rounded-md border-2 border-[#F85259] bg-[#F4E7E7] p-4 text-sm text-[#17001C]">
+            <h3 className="text-base text-[#17001C]">Commission request terms</h3>
+            <div className="mt-3 grid gap-2 text-sm leading-6 text-[#17001C]/75">
+              <p>
+                Only submit commission listings that you own, manage, or have
+                permission to post.
+              </p>
+              <p>
+                Keep links safe, accurate, and relevant to FIRST or FRC media
+                work. FMC admins may approve, deny, edit, or remove requests.
+              </p>
+            </div>
+            <label className="mt-4 flex items-start gap-3 text-sm font-semibold text-[#17001C]">
+              <input
+                checked={hasAcceptedRequestTerms}
+                className="mt-1 h-4 w-4 accent-[#7137E3]"
+                disabled={isSubmittingRequest}
+                onChange={(event) =>
+                  setHasAcceptedRequestTerms(event.target.checked)
+                }
+                type="checkbox"
+              />
+              <span>I understand and agree to these request terms.</span>
+            </label>
+          </section>
           <button
-            className="font-primary fmc-button h-10 bg-[#F85259] px-4 text-sm text-white hover:bg-[#A335E6] disabled:opacity-60 sm:w-fit"
-            disabled={isSubmittingRequest}
+            className="font-primary fmc-button h-10 bg-[#F85259] px-4 text-sm text-white hover:bg-[#A335E6] disabled:cursor-not-allowed disabled:bg-[#6f6673] disabled:opacity-65 disabled:shadow-none sm:w-fit"
+            disabled={isSubmittingRequest || !hasAcceptedRequestTerms}
             type="submit"
           >
             {isSubmittingRequest ? "Submitting..." : "Submit request"}
