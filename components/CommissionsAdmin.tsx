@@ -16,6 +16,7 @@ export default function CommissionsAdmin() {
   const [title, setTitle] = useState("");
   const [link, setLink] = useState("");
   const [costRange, setCostRange] = useState("");
+  const [editingCommissionId, setEditingCommissionId] = useState("");
 
   async function fetchCommissions() {
     const response = await fetch("/api/commissions");
@@ -78,7 +79,22 @@ export default function CommissionsAdmin() {
     };
   }, []);
 
-  async function handleAddCommission(event: FormEvent<HTMLFormElement>) {
+  function resetCommissionForm() {
+    setTitle("");
+    setLink("");
+    setCostRange("");
+    setEditingCommissionId("");
+  }
+
+  function startEditingCommission(commission: Commission) {
+    setTitle(commission.title);
+    setLink(commission.link);
+    setCostRange(commission.costRange);
+    setEditingCommissionId(commission.id);
+    setMessage("");
+  }
+
+  async function handleSaveCommission(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setMessage("");
 
@@ -90,15 +106,16 @@ export default function CommissionsAdmin() {
       return;
     }
 
-    setActiveCommissionId("new");
+    setActiveCommissionId(editingCommissionId || "new");
 
     try {
       const response = await fetch("/api/commissions", {
-        method: "POST",
+        method: editingCommissionId ? "PATCH" : "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
+          id: editingCommissionId || undefined,
           title: trimmedTitle,
           link: trimmedLink,
           costRange: trimmedCostRange,
@@ -110,20 +127,38 @@ export default function CommissionsAdmin() {
       } | null;
 
       if (!response.ok || !data?.commission) {
-        throw new Error(data?.error || "Could not add commission.");
+        throw new Error(
+          data?.error ||
+            (editingCommissionId
+              ? "Could not update commission."
+              : "Could not add commission."),
+        );
       }
 
-      setCommissions((currentCommissions) => [
-        data.commission as Commission,
-        ...currentCommissions,
-      ]);
-      setTitle("");
-      setLink("");
-      setCostRange("");
-      setMessage("Commission posted.");
+      if (editingCommissionId) {
+        setCommissions((currentCommissions) =>
+          currentCommissions.map((commission) =>
+            commission.id === editingCommissionId
+              ? (data.commission as Commission)
+              : commission,
+          ),
+        );
+        setMessage("Commission updated.");
+      } else {
+        setCommissions((currentCommissions) => [
+          data.commission as Commission,
+          ...currentCommissions,
+        ]);
+        setMessage("Commission posted.");
+      }
+      resetCommissionForm();
     } catch (error) {
       setMessage(
-        error instanceof Error ? error.message : "Could not add commission.",
+        error instanceof Error
+          ? error.message
+          : editingCommissionId
+            ? "Could not update commission."
+            : "Could not add commission.",
       );
     } finally {
       setActiveCommissionId("");
@@ -256,8 +291,10 @@ export default function CommissionsAdmin() {
 
   return (
     <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(280px,420px)_1fr]">
-      <form className="scrap-card p-6" onSubmit={handleAddCommission}>
-        <h2 className="text-lg text-[#17001C]">Post a commission</h2>
+      <form className="scrap-card p-6" onSubmit={handleSaveCommission}>
+        <h2 className="text-lg text-[#17001C]">
+          {editingCommissionId ? "Edit commission" : "Post a commission"}
+        </h2>
         <div className="mt-5 grid gap-4">
           <label className="block text-sm text-[#17001C]/75">
             Title
@@ -288,10 +325,24 @@ export default function CommissionsAdmin() {
         </div>
         <button
           className="font-primary fmc-button mt-5 h-10 bg-[#F85259] px-4 text-sm text-white hover:bg-[#A335E6]"
+          disabled={activeCommissionId === (editingCommissionId || "new")}
           type="submit"
         >
-          Add commission
+          {activeCommissionId === (editingCommissionId || "new")
+            ? "Saving..."
+            : editingCommissionId
+              ? "Save commission"
+              : "Add commission"}
         </button>
+        {editingCommissionId ? (
+          <button
+            className="ml-3 mt-5 h-10 px-4 text-sm font-semibold text-[#72007E] underline decoration-[#F85259] decoration-2 underline-offset-4"
+            onClick={resetCommissionForm}
+            type="button"
+          >
+            Cancel
+          </button>
+        ) : null}
         {message ? (
           <p className="mt-3 text-sm text-[#17001C]/70">{message}</p>
         ) : null}
@@ -364,6 +415,14 @@ export default function CommissionsAdmin() {
                 type="button"
               >
                 {activeCommissionId === commission.id ? "Removing..." : "Remove"}
+              </button>
+              <button
+                className="font-primary fmc-button absolute right-4 top-16 bg-[#7137E3] px-3 py-2 text-xs text-white hover:bg-[#A335E6]"
+                disabled={activeCommissionId === commission.id}
+                onClick={() => startEditingCommission(commission)}
+                type="button"
+              >
+                Edit
               </button>
             </div>
           ))}

@@ -773,6 +773,86 @@ export async function uploadMediaToGoogleDrive(input: {
   };
 }
 
+export async function uploadFooterProfilePictureToGoogleDrive(input: {
+  file: File;
+  handle: string;
+}) {
+  const accessToken = await getGoogleAccessToken();
+  const rootFolderId = getRequiredEnv("GOOGLE_DRIVE_ROOT_FOLDER_ID");
+  const profilePicsFolderId = await getOrCreateFolder(
+    accessToken,
+    "Profile pics",
+    rootFolderId,
+  );
+  await trySetAnyoneCanView(accessToken, profilePicsFolderId);
+
+  const fileBuffer = Buffer.from(await input.file.arrayBuffer());
+  const safeHandle = sanitizeFileName(
+    input.handle.replace(/^@+/, "") || "footer-profile",
+  );
+  const originalFileName = sanitizeFileName(input.file.name);
+  const extensionMatch = originalFileName.match(/\.[A-Za-z0-9]+$/);
+  const fileName = `${safeHandle}-${Date.now()}${extensionMatch?.[0] || ""}`;
+  const params = new URLSearchParams({
+    uploadType: "resumable",
+    fields: "id,name,webViewLink,webContentLink,thumbnailLink",
+    supportsAllDrives: "true",
+  });
+  const createUploadSession = await fetch(
+    `${driveUploadBaseUrl}/files?${params.toString()}`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+        "X-Upload-Content-Type": input.file.type || "image/jpeg",
+        "X-Upload-Content-Length": String(fileBuffer.byteLength),
+      },
+      body: JSON.stringify({
+        name: fileName,
+        mimeType: input.file.type || "image/jpeg",
+        parents: [profilePicsFolderId],
+      }),
+    },
+  );
+  const uploadUrl = createUploadSession.headers.get("Location");
+
+  if (!createUploadSession.ok || !uploadUrl) {
+    const errorText = await createUploadSession.text();
+    throw new Error(`Unable to start profile picture upload. ${errorText}`);
+  }
+
+  const lastByte = Math.max(0, fileBuffer.byteLength - 1);
+  const uploadResponse = await fetch(uploadUrl, {
+    method: "PUT",
+    headers: {
+      "Content-Type": input.file.type || "image/jpeg",
+      "Content-Length": String(fileBuffer.byteLength),
+      "Content-Range": `bytes 0-${lastByte}/${fileBuffer.byteLength}`,
+    },
+    body: fileBuffer,
+  });
+
+  if (!uploadResponse.ok) {
+    const errorText = await uploadResponse.text();
+    throw new Error(`Unable to upload profile picture. ${errorText}`);
+  }
+
+  const uploadedFile = (await uploadResponse.json()) as GoogleDriveFile;
+  await trySetAnyoneCanView(accessToken, uploadedFile.id);
+
+  return {
+    fileId: uploadedFile.id,
+    fileName: uploadedFile.name || fileName,
+    viewUrl:
+      uploadedFile.webViewLink ||
+      `https://drive.google.com/file/d/${uploadedFile.id}/view`,
+    thumbnailUrl: getGoogleDriveThumbnailUrl(uploadedFile.id),
+    folderId: profilePicsFolderId,
+    folderUrl: `https://drive.google.com/drive/folders/${profilePicsFolderId}`,
+  };
+}
+
 export async function createGoogleDriveResumableUploadSession(input: {
   fileName: string;
   mimeType: string;

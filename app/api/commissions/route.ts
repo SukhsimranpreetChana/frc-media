@@ -5,6 +5,7 @@ import {
   deleteCommissionForAdmin,
   getCommissions,
   isSupabaseAdminConfigured,
+  updateCommissionForAdmin,
 } from "@/lib/supabase";
 
 export const runtime = "nodejs";
@@ -123,6 +124,67 @@ export async function DELETE(request: Request) {
   } catch {
     return NextResponse.json(
       { error: "Unable to remove commission." },
+      { status: 500 },
+    );
+  }
+}
+
+export async function PATCH(request: Request) {
+  const unauthorized = await requireAdmin(request);
+
+  if (unauthorized) {
+    return unauthorized;
+  }
+
+  if (!isSupabaseAdminConfigured()) {
+    return NextResponse.json(
+      { error: "Missing SUPABASE_SERVICE_ROLE_KEY on the server." },
+      { status: 503 },
+    );
+  }
+
+  const payload = (await request.json().catch(() => null)) as {
+    id?: unknown;
+    title?: unknown;
+    link?: unknown;
+    costRange?: unknown;
+  } | null;
+  const id = typeof payload?.id === "string" ? payload.id.trim() : "";
+  const title = typeof payload?.title === "string" ? payload.title.trim() : "";
+  const link = typeof payload?.link === "string" ? payload.link.trim() : "";
+  const costRange =
+    typeof payload?.costRange === "string" ? payload.costRange.trim() : "";
+
+  if (!isValidUuid(id)) {
+    return NextResponse.json({ error: "Missing commission id." }, { status: 400 });
+  }
+
+  if (!title || !link || !costRange) {
+    return NextResponse.json(
+      { error: "Please add a title, link, and cost range." },
+      { status: 400 },
+    );
+  }
+
+  if (
+    title.length > maxTitleLength ||
+    link.length > maxLinkLength ||
+    costRange.length > maxCostRangeLength ||
+    !isValidHttpUrl(link)
+  ) {
+    return NextResponse.json(
+      { error: "Please check the commission details." },
+      { status: 400 },
+    );
+  }
+
+  try {
+    return NextResponse.json({
+      commission: await updateCommissionForAdmin(id, { title, link, costRange }),
+    });
+  } catch {
+    return NextResponse.json(
+      { error: "Unable to update commission." },
       { status: 500 },
     );
   }
