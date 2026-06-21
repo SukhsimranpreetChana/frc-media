@@ -113,6 +113,7 @@ export async function getMediaClips(filters?: {
   const response = await fetch(
     `${getSupabaseRestUrl("media_clips")}?${params.toString()}`,
     {
+      cache: "no-store",
       headers: getSupabaseHeaders(),
     },
   );
