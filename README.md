@@ -15,7 +15,7 @@ The FIRST Media Community web app is for sharing, reviewing, and discovering FRC
 - Commission link management
 - Light/dark mode support
 
-## This Website uses the follwoing:
+## This Website uses the following:
 
 - Next.js
 - React
@@ -39,3 +39,5 @@ Admins can:
 - Remove approved media
 - Manage footer profile links
 - Manage commission links
+
+This project was made with the help of AI, FMC Members, and Me.
