@@ -20,6 +20,7 @@ function getCreatedTime(clip: MediaClip) {
 
 function getThumbnailProxyUrl(fileUrl?: string, thumbnailUrl?: string) {
   if (fileUrl) {
+    // Proxy Drive files so the browser can show a thumbnail reliably.
     return `/api/media/thumbnail?fileUrl=${encodeURIComponent(fileUrl)}`;
   }
 
@@ -36,6 +37,7 @@ function getReviewGroups(clips: MediaClip[]) {
   const groups = new Map<string, ClipReviewGroup>();
 
   clips.forEach((clip) => {
+    // Keep files from the same upload together for approval/removal.
     const uploadedBy = clip.uploadedBy || "Unknown uploader";
     const groupId =
       clip.uploadGroupId ||
@@ -88,6 +90,7 @@ function AdminPaginationControls({
 }) {
   const pageCount = getPageCount(itemCount);
 
+  // Hide pagination when every group already fits on one page.
   if (pageCount <= 1) {
     return null;
   }
@@ -136,6 +139,7 @@ export default function ClipAdmin() {
   const visibleApprovedGroups = getVisibleGroups(approvedGroups, approvedPage);
 
   async function fetchAdminClips(approved = false) {
+    // The same endpoint serves pending clips by default and approved clips on request.
     const response = await fetch(
       approved ? "/api/admin/media?approved=true" : "/api/admin/media",
     );
@@ -177,6 +181,7 @@ export default function ClipAdmin() {
 
     async function loadInitialPendingClips() {
       try {
+        // Load both lists together so the dashboard appears in one pass.
         const [pending, approved] = await Promise.all([
           fetchAdminClips(),
           fetchAdminClips(true),
@@ -217,6 +222,7 @@ export default function ClipAdmin() {
     async function resolveFolderUrl(group: ClipReviewGroup) {
       const coverClip = getCoverClip(group);
 
+      // Older rows may only have a file link, so resolve the Drive folder if needed.
       if (group.folderUrl || resolvedFolderUrls[group.id] || !coverClip?.videoUrl) {
         return;
       }
@@ -261,6 +267,7 @@ export default function ClipAdmin() {
     setMessage("");
 
     try {
+      // Approve every file in the upload group at the same time.
       const response = await fetch("/api/admin/media", {
         method: "PATCH",
         headers: {
@@ -299,6 +306,7 @@ export default function ClipAdmin() {
     setMessage("");
 
     try {
+      // Removing a group deletes both the database rows and Drive folder when available.
       const folderUrl = group.folderUrl || resolvedFolderUrls[group.id];
       const response = await fetch("/api/admin/media", {
         method: "DELETE",

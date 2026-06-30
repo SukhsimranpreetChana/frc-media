@@ -13,6 +13,7 @@ export default function AdminGate() {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    // Check whether this browser already has a valid admin session.
     async function loadSession() {
       try {
         const response = await fetch("/api/admin/session");
@@ -38,6 +39,7 @@ export default function AdminGate() {
     setError("");
 
     try {
+      // Send the password to the session route and let the server set the session.
       const response = await fetch("/api/admin/session", {
         method: "POST",
         headers: {
@@ -63,6 +65,7 @@ export default function AdminGate() {
   }
 
   async function handleLogout() {
+    // Clear the session on the server, then lock the dashboard locally.
     await fetch("/api/admin/session", { method: "DELETE" });
     setIsUnlocked(false);
   }
@@ -78,6 +81,7 @@ export default function AdminGate() {
   if (isUnlocked) {
     return (
       <>
+        {/* Once unlocked, show all admin tools behind the same gate. */}
         <div className="mt-8 flex justify-end">
           <button
             className="font-primary fmc-button h-10 bg-[#17001C] px-4 text-sm text-white hover:bg-[#72007E]"
