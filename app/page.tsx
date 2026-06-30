@@ -3,9 +3,6 @@ import Link from "next/link";
 import RandomTeamsPreview from "@/components/RandomTeamsPreview";
 
 const discordInvite = "https://discord.gg/xCqryxThbC";
-const alexCredit = "Photo taken by FMC Member Alex on 5193.";
-const sukhCredit = "Photo taken by FMC Member Sukh on 2056.";
-
 export default function Home() {
   return (
     <main className="fmc-surface flex-1">
@@ -21,7 +18,7 @@ export default function Home() {
             sizes="100vw"
             src="/media/alex-5193-detail.jpg"
           />
-          <span className="photo-credit">{alexCredit}</span>
+          <span className="photo-credit">{"Photo taken by FMC Member Alex on 5193."}</span>
         </div>
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-6 py-16">
           <div className="max-w-3xl">
@@ -103,7 +100,7 @@ export default function Home() {
                   sizes="(min-width: 1024px) 48vw, 100vw"
                   src="/media/event-overview.png"
                 />
-                <span className="photo-credit">{sukhCredit}</span>
+                <span className="photo-credit">{"Photo taken by FMC Member Sukh on 2056."}</span>
               </div>
             </figure>
 
@@ -116,7 +113,7 @@ export default function Home() {
                   sizes="(min-width: 1024px) 34vw, 100vw"
                   src="/media/alex-5193-field.jpg"
                 />
-                <span className="photo-credit">{alexCredit}</span>
+                <span className="photo-credit">{"Photo taken by FMC Member Alex on 5193."}</span>
               </div>
             </figure>
           </div>

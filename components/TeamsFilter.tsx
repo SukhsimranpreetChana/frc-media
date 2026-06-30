@@ -65,6 +65,7 @@ function getMediaCollages(clips: MediaClip[]) {
 
   sortMediaClips(clips).forEach((clip) => {
     const uploadedBy = clip.uploadedBy || "Unknown uploader";
+    // Files from the same upload should show as a group instead of separate posts.
     const groupId =
       clip.uploadGroupId ||
       clip.driveFolderUrl ||
@@ -234,6 +235,7 @@ export default function TeamsFilter({
   }, []);
 
   const selectedPreviewTeams = useMemo(() => pickRandomTeams(), []);
+  // When there is no search yet, show a few real teams so the page does not feel empty.
   const searchableTeams = previewTeams.length > 0 ? previewTeams : teams;
   const filteredTeams = useMemo(
     () => searchTeams(query, searchableTeams),
@@ -313,6 +315,7 @@ export default function TeamsFilter({
     async function resolveCollageFolderUrl(collage: MediaCollage) {
       const coverClip = getCollageCoverClip(collage);
 
+      //Checking for already in-use urls
       if (
         collage.folderUrl ||
         resolvedCollageFolderUrls[collage.id] ||
@@ -452,6 +455,7 @@ export default function TeamsFilter({
       setIsLoadingClips(true);
 
       try {
+        // The FMC uploads are go to approved media stored through Supabase/Google Drive.
         const clips = await getMediaClips({
           teamNumber: normalizedQuery,
         });
@@ -499,6 +503,7 @@ export default function TeamsFilter({
       setIsLoadingTbaMedia(true);
 
       try {
+        // TBA gives us another source of team photos and media with the api key
         const response = await fetch(`/api/team/${normalizedQuery}/tba-media`, {
           signal: controller.signal,
         });
@@ -596,6 +601,7 @@ export default function TeamsFilter({
       setIsLoadingMatchVideos(true);
 
       try {
+        // Match videos are searched separately so they can be sorted and paged on their own.
         const response = await fetch(
           `/api/team/${normalizedQuery}/match-videos`,
           {

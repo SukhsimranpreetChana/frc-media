@@ -19,6 +19,9 @@ export const metadata: Metadata = {
     "FRC video editing",
     "FRC photo editing",
     "FIRST creative services",
+    "FMC",
+    "First Media Community",
+    "FIRST"
   ],
 };
 
