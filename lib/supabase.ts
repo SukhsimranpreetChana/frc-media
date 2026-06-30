@@ -113,6 +113,7 @@ export async function getMediaClips(filters?: {
   const response = await fetch(
     `${getSupabaseRestUrl("media_clips")}?${params.toString()}`,
     {
+      cache: "no-store",
       headers: getSupabaseHeaders(),
     },
   );
@@ -338,6 +339,36 @@ export async function deleteCommissionForAdmin(id: string) {
   }
 }
 
+export async function updateCommissionForAdmin(
+  id: string,
+  input: {
+    title: string;
+    link: string;
+    costRange: string;
+  },
+) {
+  const { data, error } = await getSupabaseAdminClient()
+    .from("commissions")
+    .update({
+      title: input.title,
+      link: input.link,
+      cost_range: input.costRange,
+    })
+    .eq("id", id)
+    .select()
+    .single<CommissionRecord>();
+
+  if (error) {
+    throw new Error(`Unable to update commission: ${error.message}`);
+  }
+
+  if (!data) {
+    throw new Error("Unable to update commission: no record returned.");
+  }
+
+  return mapCommissionRecord(data);
+}
+
 export async function createCommissionRequest(input: {
   title: string;
   link: string;
@@ -444,4 +475,34 @@ export async function deleteFooterHandleForAdmin(id: string) {
   if (error) {
     throw new Error(`Unable to remove footer handle: ${error.message}`);
   }
+}
+
+export async function updateFooterHandleForAdmin(
+  id: string,
+  input: {
+    handle: string;
+    link: string;
+    profileImageUrl?: string;
+  },
+) {
+  const { data, error } = await getSupabaseAdminClient()
+    .from("footer_handles")
+    .update({
+      handle: input.handle,
+      link: input.link,
+      profile_image_url: input.profileImageUrl ?? null,
+    })
+    .eq("id", id)
+    .select()
+    .single<FooterHandleRecord>();
+
+  if (error) {
+    throw new Error(`Unable to update footer handle: ${error.message}`);
+  }
+
+  if (!data) {
+    throw new Error("Unable to update footer handle: no record returned.");
+  }
+
+  return mapFooterHandleRecord(data);
 }

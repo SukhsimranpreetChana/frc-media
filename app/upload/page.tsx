@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import PublicMediaUpload from "@/components/PublicMediaUpload";
+import UploadLeaderboard from "@/components/UploadLeaderboard";
 
 const alexCredit = "Photo taken by FMC Member Alex on 5193.";
 
@@ -66,7 +67,10 @@ export default async function UploadPage({ searchParams }: UploadPageProps) {
             <span className="photo-credit">{alexCredit}</span>
           </div>
         </figure>
-        <PublicMediaUpload initialTeamNumber={initialTeamNumber} />
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
+          <PublicMediaUpload initialTeamNumber={initialTeamNumber} />
+          <UploadLeaderboard />
+        </div>
       </section>
     </main>
   );
