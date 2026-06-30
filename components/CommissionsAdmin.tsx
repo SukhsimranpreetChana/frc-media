@@ -5,7 +5,13 @@ import CommissionCard from "@/components/CommissionCard";
 import { downloadCsv, toCsv } from "@/lib/csvExport";
 import type { Commission, CommissionRequest } from "@/types";
 
-export default function CommissionsAdmin() {
+type CommissionsAdminProps = {
+  readOnly?: boolean;
+};
+
+export default function CommissionsAdmin({
+  readOnly = false,
+}: CommissionsAdminProps) {
   const [commissions, setCommissions] = useState<Commission[]>([]);
   const [commissionRequests, setCommissionRequests] = useState<CommissionRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -291,62 +297,75 @@ export default function CommissionsAdmin() {
 
   return (
     <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(280px,420px)_1fr]">
-      <form className="scrap-card p-6" onSubmit={handleSaveCommission}>
-        <h2 className="text-lg text-[#17001C]">
-          {editingCommissionId ? "Edit commission" : "Post a commission"}
-        </h2>
-        <div className="mt-5 grid gap-4">
-          <label className="block text-sm text-[#17001C]/75">
-            Title
-            <input
-              className="mt-2 h-11 w-full rounded-md border-2 border-[#17001C] bg-[#F4E7E7] px-4 text-sm text-[#17001C] outline-none ring-[#A335E6]/20 focus:border-[#7137E3] focus:ring-4"
-              onChange={(event) => setTitle(event.target.value)}
-              value={title}
-            />
-          </label>
-          <label className="block text-sm text-[#17001C]/75">
-            Link
-            <input
-              className="mt-2 h-11 w-full rounded-md border-2 border-[#17001C] bg-[#F4E7E7] px-4 text-sm text-[#17001C] outline-none ring-[#A335E6]/20 focus:border-[#7137E3] focus:ring-4"
-              onChange={(event) => setLink(event.target.value)}
-              type="url"
-              value={link}
-            />
-          </label>
-          <label className="block text-sm text-[#17001C]/75">
-            Cost range
-            <input
-              className="mt-2 h-11 w-full rounded-md border-2 border-[#17001C] bg-[#F4E7E7] px-4 text-sm text-[#17001C] outline-none ring-[#A335E6]/20 focus:border-[#7137E3] focus:ring-4"
-              onChange={(event) => setCostRange(event.target.value)}
-              placeholder="$50-$150"
-              value={costRange}
-            />
-          </label>
-        </div>
-        <button
-          className="font-primary fmc-button mt-5 h-10 bg-[#F85259] px-4 text-sm text-white hover:bg-[#A335E6]"
-          disabled={activeCommissionId === (editingCommissionId || "new")}
-          type="submit"
-        >
-          {activeCommissionId === (editingCommissionId || "new")
-            ? "Saving..."
-            : editingCommissionId
-              ? "Save commission"
-              : "Add commission"}
-        </button>
-        {editingCommissionId ? (
+      {!readOnly ? (
+        <form className="scrap-card p-6" onSubmit={handleSaveCommission}>
+          <h2 className="text-lg text-[#17001C]">
+            {editingCommissionId ? "Edit commission" : "Post a commission"}
+          </h2>
+          <div className="mt-5 grid gap-4">
+            <label className="block text-sm text-[#17001C]/75">
+              Title
+              <input
+                className="mt-2 h-11 w-full rounded-md border-2 border-[#17001C] bg-[#F4E7E7] px-4 text-sm text-[#17001C] outline-none ring-[#A335E6]/20 focus:border-[#7137E3] focus:ring-4"
+                onChange={(event) => setTitle(event.target.value)}
+                value={title}
+              />
+            </label>
+            <label className="block text-sm text-[#17001C]/75">
+              Link
+              <input
+                className="mt-2 h-11 w-full rounded-md border-2 border-[#17001C] bg-[#F4E7E7] px-4 text-sm text-[#17001C] outline-none ring-[#A335E6]/20 focus:border-[#7137E3] focus:ring-4"
+                onChange={(event) => setLink(event.target.value)}
+                type="url"
+                value={link}
+              />
+            </label>
+            <label className="block text-sm text-[#17001C]/75">
+              Cost range
+              <input
+                className="mt-2 h-11 w-full rounded-md border-2 border-[#17001C] bg-[#F4E7E7] px-4 text-sm text-[#17001C] outline-none ring-[#A335E6]/20 focus:border-[#7137E3] focus:ring-4"
+                onChange={(event) => setCostRange(event.target.value)}
+                placeholder="$50-$150"
+                value={costRange}
+              />
+            </label>
+          </div>
           <button
-            className="ml-3 mt-5 h-10 px-4 text-sm font-semibold text-[#72007E] underline decoration-[#F85259] decoration-2 underline-offset-4"
-            onClick={resetCommissionForm}
-            type="button"
+            className="font-primary fmc-button mt-5 h-10 bg-[#F85259] px-4 text-sm text-white hover:bg-[#A335E6]"
+            disabled={activeCommissionId === (editingCommissionId || "new")}
+            type="submit"
           >
-            Cancel
+            {activeCommissionId === (editingCommissionId || "new")
+              ? "Saving..."
+              : editingCommissionId
+                ? "Save commission"
+                : "Add commission"}
           </button>
-        ) : null}
-        {message ? (
-          <p className="mt-3 text-sm text-[#17001C]/70">{message}</p>
-        ) : null}
-      </form>
+          {editingCommissionId ? (
+            <button
+              className="ml-3 mt-5 h-10 px-4 text-sm font-semibold text-[#72007E] underline decoration-[#F85259] decoration-2 underline-offset-4"
+              onClick={resetCommissionForm}
+              type="button"
+            >
+              Cancel
+            </button>
+          ) : null}
+          {message ? (
+            <p className="mt-3 text-sm text-[#17001C]/70">{message}</p>
+          ) : null}
+        </form>
+      ) : (
+        <div className="scrap-card p-6 text-sm text-[#17001C]/70">
+          <h2 className="text-lg text-[#17001C]">Commissions read-only</h2>
+          <p className="mt-3">
+            Commission requests and posted commissions can be viewed here.
+            Posting, approving, editing, and removing are locked.
+          </p>
+          {message ? (
+            <p className="mt-3 text-sm text-[#17001C]/70">{message}</p>
+          ) : null}
+        </div>
+      )}
 
       <div>
         <section className="mb-8">
@@ -365,24 +384,26 @@ export default function CommissionsAdmin() {
             {commissionRequests.map((request) => (
               <div className="relative flex flex-col gap-3" key={request.id}>
                 <CommissionCard commission={request} />
-                <div className="flex gap-3">
-                  <button
-                    className="font-primary fmc-button h-10 flex-1 bg-[#F85259] px-4 text-sm text-white hover:bg-[#A335E6] disabled:opacity-60"
-                    disabled={activeRequestId === request.id}
-                    onClick={() => void handleApproveRequest(request)}
-                    type="button"
-                  >
-                    Approve
-                  </button>
-                  <button
-                    className="font-primary fmc-button h-10 flex-1 bg-[#17001C] px-4 text-sm text-white hover:bg-[#72007E] disabled:opacity-60"
-                    disabled={activeRequestId === request.id}
-                    onClick={() => void handleDenyRequest(request.id)}
-                    type="button"
-                  >
-                    Deny
-                  </button>
-                </div>
+                {!readOnly ? (
+                  <div className="flex gap-3">
+                    <button
+                      className="font-primary fmc-button h-10 flex-1 bg-[#F85259] px-4 text-sm text-white hover:bg-[#A335E6] disabled:opacity-60"
+                      disabled={activeRequestId === request.id}
+                      onClick={() => void handleApproveRequest(request)}
+                      type="button"
+                    >
+                      Approve
+                    </button>
+                    <button
+                      className="font-primary fmc-button h-10 flex-1 bg-[#17001C] px-4 text-sm text-white hover:bg-[#72007E] disabled:opacity-60"
+                      disabled={activeRequestId === request.id}
+                      onClick={() => void handleDenyRequest(request.id)}
+                      type="button"
+                    >
+                      Deny
+                    </button>
+                  </div>
+                ) : null}
               </div>
             ))}
           </div>
@@ -408,22 +429,28 @@ export default function CommissionsAdmin() {
           {commissions.map((commission) => (
             <div className="relative" key={commission.id}>
               <CommissionCard commission={commission} />
-              <button
-                className="font-primary fmc-button absolute right-4 top-4 bg-[#17001C] px-3 py-2 text-xs text-white hover:bg-[#72007E]"
-                disabled={activeCommissionId === commission.id}
-                onClick={() => void handleRemoveCommission(commission.id)}
-                type="button"
-              >
-                {activeCommissionId === commission.id ? "Removing..." : "Remove"}
-              </button>
-              <button
-                className="font-primary fmc-button absolute right-4 top-16 bg-[#7137E3] px-3 py-2 text-xs text-white hover:bg-[#A335E6]"
-                disabled={activeCommissionId === commission.id}
-                onClick={() => startEditingCommission(commission)}
-                type="button"
-              >
-                Edit
-              </button>
+              {!readOnly ? (
+                <>
+                  <button
+                    className="font-primary fmc-button absolute right-4 top-4 bg-[#17001C] px-3 py-2 text-xs text-white hover:bg-[#72007E]"
+                    disabled={activeCommissionId === commission.id}
+                    onClick={() => void handleRemoveCommission(commission.id)}
+                    type="button"
+                  >
+                    {activeCommissionId === commission.id
+                      ? "Removing..."
+                      : "Remove"}
+                  </button>
+                  <button
+                    className="font-primary fmc-button absolute right-4 top-16 bg-[#7137E3] px-3 py-2 text-xs text-white hover:bg-[#A335E6]"
+                    disabled={activeCommissionId === commission.id}
+                    onClick={() => startEditingCommission(commission)}
+                    type="button"
+                  >
+                    Edit
+                  </button>
+                </>
+              ) : null}
             </div>
           ))}
         </div>

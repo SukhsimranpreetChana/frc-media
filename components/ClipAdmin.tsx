@@ -122,7 +122,11 @@ function AdminPaginationControls({
   );
 }
 
-export default function ClipAdmin() {
+type ClipAdminProps = {
+  readOnly?: boolean;
+};
+
+export default function ClipAdmin({ readOnly = false }: ClipAdminProps) {
   const [pendingClips, setPendingClips] = useState<MediaClip[]>([]);
   const [approvedClips, setApprovedClips] = useState<MediaClip[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -133,10 +137,13 @@ export default function ClipAdmin() {
   const [message, setMessage] = useState("");
   const [pendingPage, setPendingPage] = useState(1);
   const [approvedPage, setApprovedPage] = useState(1);
+  const [hasAcceptedReadOnlyWarning, setHasAcceptedReadOnlyWarning] =
+    useState(false);
   const reviewGroups = getReviewGroups(pendingClips);
   const approvedGroups = getReviewGroups(approvedClips);
   const visibleReviewGroups = getVisibleGroups(reviewGroups, pendingPage);
   const visibleApprovedGroups = getVisibleGroups(approvedGroups, approvedPage);
+  const canViewPendingClips = !readOnly || hasAcceptedReadOnlyWarning;
 
   async function fetchAdminClips(approved = false) {
     // The same endpoint serves pending clips by default and approved clips on request.
@@ -357,7 +364,9 @@ export default function ClipAdmin() {
         <div>
           <h2 className="text-lg text-[#17001C]">Review submitted clips</h2>
           <p className="mt-2 text-sm text-[#17001C]/70">
-            Public uploads stay pending until an admin approves them.
+            {readOnly
+              ? "Public uploads are visible here, but read-only users cannot approve or remove them."
+              : "Public uploads stay pending until an admin approves them."}
           </p>
         </div>
         <button
@@ -370,21 +379,44 @@ export default function ClipAdmin() {
         </button>
       </div>
 
+      {readOnly ? (
+        <div className="mt-5 rounded-md border-2 border-[#F85259] bg-[#fff7c7] px-4 py-3 text-sm leading-6 text-[#17001C] shadow-[5px_5px_0_#17001C]">
+          <p className="font-primary text-base">Content warning</p>
+          <p className="mt-2">
+            These submitted clips have not been reviewed or rated yet. They may
+            contain inappropriate content, so proceed with caution.
+          </p>
+          {!hasAcceptedReadOnlyWarning ? (
+            <button
+              className="font-primary fmc-button mt-4 h-10 bg-[#F85259] px-4 text-sm text-white hover:bg-[#A335E6]"
+              onClick={() => setHasAcceptedReadOnlyWarning(true)}
+              type="button"
+            >
+              I understand
+            </button>
+          ) : (
+            <p className="mt-3 text-sm font-semibold text-[#72007E]">
+              Warning accepted. Unreviewed clips are visible.
+            </p>
+          )}
+        </div>
+      ) : null}
+
       {message ? <p className="mt-4 text-sm text-[#17001C]/75">{message}</p> : null}
 
-      {isLoading ? (
+      {canViewPendingClips && isLoading ? (
         <div className="mt-6 rounded-lg border-2 border-dashed border-[#72007E] bg-[#F4E7E7] p-6 text-sm text-[#17001C]/70">
           Loading pending clips...
         </div>
       ) : null}
 
-      {!isLoading && reviewGroups.length === 0 ? (
+      {canViewPendingClips && !isLoading && reviewGroups.length === 0 ? (
         <div className="mt-6 rounded-lg border-2 border-dashed border-[#72007E] bg-[#F4E7E7] p-6 text-sm text-[#17001C]/70">
           No clips are waiting for review right now.
         </div>
       ) : null}
 
-      {!isLoading && reviewGroups.length > 0 ? (
+      {canViewPendingClips && !isLoading && reviewGroups.length > 0 ? (
         <>
           <div className="mt-6 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
             {visibleReviewGroups.map((group) => {
@@ -456,24 +488,26 @@ export default function ClipAdmin() {
                   </div>
                 </article>
 
-                <div className="flex gap-3">
-                  <button
-                    className="font-primary fmc-button h-10 flex-1 bg-[#F85259] px-4 text-sm text-white hover:bg-[#A335E6] disabled:opacity-60"
-                    disabled={activeGroupId === group.id}
-                    onClick={() => void handleApproveGroup(group)}
-                    type="button"
-                  >
-                    Approve
-                  </button>
-                  <button
-                    className="font-primary fmc-button h-10 flex-1 bg-[#17001C] px-4 text-sm text-white hover:bg-[#72007E] disabled:opacity-60"
-                    disabled={activeGroupId === group.id}
-                    onClick={() => void handleRemoveGroup(group)}
-                    type="button"
-                  >
-                    Remove
-                  </button>
-                </div>
+                {!readOnly ? (
+                  <div className="flex gap-3">
+                    <button
+                      className="font-primary fmc-button h-10 flex-1 bg-[#F85259] px-4 text-sm text-white hover:bg-[#A335E6] disabled:opacity-60"
+                      disabled={activeGroupId === group.id}
+                      onClick={() => void handleApproveGroup(group)}
+                      type="button"
+                    >
+                      Approve
+                    </button>
+                    <button
+                      className="font-primary fmc-button h-10 flex-1 bg-[#17001C] px-4 text-sm text-white hover:bg-[#72007E] disabled:opacity-60"
+                      disabled={activeGroupId === group.id}
+                      onClick={() => void handleRemoveGroup(group)}
+                      type="button"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ) : null}
               </div>
             );
             })}
@@ -491,8 +525,9 @@ export default function ClipAdmin() {
         <div>
           <h2 className="text-lg text-[#17001C]">Reviewed uploads</h2>
           <p className="mt-2 text-sm text-[#17001C]/70">
-            Approved submissions are public. Removing one deletes it from Drive
-            and the public media library.
+            {readOnly
+              ? "Approved submissions are public and can be viewed here."
+              : "Approved submissions are public. Removing one deletes it from Drive and the public media library."}
           </p>
         </div>
       </div>
@@ -581,14 +616,16 @@ export default function ClipAdmin() {
                   </div>
                 </article>
 
-                <button
-                  className="font-primary fmc-button h-10 bg-[#17001C] px-4 text-sm text-white hover:bg-[#72007E] disabled:opacity-60"
-                  disabled={activeGroupId === group.id}
-                  onClick={() => void handleRemoveGroup(group, true)}
-                  type="button"
-                >
-                  Remove
-                </button>
+                {!readOnly ? (
+                  <button
+                    className="font-primary fmc-button h-10 bg-[#17001C] px-4 text-sm text-white hover:bg-[#72007E] disabled:opacity-60"
+                    disabled={activeGroupId === group.id}
+                    onClick={() => void handleRemoveGroup(group, true)}
+                    type="button"
+                  >
+                    Remove
+                  </button>
+                ) : null}
               </div>
             );
             })}

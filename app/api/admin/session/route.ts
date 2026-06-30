@@ -2,8 +2,11 @@ import { NextResponse } from "next/server";
 import {
   clearAdminSessionResponse,
   createAdminSessionResponse,
+  createReadOnlyAdminSessionResponse,
   hasAdminSession,
+  hasReadOnlyAdminSession,
   isAdminConfigured,
+  isReadOnlyAdminPassword,
   requireSameOrigin,
   verifyAdminPassword,
 } from "@/lib/adminAuth";
@@ -11,9 +14,14 @@ import {
 export const runtime = "nodejs";
 
 export async function GET() {
+  const authenticated = await hasAdminSession();
+  const readOnly = !authenticated && (await hasReadOnlyAdminSession());
+
   return NextResponse.json({
     configured: isAdminConfigured(),
-    authenticated: await hasAdminSession(),
+    authenticated,
+    readOnly,
+    role: authenticated ? "admin" : readOnly ? "readonly" : "none",
   });
 }
 
@@ -34,6 +42,10 @@ export async function POST(request: Request) {
       { error: "Admin password is not configured." },
       { status: 503 },
     );
+  }
+
+  if (isReadOnlyAdminPassword(password)) {
+    return createReadOnlyAdminSessionResponse();
   }
 
   if (!(await verifyAdminPassword(password))) {

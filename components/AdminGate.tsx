@@ -5,9 +5,11 @@ import ClipAdmin from "@/components/ClipAdmin";
 import CommissionsAdmin from "@/components/CommissionsAdmin";
 import FooterHandlesAdmin from "@/components/FooterHandlesAdmin";
 
+type AdminMode = "locked" | "admin" | "readonly";
+
 export default function AdminGate() {
   const [password, setPassword] = useState("");
-  const [isUnlocked, setIsUnlocked] = useState(false);
+  const [adminMode, setAdminMode] = useState<AdminMode>("locked");
   const [isConfigured, setIsConfigured] = useState(true);
   const [isCheckingSession, setIsCheckingSession] = useState(true);
   const [error, setError] = useState("");
@@ -19,10 +21,13 @@ export default function AdminGate() {
         const response = await fetch("/api/admin/session");
         const data = (await response.json()) as {
           authenticated?: boolean;
+          readOnly?: boolean;
           configured?: boolean;
         };
 
-        setIsUnlocked(Boolean(data.authenticated));
+        setAdminMode(
+          data.authenticated ? "admin" : data.readOnly ? "readonly" : "locked",
+        );
         setIsConfigured(data.configured !== false);
       } catch {
         setError("Could not check admin session.");
@@ -57,7 +62,11 @@ export default function AdminGate() {
         return;
       }
 
-      setIsUnlocked(true);
+      const data = (await response.json().catch(() => null)) as {
+        role?: string;
+      } | null;
+
+      setAdminMode(data?.role === "readonly" ? "readonly" : "admin");
       setPassword("");
     } catch {
       setError("Could not unlock admin.");
@@ -67,7 +76,7 @@ export default function AdminGate() {
   async function handleLogout() {
     // Clear the session on the server, then lock the dashboard locally.
     await fetch("/api/admin/session", { method: "DELETE" });
-    setIsUnlocked(false);
+    setAdminMode("locked");
   }
 
   if (isCheckingSession) {
@@ -78,11 +87,25 @@ export default function AdminGate() {
     );
   }
 
-  if (isUnlocked) {
+  if (adminMode !== "locked") {
+    const isReadOnly = adminMode === "readonly";
+
     return (
       <>
         {/* Once unlocked, show all admin tools behind the same gate. */}
-        <div className="mt-8 flex justify-end">
+        <div className="mt-8 flex flex-wrap items-center justify-between gap-4">
+          {isReadOnly ? (
+            <div className="max-w-xl rotate-[-0.5deg] border-2 border-[#17001C] bg-[#fff7c7] px-5 py-4 text-sm text-[#17001C] shadow-[6px_6px_0_#17001C]">
+              <p className="font-primary text-base">Read-only</p>
+              <p className="mt-2 leading-6">
+                You can view uploads, commission requests, commissions, and
+                footer profiles. Editing, approving, deleting, and uploading are
+                locked in this mode.
+              </p>
+            </div>
+          ) : (
+            <div />
+          )}
           <button
             className="font-primary fmc-button h-10 bg-[#17001C] px-4 text-sm text-white hover:bg-[#72007E]"
             onClick={() => void handleLogout()}
@@ -91,9 +114,9 @@ export default function AdminGate() {
             Log out
           </button>
         </div>
-        <ClipAdmin />
-        <CommissionsAdmin />
-        <FooterHandlesAdmin />
+        <ClipAdmin readOnly={isReadOnly} />
+        <CommissionsAdmin readOnly={isReadOnly} />
+        <FooterHandlesAdmin readOnly={isReadOnly} />
       </>
     );
   }
@@ -118,6 +141,13 @@ export default function AdminGate() {
           value={password}
         />
       </label>
+      <div className="mt-4 rotate-[-0.5deg] border-2 border-[#17001C] bg-[#fff7c7] px-4 py-3 text-sm text-[#17001C] shadow-[5px_5px_0_#17001C]">
+        <p className="font-primary">Read-only access</p>
+        <p className="mt-2">
+          Use <span className="font-semibold">FMC</span> for read-only access.
+          Read-only can view the dashboard, but cannot edit anything.
+        </p>
+      </div>
       {error ? <p className="mt-3 text-sm text-[#F85259]">{error}</p> : null}
       <button
         className="font-primary fmc-button mt-5 h-10 bg-[#F85259] px-4 text-sm text-white hover:bg-[#A335E6]"
