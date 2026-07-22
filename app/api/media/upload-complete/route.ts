@@ -22,6 +22,8 @@ export async function POST(request: Request) {
     teamNumber?: unknown;
     year?: unknown;
     uploadedBy?: unknown;
+    isAnonymous?: unknown;
+    creditRequired?: unknown;
     title?: unknown;
     uploadGroupId?: unknown;
     fileCount?: unknown;
@@ -36,6 +38,8 @@ export async function POST(request: Request) {
   const teamNumber = String(payload?.teamNumber || "").trim();
   const year = Number(payload?.year);
   const uploadedBy = String(payload?.uploadedBy || "").trim();
+  const isAnonymous = payload?.isAnonymous === true;
+  const creditRequired = payload?.creditRequired === true;
   const title = String(payload?.title || "").trim();
   const uploadGroupId = String(payload?.uploadGroupId || "").trim();
   const fileCount = Number(payload?.fileCount || 1);
@@ -84,9 +88,10 @@ export async function POST(request: Request) {
       fileName: fileName || undefined,
       uploadFolder,
     });
+    const publicUploadedBy = isAnonymous ? "Anonymous" : uploadedBy;
     const defaultTitle = fileCount > 1
-      ? `${teamNumber} collage by ${uploadedBy}`
-      : `${teamNumber} media by ${uploadedBy}`;
+      ? `${teamNumber} collage by ${publicUploadedBy}`
+      : `${teamNumber} media by ${publicUploadedBy}`;
     const clip = await createMediaClip({
       title: title || defaultTitle,
       teamNumber,
@@ -94,9 +99,10 @@ export async function POST(request: Request) {
       videoUrl: driveFile.viewUrl,
       thumbnailUrl: driveFile.thumbnailUrl,
       approved: false,
-      uploadedBy,
+      uploadedBy: publicUploadedBy,
       uploadGroupId: uploadGroupId || undefined,
       driveFolderUrl: driveFile.folderUrl,
+      creditRequired,
     });
 
     return NextResponse.json({

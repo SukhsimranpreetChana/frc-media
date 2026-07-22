@@ -159,6 +159,8 @@ async function finishUploadedFile(payload: {
   teamNumber: string;
   year: number;
   uploadedBy: string;
+  isAnonymous: boolean;
+  creditRequired: boolean;
   title: string;
   uploadGroupId: string;
   uploadFolder: NonNullable<UploadSessionResponse["uploadFolder"]>;
@@ -207,6 +209,8 @@ export default function PublicMediaUpload({
   const [year, setYear] = useState("");
   const [title, setTitle] = useState("");
   const [uploadedBy, setUploadedBy] = useState("");
+  const [isAnonymous, setIsAnonymous] = useState(false);
+  const [creditRequired, setCreditRequired] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [message, setMessage] = useState("");
@@ -273,6 +277,7 @@ export default function PublicMediaUpload({
           teamNumber: trimmedTeamNumber,
           year: numericYear,
           uploadedBy: trimmedUploadedBy,
+          isAnonymous,
           title,
           files: clientFiles,
         }),
@@ -338,6 +343,8 @@ export default function PublicMediaUpload({
           teamNumber: trimmedTeamNumber,
           year: numericYear,
           uploadedBy: trimmedUploadedBy,
+          isAnonymous,
+          creditRequired,
           title,
           uploadGroupId: sessionData.uploadGroupId,
           uploadFolder: sessionData.uploadFolder,
@@ -362,6 +369,8 @@ export default function PublicMediaUpload({
       setYear("");
       setTitle("");
       setUploadedBy("");
+      setIsAnonymous(false);
+      setCreditRequired(false);
       setFiles([]);
       setHasAcceptedUploadTerms(false);
       form.reset();
@@ -430,11 +439,49 @@ export default function PublicMediaUpload({
           <input
             className="mt-2 h-11 w-full rounded-md border-2 border-[#17001C] bg-[#F4E7E7] px-4 text-sm text-[#17001C] outline-none ring-[#A335E6]/20 focus:border-[#7137E3] focus:ring-4"
             onChange={(event) => setUploadedBy(event.target.value)}
-            placeholder="@handle or name, used for your Drive folder"
+            placeholder={
+              isAnonymous
+                ? "@handle or name, hidden from the public clip"
+                : "@handle or name, used for your Drive folder"
+            }
             required
             value={uploadedBy}
           />
         </label>
+        <div className="grid gap-3 md:col-span-2 md:grid-cols-2">
+          <label className="flex items-start gap-3 rounded-md border-2 border-[#17001C] bg-[#F4E7E7] p-4 text-sm text-[#17001C]">
+            <input
+              checked={isAnonymous}
+              className="mt-1 h-4 w-4 accent-[#7137E3]"
+              disabled={isUploading}
+              onChange={(event) => setIsAnonymous(event.target.checked)}
+              type="checkbox"
+            />
+            <span>
+              <span className="block font-semibold">Upload anonymously</span>
+              <span className="mt-1 block text-xs leading-5 text-[#17001C]/65">
+                You still need to enter a handle, but the public clip and Drive
+                folder will show Anonymous instead.
+              </span>
+            </span>
+          </label>
+          <label className="flex items-start gap-3 rounded-md border-2 border-[#17001C] bg-[#F4E7E7] p-4 text-sm text-[#17001C]">
+            <input
+              checked={creditRequired}
+              className="mt-1 h-4 w-4 accent-[#7137E3]"
+              disabled={isUploading}
+              onChange={(event) => setCreditRequired(event.target.checked)}
+              type="checkbox"
+            />
+            <span>
+              <span className="block font-semibold">Credit required</span>
+              <span className="mt-1 block text-xs leading-5 text-[#17001C]/65">
+                Adds a warning badge so viewers know they must give credit if
+                they use this clip.
+              </span>
+            </span>
+          </label>
+        </div>
         <div className="block text-sm text-[#17001C]/75 md:col-span-2">
           <span>Media Files</span>
           <input

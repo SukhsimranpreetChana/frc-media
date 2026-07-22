@@ -19,6 +19,7 @@ export type MediaClip = {
   uploadedBy?: string;
   uploadGroupId?: string;
   driveFolderUrl?: string;
+  creditRequired: boolean;
   createdAt?: string;
 };
 
@@ -33,6 +34,7 @@ export type MediaClipRecord = {
   uploaded_by: string | null;
   upload_group_id: string | null;
   drive_folder_url: string | null;
+  credit_required?: boolean | null;
   created_at: string;
 };
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import CreditRequiredBadge from "@/components/CreditRequiredBadge";
 import type { MediaClip } from "@/types";
 
 type ClipReviewGroup = {
@@ -75,6 +76,10 @@ function getVisibleGroups(groups: ClipReviewGroup[], page: number) {
     (page - 1) * adminUploadPageSize,
     page * adminUploadPageSize,
   );
+}
+
+function groupRequiresCredit(group: ClipReviewGroup) {
+  return group.clips.some((clip) => clip.creditRequired);
 }
 
 function AdminPaginationControls({
@@ -358,6 +363,60 @@ export default function ClipAdmin({ readOnly = false }: ClipAdminProps) {
     }
   }
 
+  async function handleToggleCreditRequired(
+    group: ClipReviewGroup,
+    approved = false,
+  ) {
+    const nextCreditRequired = !groupRequiresCredit(group);
+    setActiveGroupId(group.id);
+    setMessage("");
+
+    try {
+      const response = await fetch("/api/admin/media", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          clipIds: group.clips.map((clip) => clip.id),
+          creditRequired: nextCreditRequired,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Could not update credit requirement.");
+      }
+
+      const updateGroupCredit = (clips: MediaClip[]) =>
+        clips.map((clip) =>
+          group.clips.some((groupClip) => groupClip.id === clip.id)
+            ? { ...clip, creditRequired: nextCreditRequired }
+            : clip,
+        );
+
+      if (approved) {
+        setApprovedClips(updateGroupCredit);
+      } else {
+        setPendingClips(updateGroupCredit);
+      }
+
+      setMessage(
+        nextCreditRequired
+          ? "Credit requirement added."
+          : "Credit requirement removed.",
+      );
+      window.dispatchEvent(new Event("fmc-media-uploaded"));
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "Could not update credit requirement.",
+      );
+    } finally {
+      setActiveGroupId("");
+    }
+  }
+
   return (
     <section className="scrap-card mt-8 p-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
@@ -431,6 +490,7 @@ export default function ClipAdmin({ readOnly = false }: ClipAdminProps) {
               coverClip?.thumbnailUrl,
             );
             const hasBrokenThumbnail = brokenThumbnailGroupIds[group.id];
+            const creditRequired = groupRequiresCredit(group);
 
             return (
               <div className="flex flex-col gap-4" key={group.id}>
@@ -471,6 +531,11 @@ export default function ClipAdmin({ readOnly = false }: ClipAdminProps) {
                       <p className="mt-2 text-sm text-[#F4E7E7]">
                         {group.year} / {group.clips.length} file{group.clips.length === 1 ? "" : "s"} pending
                       </p>
+                      {creditRequired ? (
+                        <div className="mt-3">
+                          <CreditRequiredBadge />
+                        </div>
+                      ) : null}
                     </div>
                     <div className="mt-auto flex flex-col gap-2 sm:flex-row">
                       <a
@@ -489,23 +554,35 @@ export default function ClipAdmin({ readOnly = false }: ClipAdminProps) {
                 </article>
 
                 {!readOnly ? (
-                  <div className="flex gap-3">
+                  <div className="flex flex-col gap-3">
                     <button
-                      className="font-primary fmc-button h-10 flex-1 bg-[#F85259] px-4 text-sm text-white hover:bg-[#A335E6] disabled:opacity-60"
+                      className="font-primary fmc-button h-10 bg-[#7137E3] px-4 text-sm text-white hover:bg-[#A335E6] disabled:opacity-60"
                       disabled={activeGroupId === group.id}
-                      onClick={() => void handleApproveGroup(group)}
+                      onClick={() => void handleToggleCreditRequired(group)}
                       type="button"
                     >
-                      Approve
+                      {creditRequired
+                        ? "Remove credit required"
+                        : "Mark credit required"}
                     </button>
-                    <button
-                      className="font-primary fmc-button h-10 flex-1 bg-[#17001C] px-4 text-sm text-white hover:bg-[#72007E] disabled:opacity-60"
-                      disabled={activeGroupId === group.id}
-                      onClick={() => void handleRemoveGroup(group)}
-                      type="button"
-                    >
-                      Remove
-                    </button>
+                    <div className="flex gap-3">
+                      <button
+                        className="font-primary fmc-button h-10 flex-1 bg-[#F85259] px-4 text-sm text-white hover:bg-[#A335E6] disabled:opacity-60"
+                        disabled={activeGroupId === group.id}
+                        onClick={() => void handleApproveGroup(group)}
+                        type="button"
+                      >
+                        Approve
+                      </button>
+                      <button
+                        className="font-primary fmc-button h-10 flex-1 bg-[#17001C] px-4 text-sm text-white hover:bg-[#72007E] disabled:opacity-60"
+                        disabled={activeGroupId === group.id}
+                        onClick={() => void handleRemoveGroup(group)}
+                        type="button"
+                      >
+                        Remove
+                      </button>
+                    </div>
                   </div>
                 ) : null}
               </div>
@@ -559,6 +636,7 @@ export default function ClipAdmin({ readOnly = false }: ClipAdminProps) {
               coverClip?.thumbnailUrl,
             );
             const hasBrokenThumbnail = brokenThumbnailGroupIds[group.id];
+            const creditRequired = groupRequiresCredit(group);
 
             return (
               <div className="flex flex-col gap-4" key={group.id}>
@@ -599,6 +677,11 @@ export default function ClipAdmin({ readOnly = false }: ClipAdminProps) {
                       <p className="mt-2 text-sm text-[#F4E7E7]">
                         {group.year} / {group.clips.length} file{group.clips.length === 1 ? "" : "s"} approved
                       </p>
+                      {creditRequired ? (
+                        <div className="mt-3">
+                          <CreditRequiredBadge />
+                        </div>
+                      ) : null}
                     </div>
                     <div className="mt-auto flex flex-col gap-2 sm:flex-row">
                       <a
@@ -617,14 +700,26 @@ export default function ClipAdmin({ readOnly = false }: ClipAdminProps) {
                 </article>
 
                 {!readOnly ? (
-                  <button
-                    className="font-primary fmc-button h-10 bg-[#17001C] px-4 text-sm text-white hover:bg-[#72007E] disabled:opacity-60"
-                    disabled={activeGroupId === group.id}
-                    onClick={() => void handleRemoveGroup(group, true)}
-                    type="button"
-                  >
-                    Remove
-                  </button>
+                  <div className="flex flex-col gap-3">
+                    <button
+                      className="font-primary fmc-button h-10 bg-[#7137E3] px-4 text-sm text-white hover:bg-[#A335E6] disabled:opacity-60"
+                      disabled={activeGroupId === group.id}
+                      onClick={() => void handleToggleCreditRequired(group, true)}
+                      type="button"
+                    >
+                      {creditRequired
+                        ? "Remove credit required"
+                        : "Mark credit required"}
+                    </button>
+                    <button
+                      className="font-primary fmc-button h-10 bg-[#17001C] px-4 text-sm text-white hover:bg-[#72007E] disabled:opacity-60"
+                      disabled={activeGroupId === group.id}
+                      onClick={() => void handleRemoveGroup(group, true)}
+                      type="button"
+                    >
+                      Remove
+                    </button>
+                  </div>
                 ) : null}
               </div>
             );

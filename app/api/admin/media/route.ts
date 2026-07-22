@@ -6,6 +6,7 @@ import {
   getApprovedMediaClipsForAdmin,
   getPendingMediaClipsForAdmin,
   updateMediaClipApproval,
+  updateMediaClipCreditRequiredForAdmin,
 } from "@/lib/supabase";
 
 export const runtime = "nodejs";
@@ -54,18 +55,39 @@ export async function PATCH(request: Request) {
   const payload = (await request.json().catch(() => null)) as {
     clipIds?: unknown;
     approved?: unknown;
+    creditRequired?: unknown;
   } | null;
   const clipIds = parseClipIds(payload?.clipIds);
+  const hasApprovedUpdate = typeof payload?.approved === "boolean";
+  const hasCreditRequiredUpdate = typeof payload?.creditRequired === "boolean";
   const approved = payload?.approved === true;
+  const creditRequired = payload?.creditRequired === true;
 
   if (clipIds.length === 0) {
     return NextResponse.json({ error: "Missing clip ids." }, { status: 400 });
   }
 
-  try {
-    await Promise.all(
-      clipIds.map((clipId) => updateMediaClipApproval(clipId, approved)),
+  if (!hasApprovedUpdate && !hasCreditRequiredUpdate) {
+    return NextResponse.json(
+      { error: "Missing media update." },
+      { status: 400 },
     );
+  }
+
+  try {
+    if (hasApprovedUpdate) {
+      await Promise.all(
+        clipIds.map((clipId) => updateMediaClipApproval(clipId, approved)),
+      );
+    }
+
+    if (hasCreditRequiredUpdate) {
+      await Promise.all(
+        clipIds.map((clipId) =>
+          updateMediaClipCreditRequiredForAdmin(clipId, creditRequired),
+        ),
+      );
+    }
 
     return NextResponse.json({ ok: true });
   } catch {

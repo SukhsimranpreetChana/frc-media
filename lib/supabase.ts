@@ -81,6 +81,7 @@ export function mapMediaClipRecord(record: MediaClipRecord): MediaClip {
     uploadedBy: record.uploaded_by ?? undefined,
     uploadGroupId: record.upload_group_id ?? undefined,
     driveFolderUrl: record.drive_folder_url ?? undefined,
+    creditRequired: record.credit_required ?? false,
     createdAt: record.created_at,
   };
 }
@@ -137,6 +138,7 @@ export async function createMediaClip(clip: Omit<MediaClip, "id" | "createdAt">)
     uploaded_by: clip.uploadedBy ?? null,
     upload_group_id: clip.uploadGroupId ?? null,
     drive_folder_url: clip.driveFolderUrl ?? null,
+    credit_required: clip.creditRequired,
   };
 
   const { data, error } = await getSupabaseAdminClient()
@@ -176,6 +178,7 @@ export async function submitPendingClip(input: {
     uploadedBy: input.uploadedBy?.trim() || undefined,
     uploadGroupId: input.uploadGroupId,
     driveFolderUrl: input.driveFolderUrl,
+    creditRequired: false,
   });
 }
 
@@ -229,6 +232,28 @@ export async function updateMediaClipApproval(id: string, approved: boolean) {
 
   if (!data) {
     throw new Error("Unable to update media clip: no record returned.");
+  }
+
+  return mapMediaClipRecord(data);
+}
+
+export async function updateMediaClipCreditRequiredForAdmin(
+  id: string,
+  creditRequired: boolean,
+) {
+  const { data, error } = await getSupabaseAdminClient()
+    .from("media_clips")
+    .update({ credit_required: creditRequired })
+    .eq("id", id)
+    .select()
+    .single<MediaClipRecord>();
+
+  if (error) {
+    throw new Error(`Unable to update media clip credit: ${error.message}`);
+  }
+
+  if (!data) {
+    throw new Error("Unable to update media clip credit: no record returned.");
   }
 
   return mapMediaClipRecord(data);

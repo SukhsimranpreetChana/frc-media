@@ -11,6 +11,7 @@ create table if not exists public.media_clips (
   uploaded_by text,
   upload_group_id text,
   drive_folder_url text,
+  credit_required boolean not null default false,
   created_at timestamptz not null default now()
 );
 
@@ -78,7 +79,13 @@ alter table public.media_clips
   add column if not exists drive_folder_url text;
 
 alter table public.media_clips
+  add column if not exists credit_required boolean not null default false;
+
+alter table public.media_clips
   alter column approved set default false;
+
+alter table public.media_clips
+  alter column credit_required set default false;
 
 alter table public.media_clips
   drop column if exists event,

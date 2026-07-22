@@ -40,12 +40,14 @@ export async function POST(request: Request) {
     teamNumber?: unknown;
     year?: unknown;
     uploadedBy?: unknown;
+    isAnonymous?: unknown;
     title?: unknown;
     files?: UploadSessionFile[];
   } | null;
   const teamNumber = String(payload?.teamNumber || "").trim();
   const year = Number(payload?.year);
   const uploadedBy = String(payload?.uploadedBy || "").trim();
+  const isAnonymous = payload?.isAnonymous === true;
   const title = String(payload?.title || "").trim();
   const files = Array.isArray(payload?.files) ? payload.files : [];
   const totalUploadBytes = files.reduce(
@@ -103,7 +105,7 @@ export async function POST(request: Request) {
     const uploadFolder = await createGoogleDriveUploadFolderForSubmission({
       teamNumber,
       year,
-      uploadedBy,
+      uploadedBy: isAnonymous ? "Anonymous" : uploadedBy,
     });
     const sessions = await Promise.all(
       files.map(async (file) => {

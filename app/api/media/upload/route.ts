@@ -27,6 +27,8 @@ export async function POST(request: Request) {
   const teamNumber = String(formData.get("teamNumber") || "").trim();
   const year = Number(formData.get("year"));
   const uploadedBy = String(formData.get("uploadedBy") || "").trim();
+  const isAnonymous = formData.get("isAnonymous") === "true";
+  const creditRequired = formData.get("creditRequired") === "true";
   const title = String(formData.get("title") || "").trim();
   const uploadGroupId = crypto.randomUUID();
   const totalUploadBytes = files.reduce((total, file) => total + file.size, 0);
@@ -89,14 +91,15 @@ export async function POST(request: Request) {
 
   try {
     const uploads = [];
+    const publicUploadedBy = isAnonymous ? "Anonymous" : uploadedBy;
     const defaultTitle =
       files.length > 1
-        ? `${teamNumber} collage by ${uploadedBy}`
-        : `${teamNumber} media by ${uploadedBy}`;
+        ? `${teamNumber} collage by ${publicUploadedBy}`
+        : `${teamNumber} media by ${publicUploadedBy}`;
     const uploadFolder = await createGoogleDriveUploadFolderForSubmission({
       teamNumber,
       year,
-      uploadedBy,
+      uploadedBy: publicUploadedBy,
     });
 
     for (const file of files) {
@@ -114,9 +117,10 @@ export async function POST(request: Request) {
         videoUrl: driveFile.viewUrl,
         thumbnailUrl: driveFile.thumbnailUrl,
         approved: false,
-        uploadedBy,
+        uploadedBy: publicUploadedBy,
         uploadGroupId,
         driveFolderUrl: driveFile.folderUrl,
+        creditRequired,
       });
 
       uploads.push({

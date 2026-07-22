@@ -1,3 +1,4 @@
+import CreditRequiredBadge from "@/components/CreditRequiredBadge";
 import type { MediaClip } from "@/types";
 
 type MediaClipCardProps = {
@@ -36,6 +37,11 @@ export default function MediaClipCard({ clip }: MediaClipCardProps) {
             {clip.year}
             {clip.uploadedBy ? ` / Submitted by ${clip.uploadedBy}` : null}
           </p>
+          {clip.creditRequired ? (
+            <div className="mt-3">
+              <CreditRequiredBadge />
+            </div>
+          ) : null}
         </div>
         <div className="mt-auto flex flex-col gap-2 sm:flex-row">
           <a

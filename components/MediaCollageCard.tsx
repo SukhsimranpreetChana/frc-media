@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import CreditRequiredBadge from "@/components/CreditRequiredBadge";
 import type { MediaClip } from "@/types";
 
 export type MediaCollage = {
@@ -59,6 +60,7 @@ export default function MediaCollageCard({
     folderCover?.thumbnailUrl ||
     getThumbnailProxyUrl(coverClip?.videoUrl, coverClip?.thumbnailUrl);
   const fileCount = folderFiles.length || collage.clips.length;
+  const creditRequired = collage.clips.some((clip) => clip.creditRequired);
 
   useEffect(() => {
     setHasCoverError(false);
@@ -134,6 +136,11 @@ export default function MediaCollageCard({
           <p className="mt-2 text-sm text-[#F4E7E7]">
             {collage.year} / {fileCount} file{fileCount === 1 ? "" : "s"}
           </p>
+          {creditRequired ? (
+            <div className="mt-3">
+              <CreditRequiredBadge />
+            </div>
+          ) : null}
         </div>
         <a
           className="font-primary fmc-button mt-auto inline-flex h-10 items-center justify-center bg-[#F85259] px-4 text-sm text-white hover:bg-[#A335E6]"
