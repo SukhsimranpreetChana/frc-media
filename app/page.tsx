@@ -1,9 +1,14 @@
 import Image from "next/image";
 import Link from "next/link";
 import RandomTeamsPreview from "@/components/RandomTeamsPreview";
+import RecentUploadsCarousel from "@/components/RecentUploadsCarousel";
+import { getRecentUploadCollages } from "@/lib/recentUploads";
 
 const discordInvite = "https://discord.gg/xCqryxThbC";
-export default function Home() {
+
+export default async function Home() {
+  const recentUploads = await getRecentUploadCollages();
+
   return (
     <main className="fmc-surface flex-1">
       <section
@@ -50,6 +55,15 @@ export default function Home() {
               View media drive
             </Link>
           </div>
+        </div>
+      </section>
+
+      <section className="recent-uploads-page-section">
+        <div className="mx-auto w-full max-w-6xl px-6">
+          <RecentUploadsCarousel
+            collages={recentUploads.collages}
+            totalCount={recentUploads.totalCount}
+          />
         </div>
       </section>
 

@@ -8,12 +8,16 @@ import MediaCollageCard, {
   type MediaCollage,
 } from "@/components/MediaCollageCard";
 import TeamCard from "@/components/TeamCard";
+import RecentUploadsCarousel from "@/components/RecentUploadsCarousel";
+import { getMediaCollages } from "@/lib/mediaCollages";
 import { getMediaClips } from "@/lib/supabase";
 import { searchTeams } from "@/lib/search";
 import type { ExternalMediaItem, MatchVideo, MediaClip, Team } from "@/types";
 
 type TeamsFilterProps = {
   initialTeamNumber?: string;
+  recentUploads?: MediaCollage[];
+  recentUploadsTotalCount?: number;
   teams: Team[];
 };
 
@@ -49,55 +53,6 @@ function pickRandomTeams() {
 }
 
 const mediaPageSize = 6;
-
-function getCreatedTime(clip: MediaClip) {
-  return clip.createdAt ? new Date(clip.createdAt).getTime() : 0;
-}
-
-function sortMediaClips(clips: MediaClip[]) {
-  return [...clips].sort(
-    (a, b) => b.year - a.year || getCreatedTime(b) - getCreatedTime(a),
-  );
-}
-
-function getMediaCollages(clips: MediaClip[]) {
-  const groups = new Map<string, MediaCollage>();
-
-  sortMediaClips(clips).forEach((clip) => {
-    const uploadedBy = clip.uploadedBy || "Unknown uploader";
-    // Files from the same upload should show as a group instead of separate posts.
-    const groupId =
-      clip.uploadGroupId ||
-      clip.driveFolderUrl ||
-      `${clip.teamNumber}-${clip.year}-${uploadedBy}`;
-    const existingGroup = groups.get(groupId);
-
-    if (existingGroup) {
-      existingGroup.clips.push(clip);
-      existingGroup.folderUrl = existingGroup.folderUrl || clip.driveFolderUrl;
-      return;
-    }
-
-    groups.set(groupId, {
-      id: groupId,
-      title: clip.title || `${clip.teamNumber} media by ${uploadedBy}`,
-      clips: [clip],
-      folderUrl: clip.driveFolderUrl,
-      teamNumber: clip.teamNumber,
-      year: clip.year,
-    });
-  });
-
-  return Array.from(groups.values()).sort((a, b) => {
-    const aCover = getCollageCoverClip(a);
-    const bCover = getCollageCoverClip(b);
-
-    return (
-      b.year - a.year ||
-      getCreatedTime(bCover) - getCreatedTime(aCover)
-    );
-  });
-}
 
 function sortExternalMedia(items: ExternalMediaItem[]) {
   return [...items].sort(
@@ -175,6 +130,8 @@ function PaginationControls({
 
 export default function TeamsFilter({
   initialTeamNumber = "",
+  recentUploads = [],
+  recentUploadsTotalCount = recentUploads.length,
   teams,
 }: TeamsFilterProps) {
   const [query, setQuery] = useState(getDigitsOnly(initialTeamNumber));
@@ -760,6 +717,13 @@ export default function TeamsFilter({
           </div>
         </section>
       ) : null}
+
+      <div className="mt-8">
+        <RecentUploadsCarousel
+          collages={recentUploads}
+          totalCount={recentUploadsTotalCount}
+        />
+      </div>
 
       {isTeamNumberSearch ? (
         <section className="mt-8">

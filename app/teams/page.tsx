@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import TeamsFilter from "@/components/TeamsFilter";
+import { getRecentUploadCollages } from "@/lib/recentUploads";
 import { featuredTeams } from "@/lib/search";
 
 type TeamsPageProps = {
@@ -39,6 +40,7 @@ function getDigitsOnly(value: string) {
 export default async function TeamsPage({ searchParams }: TeamsPageProps) {
   const params = await searchParams;
   const initialTeamNumber = getDigitsOnly(getSearchParamValue(params.team));
+  const recentUploads = await getRecentUploadCollages();
 
   return (
     <main className="fmc-surface flex-1">
@@ -51,7 +53,12 @@ export default async function TeamsPage({ searchParams }: TeamsPageProps) {
           </p>
         </div>
 
-        <TeamsFilter initialTeamNumber={initialTeamNumber} teams={featuredTeams} />
+        <TeamsFilter
+          initialTeamNumber={initialTeamNumber}
+          recentUploads={recentUploads.collages}
+          recentUploadsTotalCount={recentUploads.totalCount}
+          teams={featuredTeams}
+        />
       </section>
     </main>
   );

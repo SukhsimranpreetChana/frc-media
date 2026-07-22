@@ -2,16 +2,14 @@
 
 import { useEffect, useMemo, useState } from "react";
 import CreditRequiredBadge from "@/components/CreditRequiredBadge";
-import type { MediaClip } from "@/types";
+import {
+  getCollageCoverClip,
+  getCreatedTime,
+  type MediaCollage,
+} from "@/lib/mediaCollages";
 
-export type MediaCollage = {
-  id: string;
-  title: string;
-  clips: MediaClip[];
-  folderUrl?: string;
-  teamNumber: string;
-  year: number;
-};
+export { getCollageCoverClip };
+export type { MediaCollage };
 
 type DriveFolderFile = {
   id: string;
@@ -23,22 +21,12 @@ type DriveFolderFile = {
   modifiedTime?: string;
 };
 
-function getCreatedTime(clip: MediaClip) {
-  return clip.createdAt ? new Date(clip.createdAt).getTime() : 0;
-}
-
 function getThumbnailProxyUrl(fileUrl?: string, thumbnailUrl?: string) {
   if (fileUrl) {
     return `/api/media/thumbnail?fileUrl=${encodeURIComponent(fileUrl)}`;
   }
 
   return thumbnailUrl;
-}
-
-export function getCollageCoverClip(collage: MediaCollage) {
-  return [...collage.clips].sort(
-    (a, b) => getCreatedTime(b) - getCreatedTime(a),
-  )[0];
 }
 
 export default function MediaCollageCard({

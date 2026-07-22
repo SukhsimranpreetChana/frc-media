@@ -95,7 +95,7 @@ export default function AdminGate() {
         {/* Once unlocked, show all admin tools behind the same gate. */}
         <div className="mt-8 flex flex-wrap items-center justify-between gap-4">
           {isReadOnly ? (
-            <div className="max-w-xl rotate-[-0.5deg] border-2 border-[#17001C] bg-[#fff7c7] px-5 py-4 text-sm text-[#17001C] shadow-[6px_6px_0_#17001C]">
+            <div className="admin-readonly-note max-w-xl rotate-[-0.5deg] px-5 py-4 text-sm shadow-[6px_6px_0_#17001C]">
               <p className="font-primary text-base">Read-only</p>
               <p className="mt-2 leading-6">
                 You can view uploads, commission requests, commissions, and
@@ -141,7 +141,7 @@ export default function AdminGate() {
           value={password}
         />
       </label>
-      <div className="mt-4 rotate-[-0.5deg] border-2 border-[#17001C] bg-[#fff7c7] px-4 py-3 text-sm text-[#17001C] shadow-[5px_5px_0_#17001C]">
+      <div className="admin-readonly-note mt-4 rotate-[-0.5deg] px-4 py-3 text-sm shadow-[5px_5px_0_#17001C]">
         <p className="font-primary">Read-only access</p>
         <p className="mt-2">
           Use <span className="font-semibold">FMC</span> for read-only access.

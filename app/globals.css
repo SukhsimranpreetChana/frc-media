@@ -426,6 +426,118 @@ input:focus-visible + div .fmc-file-picker {
   color: rgba(249, 240, 251, 0.52);
 }
 
+.admin-readonly-note {
+  border: 2px solid #17001c;
+  background: #fff2a8;
+  color: #17001c;
+}
+
+:root[data-theme="dark"] .admin-readonly-note {
+  border-color: #f85259;
+  background: #4a3411;
+  color: #fff2a8;
+  box-shadow: 5px 5px 0 rgba(248, 82, 89, 0.45);
+}
+
+.recent-uploads-page-section {
+  padding: 2rem 0 0;
+}
+
+.recent-uploads-section {
+  background: transparent;
+  padding: 1.5rem 0 1.75rem;
+}
+
+.recent-uploads-viewport {
+  position: relative;
+  min-height: 18rem;
+  overflow: hidden;
+}
+
+.recent-uploads-track {
+  inset: 0;
+  transform: translate3d(0, 0, 0);
+  will-change: opacity, transform;
+}
+
+.recent-uploads-track[class*="recent-uploads-track--exit"] {
+  position: absolute;
+  pointer-events: none;
+}
+
+.recent-uploads-track--enter-next {
+  animation: recent-uploads-enter-next 520ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.recent-uploads-track--exit-next {
+  animation: recent-uploads-exit-next 520ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.recent-uploads-track--enter-previous {
+  animation: recent-uploads-enter-previous 520ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.recent-uploads-track--exit-previous {
+  animation: recent-uploads-exit-previous 520ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes recent-uploads-enter-next {
+  from {
+    opacity: 0.22;
+    transform: translate3d(8%, 0, 0);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes recent-uploads-exit-next {
+  from {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translate3d(-8%, 0, 0);
+  }
+}
+
+@keyframes recent-uploads-enter-previous {
+  from {
+    opacity: 0.22;
+    transform: translate3d(-8%, 0, 0);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes recent-uploads-exit-previous {
+  from {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translate3d(8%, 0, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .recent-uploads-track--enter-next,
+  .recent-uploads-track--exit-next,
+  .recent-uploads-track--enter-previous,
+  .recent-uploads-track--exit-previous {
+    animation: none;
+  }
+}
+
 .nav-tab {
   position: relative;
   display: inline-flex;
