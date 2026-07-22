@@ -718,12 +718,14 @@ export default function TeamsFilter({
         </section>
       ) : null}
 
-      <div className="mt-8">
-        <RecentUploadsCarousel
-          collages={recentUploads}
-          totalCount={recentUploadsTotalCount}
-        />
-      </div>
+      {!isTeamNumberSearch ? (
+        <div className="mt-8">
+          <RecentUploadsCarousel
+            collages={recentUploads}
+            totalCount={recentUploadsTotalCount}
+          />
+        </div>
+      ) : null}
 
       {isTeamNumberSearch ? (
         <section className="mt-8">
