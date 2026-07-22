@@ -453,15 +453,22 @@ export default function PublicMediaUpload({
             <input
               checked={isAnonymous}
               className="mt-1 h-4 w-4 accent-[#7137E3]"
-              disabled={isUploading}
-              onChange={(event) => setIsAnonymous(event.target.checked)}
+              disabled={isUploading || creditRequired}
+              onChange={(event) => {
+                setIsAnonymous(event.target.checked);
+
+                if (event.target.checked) {
+                  setCreditRequired(false);
+                }
+              }}
               type="checkbox"
             />
             <span>
               <span className="block font-semibold">Upload anonymously</span>
               <span className="mt-1 block text-xs leading-5 text-[#17001C]/65">
                 You still need to enter a handle, but the public clip and Drive
-                folder will show Anonymous instead.
+                folder will show Anonymous instead. Anonymous uploads cannot
+                require credit.
               </span>
             </span>
           </label>
@@ -469,15 +476,21 @@ export default function PublicMediaUpload({
             <input
               checked={creditRequired}
               className="mt-1 h-4 w-4 accent-[#7137E3]"
-              disabled={isUploading}
-              onChange={(event) => setCreditRequired(event.target.checked)}
+              disabled={isUploading || isAnonymous}
+              onChange={(event) => {
+                setCreditRequired(event.target.checked);
+
+                if (event.target.checked) {
+                  setIsAnonymous(false);
+                }
+              }}
               type="checkbox"
             />
             <span>
               <span className="block font-semibold">Credit required</span>
               <span className="mt-1 block text-xs leading-5 text-[#17001C]/65">
                 Adds a warning badge so viewers know they must give credit if
-                they use this clip.
+                they use this clip. Credit-required uploads cannot be anonymous.
               </span>
             </span>
           </label>
