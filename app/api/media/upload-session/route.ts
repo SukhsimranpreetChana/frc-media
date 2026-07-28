@@ -6,8 +6,8 @@ import {
 
 export const runtime = "nodejs";
 
-const maxFileSizeBytes = 2 * 1024 * 1024 * 1024;
-const maxTotalUploadBytes = 2 * 1024 * 1024 * 1024;
+const maxFileSizeBytes = 10 * 1024 * 1024 * 1024;
+const maxTotalUploadBytes = 10 * 1024 * 1024 * 1024;
 const maxUploadedByLength = 80;
 const maxTitleLength = 120;
 
@@ -96,7 +96,7 @@ export async function POST(request: Request) {
     totalUploadBytes > maxTotalUploadBytes
   ) {
     return NextResponse.json(
-      { error: "Uploads can be up to 2 GB total, with only image or video files." },
+      { error: "Uploads can be up to 10 GB total, with only image or video files." },
       { status: 400 },
     );
   }

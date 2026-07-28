@@ -8,8 +8,8 @@ import { createMediaClip } from "@/lib/supabase";
 export const runtime = "nodejs";
 
 const maxFileCount = 6;
-const maxFileSizeBytes = 100 * 1024 * 1024;
-const maxTotalUploadBytes = 250 * 1024 * 1024;
+const maxFileSizeBytes = 10 * 1024 * 1024 * 1024;
+const maxTotalUploadBytes = 10 * 1024 * 1024 * 1024;
 const maxUploadedByLength = 80;
 const maxTitleLength = 120;
 
@@ -52,7 +52,7 @@ export async function POST(request: Request) {
     totalUploadBytes > maxTotalUploadBytes
   ) {
     return NextResponse.json(
-      { error: "One or more files are too large for this upload." },
+      { error: "Uploads can be up to 10 GB total, with only image or video files." },
       { status: 400 },
     );
   }

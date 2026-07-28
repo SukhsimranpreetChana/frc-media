@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { type CSSProperties, useEffect, useRef, useState } from "react";
 import CreditRequiredBadge from "@/components/CreditRequiredBadge";
 import {
   getCollageCoverClip,
@@ -12,9 +12,10 @@ type RecentUploadsCarouselProps = {
   totalCount?: number;
 };
 
-const uploadsPerPage = 3;
-const uploadFetchBatchSize = 9;
+const uploadFetchBatchSize = 18;
 const slideDurationMs = 520;
+const cardMinWidth = 230;
+const cardGap = 16;
 
 function getThumbnailProxyUrl(fileUrl?: string, thumbnailUrl?: string) {
   if (fileUrl) {
@@ -24,8 +25,20 @@ function getThumbnailProxyUrl(fileUrl?: string, thumbnailUrl?: string) {
   return thumbnailUrl;
 }
 
-function getVisibleCollages(collages: MediaCollage[], startIndex: number) {
-  return collages.slice(startIndex, startIndex + uploadsPerPage);
+function getVisibleCollages(
+  collages: MediaCollage[],
+  startIndex: number,
+  cardsPerPage: number,
+) {
+  return collages.slice(startIndex, startIndex + cardsPerPage);
+}
+
+function getCardsPerPage(width: number) {
+  if (width <= 0) {
+    return 1;
+  }
+
+  return Math.max(1, Math.floor((width + cardGap) / (cardMinWidth + cardGap)));
 }
 
 function getCollageCoverUrl(collage: MediaCollage) {
@@ -98,8 +111,10 @@ export default function RecentUploadsCarousel({
   collages,
   totalCount = collages.length,
 }: RecentUploadsCarouselProps) {
+  const viewportRef = useRef<HTMLDivElement | null>(null);
   const [loadedCollages, setLoadedCollages] = useState(collages);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [cardsPerPage, setCardsPerPage] = useState(1);
   const [previousIndex, setPreviousIndex] = useState<number | null>(null);
   const [slideDirection, setSlideDirection] = useState<"next" | "previous">(
     "next",
@@ -109,25 +124,64 @@ export default function RecentUploadsCarousel({
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [loadError, setLoadError] = useState("");
   const hasMultipleUploads = totalCount > 1;
-  const visibleCollages = getVisibleCollages(loadedCollages, currentIndex);
+  const visibleCollages = getVisibleCollages(
+    loadedCollages,
+    currentIndex,
+    cardsPerPage,
+  );
   const previousCollages =
     previousIndex === null
       ? []
-      : getVisibleCollages(loadedCollages, previousIndex);
-  const lastStartIndex = Math.max(0, totalCount - 1);
+      : getVisibleCollages(loadedCollages, previousIndex, cardsPerPage);
+  const lastStartIndex = Math.max(0, totalCount - cardsPerPage);
   const canShowPrevious = currentIndex > 0;
   const canShowNext = currentIndex < lastStartIndex;
-  const nextIndex = Math.min(lastStartIndex, currentIndex + 1);
-  const previousButtonIndex = Math.max(0, currentIndex - 1);
+  const nextIndex = Math.min(lastStartIndex, currentIndex + cardsPerPage);
+  const previousButtonIndex = Math.max(0, currentIndex - cardsPerPage);
   const hasMoreUploads = loadedCollages.length < totalCount;
   const preloadedCollages = Array.from(
     new Map(
       [
-        ...getVisibleCollages(loadedCollages, nextIndex),
-        ...getVisibleCollages(loadedCollages, previousButtonIndex),
+        ...getVisibleCollages(loadedCollages, nextIndex, cardsPerPage),
+        ...getVisibleCollages(
+          loadedCollages,
+          previousButtonIndex,
+          cardsPerPage,
+        ),
       ].map((collage) => [collage.id, collage]),
     ).values(),
   );
+
+  useEffect(() => {
+    const viewport = viewportRef.current;
+
+    if (!viewport) {
+      return;
+    }
+
+    function updateCardsPerPage() {
+      const currentViewport = viewportRef.current;
+
+      if (!currentViewport) {
+        return;
+      }
+
+      setCardsPerPage(getCardsPerPage(currentViewport.clientWidth));
+    }
+
+    updateCardsPerPage();
+
+    const resizeObserver = new ResizeObserver(updateCardsPerPage);
+    resizeObserver.observe(viewport);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, []);
+
+  useEffect(() => {
+    setCurrentIndex((index) => Math.min(index, lastStartIndex));
+  }, [lastStartIndex]);
 
   useEffect(() => {
     if (previousIndex === null) {
@@ -202,13 +256,30 @@ export default function RecentUploadsCarousel({
 
   useEffect(() => {
     const nearingLoadedEnd =
-      currentIndex + uploadsPerPage * 2 >= loadedCollages.length;
+      currentIndex + cardsPerPage * 2 >= loadedCollages.length;
 
     if (nearingLoadedEnd && hasMoreUploads && !isLoadingMore && !loadError) {
       void loadMoreUploads();
     }
   }, [
     currentIndex,
+    hasMoreUploads,
+    isLoadingMore,
+    loadError,
+    cardsPerPage,
+    loadedCollages.length,
+  ]);
+
+  useEffect(() => {
+    const needsMoreForCurrentRow =
+      currentIndex + cardsPerPage > loadedCollages.length;
+
+    if (needsMoreForCurrentRow && hasMoreUploads && !isLoadingMore && !loadError) {
+      void loadMoreUploads();
+    }
+  }, [
+    currentIndex,
+    cardsPerPage,
     hasMoreUploads,
     isLoadingMore,
     loadError,
@@ -232,7 +303,7 @@ export default function RecentUploadsCarousel({
       return;
     }
 
-    const nextVisibleEnd = nextIndex + uploadsPerPage;
+    const nextVisibleEnd = nextIndex + cardsPerPage;
 
     if (nextVisibleEnd > loadedCollages.length && hasMoreUploads) {
       const nextCollages = await loadMoreUploads();
@@ -282,11 +353,16 @@ export default function RecentUploadsCarousel({
         >
           &lt;
         </button>
-        <div className="recent-uploads-viewport">
+        <div className="recent-uploads-viewport" ref={viewportRef}>
           {previousIndex !== null ? (
             <div
-              className={`recent-uploads-track recent-uploads-track--exit-${slideDirection} grid gap-4 md:grid-cols-3`}
+              className={`recent-uploads-track recent-uploads-track--exit-${slideDirection} recent-uploads-grid`}
               key={`exit-${slideDirection}-${animationKey}`}
+              style={
+                {
+                  "--recent-upload-columns": cardsPerPage,
+                } as CSSProperties
+              }
             >
               {previousCollages.map((collage) => (
                 <RecentUploadCard collage={collage} key={collage.id} />
@@ -294,8 +370,13 @@ export default function RecentUploadsCarousel({
             </div>
           ) : null}
           <div
-            className={`recent-uploads-track recent-uploads-track--enter-${slideDirection} grid gap-4 md:grid-cols-3`}
+            className={`recent-uploads-track recent-uploads-track--enter-${slideDirection} recent-uploads-grid`}
             key={`enter-${slideDirection}-${animationKey}`}
+            style={
+              {
+                "--recent-upload-columns": cardsPerPage,
+              } as CSSProperties
+            }
           >
             {visibleCollages.map((collage) => (
               <RecentUploadCard collage={collage} key={collage.id} />

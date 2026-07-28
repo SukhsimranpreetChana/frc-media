@@ -25,41 +25,52 @@ export default async function Home() {
           />
           <span className="photo-credit">{"Photo taken by FMC Member Alex on 5193."}</span>
         </div>
-        <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-6 py-16">
-          <div className="max-w-3xl">
-            <h1 className="text-4xl text-white sm:text-5xl">
-              Who are we?
-            </h1>
-            <p className="mt-6 text-lg leading-8 text-[#F4E7E7]">
-              We are the FIRST Media Community (FMC); a community of aspiring FIRST creatives consisting of students, alumni, and mentors 
-              who share ideas and create media of any variety. Not only to make it more accessible, but also 
-              to help out others with their media. Our goal is to provide a space where aspiring and experienced 
-              creatives can connect, share ideas, develop their skills, and collaborate on projects ranging from 
-              photography and videography to graphic design, social media, and more.
-            </p>
+        <div className="home-mission-content mx-auto grid w-full max-w-6xl gap-8 px-6 py-16">
+          <div>
+            <div className="max-w-3xl">
+              <h1 className="text-4xl text-white sm:text-5xl">
+                Who are we?
+              </h1>
+              <p className="mt-6 text-lg leading-8 text-[#F4E7E7]">
+                We are the FIRST Media Community (FMC); a community of aspiring FIRST creatives consisting of students, alumni, and mentors 
+                who share ideas and create media of any variety. Not only to make it more accessible, but also 
+                to help out others with their media. Our goal is to provide a space where aspiring and experienced 
+                creatives can connect, share ideas, develop their skills, and collaborate on projects ranging from 
+                photography and videography to graphic design, social media, and more.
+              </p>
+            </div>
+
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <a
+                className="font-primary fmc-button inline-flex h-11 items-center justify-center bg-[#F85259] px-5 text-sm text-white hover:bg-[#A335E6]"
+                href={discordInvite}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Join the Discord
+              </a>
+              <Link
+                className="font-primary fmc-button inline-flex h-11 items-center justify-center bg-[#17001C]/80 px-5 text-sm text-white hover:bg-[#72007E]"
+                href="/teams"
+              >
+                View media drive
+              </Link>
+            </div>
           </div>
 
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <a
-              className="font-primary fmc-button inline-flex h-11 items-center justify-center bg-[#F85259] px-5 text-sm text-white hover:bg-[#A335E6]"
-              href={discordInvite}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Join the Discord
-            </a>
-            <Link
-              className="font-primary fmc-button inline-flex h-11 items-center justify-center bg-[#17001C]/80 px-5 text-sm text-white hover:bg-[#72007E]"
-              href="/teams"
-            >
-              View media drive
-            </Link>
-          </div>
+          <Image
+            alt="FMC mascot holding a camera"
+            className="home-mascot-sticker"
+            height={480}
+            src="/media/fmc-mascot.gif"
+            unoptimized
+            width={480}
+          />
         </div>
       </section>
 
       <section className="recent-uploads-page-section">
-        <div className="mx-auto w-full max-w-6xl px-6">
+        <div className="w-full px-6">
           <RecentUploadsCarousel
             collages={recentUploads.collages}
             totalCount={recentUploads.totalCount}
@@ -134,9 +145,9 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="mx-auto w-full max-w-6xl px-6 pb-16 pt-12">
-        <div className="max-w-3xl">
-          <div className="mb-5 flex items-end justify-between gap-4 border-b-4 border-[#F85259] pb-3">
+      <section className="home-team-search-section">
+        <div className="w-full px-6">
+          <div className="mb-5 flex flex-col gap-4 border-b-4 border-[#F85259] pb-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="text-sm text-[#72007E]">FIND MEDIA</p>
               <h2 className="text-2xl text-[#17001C]">

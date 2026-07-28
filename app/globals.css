@@ -286,6 +286,36 @@ input:focus-visible + div .fmc-file-picker {
   z-index: 1;
 }
 
+.home-mission-content {
+  align-items: start;
+}
+
+.home-mascot-sticker {
+  display: none;
+  height: auto;
+  opacity: 0.82;
+}
+
+@media (min-width: 1024px) {
+  .home-mission-content {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (min-width: 1280px) {
+  .home-mission-content {
+    grid-template-columns: minmax(0, 1fr) 22rem;
+  }
+
+  .home-mascot-sticker {
+    display: block;
+    align-self: center;
+    justify-self: end;
+    width: 22rem;
+    transform: translateX(3rem);
+  }
+}
+
 .photo-credit {
   position: absolute;
   right: 0.75rem;
@@ -448,6 +478,17 @@ input:focus-visible + div .fmc-file-picker {
   padding: 1.5rem 0 1.75rem;
 }
 
+.home-team-search-section {
+  background: transparent;
+  padding: 1.5rem 0 4rem;
+}
+
+.home-team-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+  gap: 1rem;
+}
+
 .recent-uploads-viewport {
   position: relative;
   min-height: 18rem;
@@ -458,6 +499,12 @@ input:focus-visible + div .fmc-file-picker {
   inset: 0;
   transform: translate3d(0, 0, 0);
   will-change: opacity, transform;
+}
+
+.recent-uploads-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--recent-upload-columns, 1), minmax(0, 1fr));
+  gap: 1rem;
 }
 
 .recent-uploads-track[class*="recent-uploads-track--exit"] {
