@@ -110,3 +110,33 @@ export type FooterHandleRecord = {
   profile_image_url: string | null;
   created_at: string;
 };
+
+export type CompetitionSubmission = {
+  id: string;
+  competitionNumber: number;
+  handle: string;
+  submissionLink: string;
+  fileUrl: string;
+  thumbnailUrl: string;
+  driveFolderUrl?: string;
+  creativityScore?: number;
+  effortScore?: number;
+  executionScore?: number;
+  reviewed: boolean;
+  createdAt?: string;
+};
+
+export type CompetitionSubmissionRecord = {
+  id: string;
+  competition_number: number;
+  handle: string;
+  submission_link: string;
+  file_url: string;
+  thumbnail_url: string;
+  drive_folder_url: string | null;
+  creativity_score: number | null;
+  effort_score: number | null;
+  execution_score: number | null;
+  reviewed: boolean;
+  created_at: string;
+};

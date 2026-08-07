@@ -4,6 +4,8 @@ import type {
   CommissionRecord,
   CommissionRequest,
   CommissionRequestRecord,
+  CompetitionSubmission,
+  CompetitionSubmissionRecord,
   FooterHandle,
   FooterHandleRecord,
   MediaClip,
@@ -307,6 +309,25 @@ function mapFooterHandleRecord(record: FooterHandleRecord): FooterHandle {
   };
 }
 
+function mapCompetitionSubmissionRecord(
+  record: CompetitionSubmissionRecord,
+): CompetitionSubmission {
+  return {
+    id: record.id,
+    competitionNumber: record.competition_number,
+    handle: record.handle,
+    submissionLink: record.submission_link,
+    fileUrl: record.file_url,
+    thumbnailUrl: record.thumbnail_url,
+    driveFolderUrl: record.drive_folder_url ?? undefined,
+    creativityScore: record.creativity_score ?? undefined,
+    effortScore: record.effort_score ?? undefined,
+    executionScore: record.execution_score ?? undefined,
+    reviewed: record.reviewed,
+    createdAt: record.created_at,
+  };
+}
+
 export async function getCommissions() {
   const params = new URLSearchParams({
     select: "*",
@@ -530,4 +551,105 @@ export async function updateFooterHandleForAdmin(
   }
 
   return mapFooterHandleRecord(data);
+}
+
+export async function getCompetitionSubmissionsForAdmin() {
+  const { data, error } = await getSupabaseAdminClient()
+    .from("competition_submissions")
+    .select("*")
+    .order("competition_number", { ascending: true })
+    .order("created_at", { ascending: true })
+    .returns<CompetitionSubmissionRecord[]>();
+
+  if (error) {
+    throw new Error("Unable to load competition submissions.");
+  }
+
+  return (data || []).map(mapCompetitionSubmissionRecord);
+}
+
+export async function hasCompetitionSubmissionForHandle(input: {
+  competitionNumber: number;
+  handle: string;
+}) {
+  const { count, error } = await getSupabaseAdminClient()
+    .from("competition_submissions")
+    .select("id", { count: "exact", head: true })
+    .eq("competition_number", input.competitionNumber)
+    .ilike("handle", input.handle);
+
+  if (error) {
+    throw new Error("Unable to check competition submissions.");
+  }
+
+  return (count || 0) > 0;
+}
+
+export async function createCompetitionSubmission(input: {
+  competitionNumber: number;
+  handle: string;
+  submissionLink: string;
+  fileUrl: string;
+  thumbnailUrl: string;
+  driveFolderUrl?: string;
+}) {
+  const { data, error } = await getSupabaseAdminClient()
+    .from("competition_submissions")
+    .insert({
+      competition_number: input.competitionNumber,
+      handle: input.handle,
+      submission_link: input.submissionLink,
+      file_url: input.fileUrl,
+      thumbnail_url: input.thumbnailUrl,
+      drive_folder_url: input.driveFolderUrl ?? null,
+      reviewed: false,
+    })
+    .select()
+    .single<CompetitionSubmissionRecord>();
+
+  if (error) {
+    throw new Error(`Unable to create competition submission: ${error.message}`);
+  }
+
+  if (!data) {
+    throw new Error("Unable to create competition submission: no record returned.");
+  }
+
+  return mapCompetitionSubmissionRecord(data);
+}
+
+export async function updateCompetitionSubmissionScoresForAdmin(
+  id: string,
+  input: {
+    creativityScore?: number;
+    effortScore?: number;
+    executionScore?: number;
+  },
+) {
+  const reviewed = [
+    input.creativityScore,
+    input.effortScore,
+    input.executionScore,
+  ].every((score) => typeof score === "number");
+  const { data, error } = await getSupabaseAdminClient()
+    .from("competition_submissions")
+    .update({
+      creativity_score: input.creativityScore ?? null,
+      effort_score: input.effortScore ?? null,
+      execution_score: input.executionScore ?? null,
+      reviewed,
+    })
+    .eq("id", id)
+    .select()
+    .single<CompetitionSubmissionRecord>();
+
+  if (error) {
+    throw new Error(`Unable to update competition scores: ${error.message}`);
+  }
+
+  if (!data) {
+    throw new Error("Unable to update competition scores: no record returned.");
+  }
+
+  return mapCompetitionSubmissionRecord(data);
 }

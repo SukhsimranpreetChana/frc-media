@@ -14,7 +14,7 @@ type RecentUploadsCarouselProps = {
 
 const uploadFetchBatchSize = 18;
 const slideDurationMs = 520;
-const cardMinWidth = 230;
+const cardMinWidth = 260;
 const cardGap = 16;
 
 function getThumbnailProxyUrl(fileUrl?: string, thumbnailUrl?: string) {
@@ -88,11 +88,16 @@ function RecentUploadCard({ collage }: { collage: MediaCollage }) {
             {collage.year} / {collage.clips.length} file
             {collage.clips.length === 1 ? "" : "s"}
           </p>
-          {creditRequired ? (
-            <div className="mt-3">
+          <div
+            className={`mt-3 min-h-9 ${creditRequired ? "" : "invisible"}`}
+            aria-hidden={creditRequired ? undefined : "true"}
+          >
+            {creditRequired ? (
               <CreditRequiredBadge compact />
-            </div>
-          ) : null}
+            ) : (
+              <span className="block h-9" />
+            )}
+          </div>
         </div>
         <a
           className="font-primary fmc-button mt-auto inline-flex h-9 items-center justify-center bg-[#F85259] px-3 text-xs text-white hover:bg-[#A335E6]"

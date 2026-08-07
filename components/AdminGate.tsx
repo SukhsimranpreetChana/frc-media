@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import ClipAdmin from "@/components/ClipAdmin";
 import CommissionsAdmin from "@/components/CommissionsAdmin";
+import CompetitionSubmissionsAdmin from "@/components/CompetitionSubmissionsAdmin";
 import FooterHandlesAdmin from "@/components/FooterHandlesAdmin";
 
 type AdminMode = "locked" | "admin" | "readonly";
@@ -98,9 +99,9 @@ export default function AdminGate() {
             <div className="admin-readonly-note max-w-xl rotate-[-0.5deg] px-5 py-4 text-sm shadow-[6px_6px_0_#17001C]">
               <p className="font-primary text-base">Read-only</p>
               <p className="mt-2 leading-6">
-                You can view uploads, commission requests, commissions, and
-                footer profiles. Editing, approving, deleting, and uploading are
-                locked in this mode.
+                You can view uploads, competition submissions, commission
+                requests, commissions, and footer profiles. Editing, approving,
+                deleting, and uploading are locked in this mode.
               </p>
             </div>
           ) : (
@@ -115,6 +116,7 @@ export default function AdminGate() {
           </button>
         </div>
         <ClipAdmin readOnly={isReadOnly} />
+        <CompetitionSubmissionsAdmin readOnly={isReadOnly} />
         <CommissionsAdmin readOnly={isReadOnly} />
         <FooterHandlesAdmin readOnly={isReadOnly} />
       </>

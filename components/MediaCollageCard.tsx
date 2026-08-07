@@ -92,7 +92,7 @@ export default function MediaCollageCard({
   }, [collage.folderUrl]);
 
   return (
-    <article className="fmc-dark-halftone flex flex-col overflow-hidden rounded-2xl border-2 border-[#F85259]/50 text-white shadow-[8px_8px_0_#17001C]">
+    <article className="fmc-dark-halftone flex h-full flex-col overflow-hidden rounded-2xl border-2 border-[#F85259]/50 text-white shadow-[8px_8px_0_#17001C]">
       <a
         className="block"
         href={viewUrl}
@@ -120,15 +120,22 @@ export default function MediaCollageCard({
           <p className="scrap-chip inline-flex rounded-md px-2 py-1 text-sm text-[#17001C]">
             FRC {collage.teamNumber}
           </p>
-          <h3 className="mt-3 text-xl text-white">{collage.title}</h3>
+          <h3 className="mt-3 line-clamp-2 text-xl text-white">
+            {collage.title}
+          </h3>
           <p className="mt-2 text-sm text-[#F4E7E7]">
             {collage.year} / {fileCount} file{fileCount === 1 ? "" : "s"}
           </p>
-          {creditRequired ? (
-            <div className="mt-3">
+          <div
+            className={`mt-3 min-h-10 ${creditRequired ? "" : "invisible"}`}
+            aria-hidden={creditRequired ? undefined : "true"}
+          >
+            {creditRequired ? (
               <CreditRequiredBadge />
-            </div>
-          ) : null}
+            ) : (
+              <span className="block h-10" />
+            )}
+          </div>
         </div>
         <a
           className="font-primary fmc-button mt-auto inline-flex h-10 items-center justify-center bg-[#F85259] px-4 text-sm text-white hover:bg-[#A335E6]"

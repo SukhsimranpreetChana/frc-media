@@ -692,6 +692,47 @@ export async function createGoogleDriveUploadFolderForSubmission(input: {
   };
 }
 
+export async function createGoogleDriveUploadFolderForCompetition(input: {
+  competitionNumber: number;
+  handle: string;
+}): Promise<GoogleDriveUploadFolder> {
+  const accessToken = await getGoogleAccessToken();
+  const rootFolderId = getRequiredEnv("GOOGLE_DRIVE_ROOT_FOLDER_ID");
+  const competitionsFolderId = await getOrCreateFolder(
+    accessToken,
+    "Competitions",
+    rootFolderId,
+  );
+  const competitionFolderId = await getOrCreateFolder(
+    accessToken,
+    `Comp ${input.competitionNumber}`,
+    competitionsFolderId,
+  );
+  const baseHandleFolderName = sanitizeFolderName(
+    input.handle.replace(/^@+/, "") || "Unknown contestant",
+  );
+  const existingFolders = await listFolders(accessToken, competitionFolderId);
+  const handleFolderName = getNextFolderName(
+    baseHandleFolderName,
+    existingFolders
+      .map((folder) => folder.name)
+      .filter((name): name is string => Boolean(name)),
+  );
+  const handleFolderId = await createFolder(
+    accessToken,
+    handleFolderName,
+    competitionFolderId,
+  );
+
+  await trySetAnyoneCanView(accessToken, handleFolderId);
+
+  return {
+    id: handleFolderId,
+    name: handleFolderName,
+    url: `https://drive.google.com/drive/folders/${handleFolderId}`,
+  };
+}
+
 export async function uploadMediaToGoogleDrive(input: {
   file: File;
   teamNumber: string;

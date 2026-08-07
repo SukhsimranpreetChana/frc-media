@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Dela_Gothic_One, Nunito } from "next/font/google";
 import Footer from "@/components/Footer";
+import CompetitionAnnouncement from "@/components/CompetitionAnnouncement";
 import DarkModeToggle from "@/components/DarkModeToggle";
 import HalftoneScroll from "@/components/HalftoneScroll";
 import Navbar from "@/components/Navbar";
@@ -70,6 +71,7 @@ export default function RootLayout({
         <Navbar />
         {children}
         <Footer />
+        <CompetitionAnnouncement />
         <TermsPrompt />
       </body>
     </html>

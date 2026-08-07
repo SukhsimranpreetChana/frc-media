@@ -36,6 +36,10 @@
   --font-secondary: var(--font-nunito);
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   background:
     radial-gradient(circle at 1px 1px, rgba(113, 55, 227, 0.18) 1px, transparent 1.6px),
@@ -117,6 +121,10 @@ body {
     3px 0;
   opacity: 0.2;
   animation: fmc-motion-lines-alt 8.5s ease-in-out 1.4s infinite;
+}
+
+#competition-submit {
+  scroll-margin-top: 2rem;
 }
 
 h1,
@@ -503,8 +511,394 @@ input:focus-visible + div .fmc-file-picker {
 
 .recent-uploads-grid {
   display: grid;
-  grid-template-columns: repeat(var(--recent-upload-columns, 1), minmax(0, 1fr));
+  grid-template-columns: repeat(var(--recent-upload-columns, 1), minmax(0, 19rem));
   gap: 1rem;
+  justify-content: center;
+}
+
+.competition-hero {
+  position: relative;
+  display: grid;
+  min-height: 25rem;
+  overflow: hidden;
+  align-items: center;
+  gap: 2rem;
+  border: 2px solid rgba(248, 82, 89, 0.72);
+  border-radius: 8px;
+  padding: clamp(1.5rem, 5vw, 3.5rem);
+  box-shadow: 10px 10px 0 rgba(114, 0, 126, 0.8);
+}
+
+.competition-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    linear-gradient(115deg, rgba(248, 82, 89, 0.24), transparent 36%),
+    linear-gradient(280deg, rgba(113, 55, 227, 0.28), transparent 44%);
+}
+
+.competition-hero > * {
+  position: relative;
+  z-index: 2;
+}
+
+.competition-hero-glow {
+  position: absolute;
+  right: -5rem;
+  top: -7rem;
+  width: 22rem;
+  height: 22rem;
+  border: 2px solid rgba(248, 82, 89, 0.46);
+  border-radius: 8px;
+  background: rgba(113, 55, 227, 0.24);
+  rotate: 10deg;
+}
+
+.competition-prize-badge {
+  display: flex;
+  width: min(100%, 18rem);
+  min-height: 12rem;
+  align-items: center;
+  justify-content: center;
+  justify-self: start;
+  flex-direction: column;
+  border: 2px solid #f85259;
+  border-radius: 8px;
+  background: #f4e7e7;
+  color: #17001c;
+  box-shadow: 8px 8px 0 #72007e;
+  rotate: 2deg;
+}
+
+.competition-prize-badge span {
+  font-family: var(--font-dela-gothic-one);
+  font-size: clamp(2.75rem, 8vw, 5.5rem);
+  line-height: 1;
+}
+
+.competition-prize-badge small {
+  margin-top: 0.5rem;
+  font-family: var(--font-dela-gothic-one);
+  font-size: 0.9rem;
+  text-transform: uppercase;
+}
+
+.competition-prize-card {
+  background:
+    linear-gradient(135deg, rgba(248, 82, 89, 0.15), transparent 42%),
+    #ffffff;
+}
+
+.competition-leaderboard-deadline {
+  display: grid;
+  gap: 1rem;
+}
+
+.competition-prize-title {
+  font-family: var(--font-dela-gothic-one);
+  font-size: clamp(2rem, 6vw, 3.9rem);
+  line-height: 1;
+}
+
+.competition-prize-list {
+  list-style: none;
+}
+
+.competition-prize-row {
+  display: grid;
+  grid-template-columns: 2.25rem minmax(5rem, 1fr) minmax(4.5rem, auto);
+  align-items: center;
+  gap: 0.75rem;
+  border: 2px solid rgba(23, 0, 28, 0.15);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.75);
+  padding: 0.65rem;
+  color: #17001c;
+}
+
+.competition-prize-row:nth-child(-n + 3) {
+  border-color: rgba(248, 82, 89, 0.55);
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.competition-prize-rank {
+  display: flex;
+  width: 2.25rem;
+  height: 2.25rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: #17001c;
+  color: #ffffff;
+  font-family: var(--font-dela-gothic-one);
+  font-size: 0.85rem;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.competition-prize-reward {
+  font-family: var(--font-dela-gothic-one);
+  font-size: clamp(1rem, 1.7vw, 1.35rem);
+  line-height: 1.15;
+  color: #72007e;
+  white-space: nowrap;
+}
+
+.competition-prize-row:last-child {
+  grid-template-columns: 3.65rem minmax(6rem, 1fr) minmax(10rem, auto);
+}
+
+.competition-prize-row:last-child .competition-prize-rank {
+  width: 3.65rem;
+  font-size: 0.72rem;
+}
+
+.competition-prize-row:last-child .competition-prize-reward {
+  grid-column: auto;
+  text-align: right;
+  white-space: nowrap;
+}
+
+:root[data-theme="dark"] .competition-prize-card {
+  background:
+    linear-gradient(135deg, rgba(248, 82, 89, 0.18), transparent 42%),
+    var(--theme-surface);
+}
+
+:root[data-theme="dark"] .competition-prize-row {
+  border-color: rgba(248, 82, 89, 0.72);
+  background: rgba(244, 231, 231, 0.08);
+  color: #fff7ff;
+}
+
+:root[data-theme="dark"] .competition-prize-row:nth-child(-n + 3) {
+  border-color: #ffd957;
+  background: rgba(255, 242, 168, 0.1);
+}
+
+:root[data-theme="dark"] .competition-prize-rank {
+  background: #f85259;
+  color: #ffffff;
+}
+
+:root[data-theme="dark"] .competition-prize-reward {
+  color: #ffd957;
+}
+
+.competition-announcement {
+  position: fixed;
+  top: 0.75rem;
+  left: 1rem;
+  right: 1rem;
+  z-index: 120;
+  max-width: calc(100vw - 2rem);
+  animation: competition-announcement-in 360ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.competition-announcement--leaving {
+  animation: competition-announcement-out 260ms ease-in both;
+}
+
+.competition-announcement-card {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  width: 100%;
+  overflow: hidden;
+  align-items: center;
+  gap: 0.85rem;
+  border: 2px solid #f85259;
+  border-radius: 8px;
+  background-color: #fff2a8;
+  background:
+    radial-gradient(circle at 1px 1px, rgba(248, 82, 89, 0.18) 1px, transparent 1.6px),
+    linear-gradient(135deg, #fff2a8 0%, #f4e7e7 54%, #ffffff 100%);
+  background-size: 16px 16px, 100% 100%;
+  padding: 0.8rem 1rem;
+  box-shadow: 0 8px 0 rgba(248, 82, 89, 0.34);
+}
+
+.competition-announcement-copy {
+  min-width: 0;
+  color: #17001c;
+}
+
+.competition-announcement-copy p:first-child {
+  color: #72007e;
+}
+
+.competition-announcement-copy h2 {
+  color: #17001c;
+}
+
+.competition-announcement-copy p:last-child {
+  color: rgba(23, 0, 28, 0.78);
+}
+
+.competition-announcement-countdown {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(2.7rem, 1fr));
+  gap: 0.4rem;
+}
+
+.competition-announcement-actions {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.competition-announcement-time {
+  display: flex;
+  min-height: 3rem;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  border: 2px solid rgba(23, 0, 28, 0.82);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.competition-announcement-time span {
+  font-family: var(--font-dela-gothic-one);
+  font-size: 1rem;
+  color: #17001c;
+}
+
+.competition-announcement-time small {
+  margin-top: 0.15rem;
+  color: rgba(23, 0, 28, 0.7);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+}
+
+:root[data-theme="dark"] .competition-announcement-card {
+  border-color: #f85259;
+  background: #120016;
+  box-shadow: 0 8px 0 rgba(248, 82, 89, 0.45);
+}
+
+:root[data-theme="dark"] .competition-announcement-copy {
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.42);
+  padding: 0.45rem 0.65rem;
+}
+
+:root[data-theme="dark"] .competition-announcement-copy,
+:root[data-theme="dark"] .competition-announcement-copy h2 {
+  color: #ffffff;
+}
+
+:root[data-theme="dark"] .competition-announcement-copy p:first-child {
+  color: #ffd957;
+}
+
+:root[data-theme="dark"] .competition-announcement-copy p:last-child {
+  color: #f4e7e7;
+}
+
+:root[data-theme="dark"] .competition-announcement-time {
+  border-color: rgba(255, 242, 168, 0.72);
+  background: rgba(23, 0, 28, 0.76);
+}
+
+:root[data-theme="dark"] .competition-announcement-time span {
+  color: #ffffff;
+}
+
+:root[data-theme="dark"] .competition-announcement-time small {
+  color: rgba(255, 247, 255, 0.76);
+}
+
+.competition-confetti {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.competition-confetti span {
+  position: absolute;
+  top: -0.9rem;
+  left: calc(((var(--confetti-index) * 41) % 100) * 1%);
+  width: 0.36rem;
+  height: 0.55rem;
+  border-radius: 2px;
+  background: #f85259;
+  animation: competition-confetti-fall 1.3s ease-out forwards;
+  animation-delay: calc((var(--confetti-index) % 8) * 70ms);
+  rotate: calc((var(--confetti-index) * 19deg) - 90deg);
+}
+
+.competition-confetti span:nth-child(3n) {
+  background: #7137e3;
+}
+
+.competition-confetti span:nth-child(3n + 1) {
+  background: #f4e7e7;
+}
+
+@media (min-width: 900px) {
+  .competition-hero {
+    grid-template-columns: minmax(0, 1fr) 18rem;
+  }
+
+  .competition-leaderboard-deadline {
+    grid-template-columns: minmax(14rem, 0.28fr) minmax(0, 1fr);
+    align-items: end;
+  }
+
+  .competition-prize-badge {
+    justify-self: end;
+  }
+
+  .competition-announcement-card {
+    grid-template-columns: minmax(0, 1fr) minmax(15rem, 0.45fr) auto;
+  }
+}
+
+@media (min-width: 1280px) {
+  .competition-prize-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .competition-prize-row,
+  .competition-prize-row:last-child {
+    grid-template-columns: 2.25rem minmax(0, 1fr);
+  }
+
+  .competition-prize-row:last-child .competition-prize-rank {
+    width: 2.25rem;
+  }
+
+  .competition-prize-row .text-right {
+    grid-column: 2;
+    text-align: left;
+  }
+
+  .competition-prize-reward {
+    white-space: normal;
+  }
+
+  .competition-announcement-card {
+    gap: 0.7rem;
+  }
+
+  .competition-announcement-actions {
+    flex-direction: column;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .competition-announcement,
+  .competition-announcement--leaving,
+  .competition-confetti span {
+    animation: none;
+  }
 }
 
 .recent-uploads-track[class*="recent-uploads-track--exit"] {
@@ -573,6 +967,51 @@ input:focus-visible + div .fmc-file-picker {
   to {
     opacity: 0;
     transform: translate3d(8%, 0, 0);
+  }
+}
+
+@keyframes competition-announcement-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -120%, 0);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes competition-announcement-out {
+  from {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translate3d(0, -120%, 0);
+  }
+}
+
+@keyframes competition-confetti-fall {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -2rem, 0) rotate(0deg);
+  }
+
+  10% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate3d(
+        calc(((var(--confetti-index) % 5) - 2) * 2rem),
+        7rem,
+        0
+      )
+      rotate(340deg);
   }
 }
 
