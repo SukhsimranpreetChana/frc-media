@@ -95,18 +95,7 @@ export default function AdminGate() {
       <>
         {/* Once unlocked, show all admin tools behind the same gate. */}
         <div className="mt-8 flex flex-wrap items-center justify-between gap-4">
-          {isReadOnly ? (
-            <div className="admin-readonly-note max-w-xl rotate-[-0.5deg] px-5 py-4 text-sm shadow-[6px_6px_0_#17001C]">
-              <p className="font-primary text-base">Read-only</p>
-              <p className="mt-2 leading-6">
-                You can view uploads, competition submissions, commission
-                requests, commissions, and footer profiles. Editing, approving,
-                deleting, and uploading are locked in this mode.
-              </p>
-            </div>
-          ) : (
-            <div />
-          )}
+          <div />
           <button
             className="font-primary fmc-button h-10 bg-[#17001C] px-4 text-sm text-white hover:bg-[#72007E]"
             onClick={() => void handleLogout()}
@@ -143,13 +132,6 @@ export default function AdminGate() {
           value={password}
         />
       </label>
-      <div className="admin-readonly-note mt-4 rotate-[-0.5deg] px-4 py-3 text-sm shadow-[5px_5px_0_#17001C]">
-        <p className="font-primary">Read-only access</p>
-        <p className="mt-2">
-          Use <span className="font-semibold">FMC</span> for read-only access.
-          Read-only can view the dashboard, but cannot edit anything.
-        </p>
-      </div>
       {error ? <p className="mt-3 text-sm text-[#F85259]">{error}</p> : null}
       <button
         className="font-primary fmc-button mt-5 h-10 bg-[#F85259] px-4 text-sm text-white hover:bg-[#A335E6]"

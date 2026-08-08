@@ -559,7 +559,7 @@ input:focus-visible + div .fmc-file-picker {
 
 .competition-prize-badge {
   display: flex;
-  width: min(100%, 18rem);
+  width: min(100%, 20rem);
   min-height: 12rem;
   align-items: center;
   justify-content: center;
@@ -570,13 +570,18 @@ input:focus-visible + div .fmc-file-picker {
   background: #f4e7e7;
   color: #17001c;
   box-shadow: 8px 8px 0 #72007e;
+  overflow: hidden;
+  padding: 1.25rem;
   rotate: 2deg;
 }
 
 .competition-prize-badge span {
   font-family: var(--font-dela-gothic-one);
-  font-size: clamp(2.75rem, 8vw, 5.5rem);
+  font-size: clamp(2.5rem, 4.2vw, 3.75rem);
   line-height: 1;
+  max-width: 100%;
+  text-align: center;
+  white-space: nowrap;
 }
 
 .competition-prize-badge small {
@@ -646,6 +651,44 @@ input:focus-visible + div .fmc-file-picker {
   line-height: 1.15;
   color: #72007e;
   white-space: nowrap;
+}
+
+.competition-star-button {
+  display: flex;
+  aspect-ratio: 1;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid rgba(248, 82, 89, 0.5);
+  border-radius: 6px;
+  background: rgba(244, 231, 231, 0.08);
+  color: rgba(244, 231, 231, 0.52);
+  font-size: clamp(0.95rem, 2vw, 1.35rem);
+  line-height: 1;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+.competition-star-button:hover:not(:disabled),
+.competition-star-button:focus-visible {
+  border-color: #ffd957;
+  color: #ffd957;
+  outline: none;
+  transform: translateY(-1px);
+}
+
+.competition-star-button--selected {
+  border-color: #ffd957;
+  background: rgba(255, 217, 87, 0.16);
+  color: #ffd957;
+}
+
+.competition-star-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.68;
 }
 
 .competition-prize-row:last-child {

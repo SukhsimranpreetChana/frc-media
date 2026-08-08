@@ -104,14 +104,26 @@ async function uploadFileToGoogleDrive(input: {
       Math.min(uploadedBytes + chunkSizeBytes, input.file.size),
     );
     const chunkEnd = uploadedBytes + chunk.size - 1;
-    const response = await fetch(input.uploadUrl, {
-      method: "PUT",
-      headers: {
-        "Content-Range": `bytes ${uploadedBytes}-${chunkEnd}/${input.file.size}`,
-        "Content-Type": input.file.type || "application/octet-stream",
-      },
-      body: chunk,
-    });
+    const isFinalChunk = chunkEnd + 1 >= input.file.size;
+    let response: Response;
+
+    try {
+      response = await fetch(input.uploadUrl, {
+        method: "PUT",
+        headers: {
+          "Content-Range": `bytes ${uploadedBytes}-${chunkEnd}/${input.file.size}`,
+          "Content-Type": input.file.type || "application/octet-stream",
+        },
+        body: chunk,
+      });
+    } catch (error) {
+      if (isFinalChunk) {
+        input.onProgress(input.file.size);
+        return undefined;
+      }
+
+      throw error;
+    }
 
     uploadedBytes += chunk.size;
     input.onProgress(uploadedBytes);
@@ -142,19 +154,40 @@ async function finishCompetitionUpload(payload: {
   submissionLink: string;
   uploadFolder: UploadFolder;
 }) {
-  const completeResponse = await fetch("/api/competition/upload-complete", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(payload),
-  });
-  const completeData =
-    await readJsonResponse<UploadCompleteResponse>(completeResponse);
+  let lastError: Error | undefined;
 
-  if (!completeResponse.ok) {
-    throw new Error(completeData?.error || "Unable to finish upload.");
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    try {
+      const completeResponse = await fetch("/api/competition/upload-complete", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+      const completeData =
+        await readJsonResponse<UploadCompleteResponse>(completeResponse);
+
+      if (!completeResponse.ok) {
+        throw new Error(completeData?.error || "Unable to finish upload.");
+      }
+
+      return;
+    } catch (error) {
+      lastError =
+        error instanceof Error
+          ? error
+          : new Error("Unable to finish upload.");
+
+      if (attempt < 4) {
+        await new Promise((resolve) =>
+          setTimeout(resolve, 1000 * (attempt + 1)),
+        );
+      }
+    }
   }
+
+  throw lastError || new Error("Unable to finish upload.");
 }
 
 export default function CompetitionUpload() {

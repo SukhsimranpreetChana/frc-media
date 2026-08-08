@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import CompetitionCountdown from "@/components/competition/CompetitionCountdown";
 import CompetitionUpload from "@/components/competition/CompetitionUpload";
 import { currentCompetitionDeadline } from "@/lib/competition";
@@ -6,6 +7,7 @@ import { currentCompetitionDeadline } from "@/lib/competition";
 const logoFolderUrl =
   "https://drive.google.com/drive/folders/13VngzW8NqT3LIbwWJ2H2jEoz5tjr21Cl?usp=sharing";
 const competitionDiscordUrl = "https://discord.gg/uzPvf2kMme";
+const competitionPageUrl = "https://www.firstmediacommunity.org/competition";
 
 export const metadata: Metadata = {
   title: "FRCtees x FMC Editing Contest",
@@ -22,18 +24,95 @@ export default function CompetitionPage() {
     { rank: "5", placement: "5th place", reward: "$15" },
     { rank: "6-10", placement: "6th-10th place", reward: "Honorable Mention" },
   ];
-  const requirements = [
-    "Must be a FIRST Robotics Competition (FRC) edit.",
-    "Add the FRCtees logo somewhere in the edit.",
-    "Tag @first.media.community when submitting, or @FIRSTmediacommunity on YouTube.",
-    "Post your submission link in submissions.",
-    "Only one edit max per person.",
+  const requirements: { id: string; content: ReactNode }[] = [
+    {
+      id: "frc-related",
+      content: (
+        <>
+          The edit <strong>MUST</strong> be related to the FIRST Robotics
+          Competition (FRC), but it does not have to be of a robot. It may help
+          with creativity points if executed properly.
+        </>
+      ),
+    },
+    {
+      id: "frctees-logo",
+      content: (
+        <>
+          Add the <em>FRCtees</em> logo somewhere in the edit, and it must be on
+          screen for a <strong>MINIMUM</strong> of half a second. Logos can be
+          found{" "}
+          <a
+            className="font-bold text-[#72007E] underline decoration-[#F85259] underline-offset-4"
+            href={logoFolderUrl}
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            HERE
+          </a>
+          .
+        </>
+      ),
+    },
+    {
+      id: "tag-fmc",
+      content:
+        "Must tag @first.media.community when submitting on Instagram/TikTok, or @FIRSTmediacommunity if submitted on YouTube.",
+    },
+    {
+      id: "submissions-open",
+      content: (
+        <>
+          Submissions will open a week before the deadline on the{" "}
+          <a
+            className="font-bold text-[#72007E] underline decoration-[#F85259] underline-offset-4"
+            href={competitionPageUrl}
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            FMC Website
+          </a>
+          .
+        </>
+      ),
+    },
   ];
-  const info = [
-    "FRC clips can be found in clips.",
-    "Any song is allowed.",
-    "Prizes can be claimed through PayPal.",
-    "International winners outside the US will have more options.",
+  const judging = [
+    "We will judge based on creativity, effort, and execution, with each being ranked on a 1-10 scale. A perfect score would be 30 points.",
+    "There will be multiple judges, including FMC admin, FRCtees, and a few other FRC editors.",
+    "Judging will take place immediately after the deadline.",
+  ];
+  const info: { id: string; content: ReactNode }[] = [
+    {
+      id: "clips",
+      content: <strong>FRC clips can be found in clips.</strong>,
+    },
+    {
+      id: "one-edit",
+      content: (
+        <>
+          Can post <strong>1 edit MAX</strong>.
+        </>
+      ),
+    },
+    {
+      id: "song",
+      content: "Any song is allowed.",
+    },
+    {
+      id: "prizes",
+      content: (
+        <>
+          Prizes can be claimed through{" "}
+          <strong>
+            PayPal, Apple Cash, bank transfer, Visa gift card, Cash App, Venmo,
+            Revolut, Interac (Canada), and Wise international wire
+            (international)
+          </strong>
+          .
+        </>
+      ),
+    },
   ];
 
   return (
@@ -122,34 +201,25 @@ export default function CompetitionPage() {
             <h2 className="text-lg text-[#17001C]">Requirements</h2>
             <ul className="mt-4 grid gap-3 text-sm leading-6 text-[#17001C]/75">
               {requirements.map((requirement) => (
-                <li key={requirement}>{requirement}</li>
+                <li key={requirement.id}>{requirement.content}</li>
               ))}
             </ul>
-            <a
-              className="font-primary fmc-button mt-5 inline-flex h-10 items-center justify-center bg-[#7137E3] px-4 text-sm text-white hover:bg-[#A335E6]"
-              href={logoFolderUrl}
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              FRCtees logos
-            </a>
           </section>
 
           <section className="scrap-card p-5">
             <h2 className="text-lg text-[#17001C]">Judging</h2>
-            <p className="mt-4 text-sm leading-6 text-[#17001C]/75">
-              We will judge based on creativity, effort, and execution. There
-              will be multiple judges including FMC admin, FRCtees, and a few
-              other FRC editors. Judging will take place immediately after the
-              deadline.
-            </p>
+            <ul className="mt-4 grid gap-3 text-sm leading-6 text-[#17001C]/75">
+              {judging.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
           </section>
 
           <section className="scrap-card p-5">
             <h2 className="text-lg text-[#17001C]">Info</h2>
             <ul className="mt-4 grid gap-3 text-sm leading-6 text-[#17001C]/75">
               {info.map((item) => (
-                <li key={item}>{item}</li>
+                <li key={item.id}>{item.content}</li>
               ))}
             </ul>
             <a

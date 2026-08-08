@@ -653,3 +653,14 @@ export async function updateCompetitionSubmissionScoresForAdmin(
 
   return mapCompetitionSubmissionRecord(data);
 }
+
+export async function deleteCompetitionSubmissionForAdmin(id: string) {
+  const { error } = await getSupabaseAdminClient()
+    .from("competition_submissions")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    throw new Error(`Unable to remove competition submission: ${error.message}`);
+  }
+}

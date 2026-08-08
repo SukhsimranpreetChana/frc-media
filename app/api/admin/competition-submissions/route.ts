@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireAdmin, requireAdminOrReadOnly } from "@/lib/adminAuth";
 import {
+  deleteCompetitionSubmissionForAdmin,
   getCompetitionSubmissionsForAdmin,
   updateCompetitionSubmissionScoresForAdmin,
 } from "@/lib/supabase";
@@ -87,6 +88,37 @@ export async function PATCH(request: Request) {
   } catch {
     return NextResponse.json(
       { error: "Unable to save competition scores." },
+      { status: 500 },
+    );
+  }
+}
+
+export async function DELETE(request: Request) {
+  const unauthorized = await requireAdmin(request);
+
+  if (unauthorized) {
+    return unauthorized;
+  }
+
+  const payload = (await request.json().catch(() => null)) as {
+    id?: unknown;
+  } | null;
+  const id = typeof payload?.id === "string" ? payload.id.trim() : "";
+
+  if (!/^[0-9a-fA-F-]{36}$/.test(id)) {
+    return NextResponse.json(
+      { error: "Missing competition submission id." },
+      { status: 400 },
+    );
+  }
+
+  try {
+    await deleteCompetitionSubmissionForAdmin(id);
+
+    return NextResponse.json({ ok: true });
+  } catch {
+    return NextResponse.json(
+      { error: "Unable to remove competition submission." },
       { status: 500 },
     );
   }
