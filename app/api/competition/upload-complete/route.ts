@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
+import { requireSameOrigin } from "@/lib/adminAuth";
 import { completeGoogleDriveResumableUpload } from "@/lib/googleDrive";
+import { checkRateLimit } from "@/lib/rateLimit";
 import {
   currentCompetitionNumber,
   isCurrentCompetitionOpen,
@@ -27,6 +29,28 @@ function isValidUrl(value: string) {
 }
 
 export async function POST(request: Request) {
+  const forbidden = requireSameOrigin(request);
+
+  if (forbidden) {
+    return forbidden;
+  }
+
+  const rateLimit = checkRateLimit(request, {
+    scope: "competition-upload-complete",
+    limit: 10,
+    windowMs: 60 * 60 * 1000,
+  });
+
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { error: "Too many upload attempts. Please try again later." },
+      {
+        status: 429,
+        headers: { "Retry-After": String(rateLimit.retryAfterSeconds) },
+      },
+    );
+  }
+
   if (!isCurrentCompetitionOpen()) {
     return NextResponse.json(
       { error: "Competition submissions are closed." },

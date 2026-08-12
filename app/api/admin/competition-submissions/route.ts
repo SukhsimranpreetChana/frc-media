@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { requireAdmin, requireAdminOrReadOnly } from "@/lib/adminAuth";
+import { requireAdmin } from "@/lib/adminAuth";
 import {
   deleteCompetitionSubmissionForAdmin,
   getCompetitionSubmissionsForAdmin,
@@ -23,7 +23,7 @@ function parseScore(value: unknown) {
 }
 
 export async function GET(request: Request) {
-  const unauthorized = await requireAdminOrReadOnly(request);
+  const unauthorized = await requireAdmin(request);
 
   if (unauthorized) {
     return unauthorized;

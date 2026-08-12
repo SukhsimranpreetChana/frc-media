@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { requireSameOrigin } from "@/lib/adminAuth";
+import { checkRateLimit } from "@/lib/rateLimit";
 
 type ContactPayload = {
   name?: string;
@@ -30,6 +32,28 @@ function escapeHtml(value: string) {
 }
 
 export async function POST(request: Request) {
+  const forbidden = requireSameOrigin(request);
+
+  if (forbidden) {
+    return forbidden;
+  }
+
+  const rateLimit = checkRateLimit(request, {
+    scope: "contact-form",
+    limit: 5,
+    windowMs: 60 * 60 * 1000,
+  });
+
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { error: "Too many messages. Please try again later." },
+      {
+        status: 429,
+        headers: { "Retry-After": String(rateLimit.retryAfterSeconds) },
+      },
+    );
+  }
+
   let payload: ContactPayload;
 
   try {

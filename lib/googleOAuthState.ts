@@ -3,12 +3,7 @@ import { createHmac, randomUUID, timingSafeEqual } from "crypto";
 const maxStateAgeMs = 10 * 60 * 1000;
 
 function getStateSecret() {
-  return (
-    process.env.GOOGLE_OAUTH_STATE_SECRET ||
-    process.env.ADMIN_SESSION_SECRET ||
-    process.env.FMC_ADMIN_PASSWORD ||
-    process.env.GOOGLE_CLIENT_SECRET
-  );
+  return process.env.GOOGLE_OAUTH_STATE_SECRET;
 }
 
 function signState(nonce: string, createdAt: number) {
@@ -43,7 +38,9 @@ export async function consumeGoogleOAuthState(state: string) {
     return false;
   }
 
-  if (Date.now() - createdAt > maxStateAgeMs) {
+  const age = Date.now() - createdAt;
+
+  if (!Number.isSafeInteger(createdAt) || age < 0 || age > maxStateAgeMs) {
     return false;
   }
 

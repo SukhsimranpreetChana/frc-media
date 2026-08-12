@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { requireSameOrigin } from "@/lib/adminAuth";
+import { checkRateLimit } from "@/lib/rateLimit";
 import {
   createGoogleDriveResumableUploadSession,
   createGoogleDriveUploadFolderForSubmission,
@@ -36,6 +38,28 @@ function isUploadSessionFile(file: UploadSessionFile) {
 }
 
 export async function POST(request: Request) {
+  const forbidden = requireSameOrigin(request);
+
+  if (forbidden) {
+    return forbidden;
+  }
+
+  const rateLimit = checkRateLimit(request, {
+    scope: "media-upload-session",
+    limit: 10,
+    windowMs: 60 * 60 * 1000,
+  });
+
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { error: "Too many upload attempts. Please try again later." },
+      {
+        status: 429,
+        headers: { "Retry-After": String(rateLimit.retryAfterSeconds) },
+      },
+    );
+  }
+
   const payload = (await request.json().catch(() => null)) as {
     teamNumber?: unknown;
     year?: unknown;

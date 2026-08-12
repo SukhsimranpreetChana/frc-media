@@ -1,28 +1,27 @@
-import { createHmac, randomUUID, timingSafeEqual } from "crypto";
+import { createHash, createHmac, randomUUID, timingSafeEqual } from "crypto";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 const adminCookieName = "fmc_admin_session";
 const readOnlyCookieName = "fmc_admin_readonly_session";
 const sessionMaxAgeSeconds = 60 * 60 * 8;
-const readOnlyPassword = "FMC";
 
 function getAdminPassword() {
   return process.env.FMC_ADMIN_PASSWORD;
 }
 
 function getSessionSecret() {
-  return process.env.ADMIN_SESSION_SECRET || getAdminPassword();
+  return process.env.ADMIN_SESSION_SECRET;
 }
 
-function signSession(sessionId: string) {
+function signSession(payload: string) {
   const secret = getSessionSecret();
 
   if (!secret) {
-    throw new Error("Missing FMC_ADMIN_PASSWORD.");
+    throw new Error("Missing ADMIN_SESSION_SECRET.");
   }
 
-  return createHmac("sha256", secret).update(sessionId).digest("base64url");
+  return createHmac("sha256", secret).update(payload).digest("base64url");
 }
 
 function verifySignedValue(value?: string) {
@@ -30,16 +29,27 @@ function verifySignedValue(value?: string) {
     return false;
   }
 
-  const [sessionId, signature] = value.split(".");
+  const [version, issuedAtValue, sessionId, signature, extra] = value.split(".");
 
-  if (!sessionId || !signature) {
+  if (version !== "v1" || !issuedAtValue || !sessionId || !signature || extra) {
+    return false;
+  }
+
+  const issuedAt = Number(issuedAtValue);
+  const now = Math.floor(Date.now() / 1000);
+
+  if (
+    !Number.isSafeInteger(issuedAt) ||
+    issuedAt > now + 60 ||
+    now - issuedAt > sessionMaxAgeSeconds
+  ) {
     return false;
   }
 
   let expectedSignature: string;
 
   try {
-    expectedSignature = signSession(sessionId);
+    expectedSignature = signSession(`${version}.${issuedAtValue}.${sessionId}`);
   } catch {
     return false;
   }
@@ -72,23 +82,13 @@ export function requireSameOrigin(request: Request) {
 }
 
 export function isAdminConfigured() {
-  return Boolean(getAdminPassword());
+  return Boolean(getAdminPassword() && getSessionSecret());
 }
 
 export async function hasAdminSession() {
   const cookieStore = await cookies();
 
   return verifySignedValue(cookieStore.get(adminCookieName)?.value);
-}
-
-export async function hasReadOnlyAdminSession() {
-  const cookieStore = await cookies();
-
-  return verifySignedValue(cookieStore.get(readOnlyCookieName)?.value);
-}
-
-export async function hasAdminOrReadOnlySession() {
-  return (await hasAdminSession()) || (await hasReadOnlyAdminSession());
 }
 
 export async function requireAdmin(request: Request) {
@@ -105,29 +105,18 @@ export async function requireAdmin(request: Request) {
   return null;
 }
 
-export async function requireAdminOrReadOnly(request: Request) {
-  const forbidden = requireSameOrigin(request);
-
-  if (forbidden) {
-    return forbidden;
-  }
-
-  if (!(await hasAdminOrReadOnlySession())) {
-    return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
-  }
-
-  return null;
-}
-
 function setSignedSessionCookie(response: NextResponse, cookieName: string) {
   const sessionId = randomUUID();
+  const issuedAt = Math.floor(Date.now() / 1000);
+  const payload = `v1.${issuedAt}.${sessionId}`;
 
-  response.cookies.set(cookieName, `${sessionId}.${signSession(sessionId)}`, {
+  response.cookies.set(cookieName, `${payload}.${signSession(payload)}`, {
     httpOnly: true,
     sameSite: "strict",
     secure: process.env.NODE_ENV === "production",
     maxAge: sessionMaxAgeSeconds,
     path: "/",
+    priority: "high",
   });
 }
 
@@ -140,25 +129,12 @@ export function createAdminSessionResponse() {
   return response;
 }
 
-export function createReadOnlyAdminSessionResponse() {
-  const response = NextResponse.json({ ok: true, role: "readonly" });
-
-  setSignedSessionCookie(response, readOnlyCookieName);
-  response.cookies.delete(adminCookieName);
-
-  return response;
-}
-
 export function clearAdminSessionResponse() {
   const response = NextResponse.json({ ok: true });
   response.cookies.delete(adminCookieName);
   response.cookies.delete(readOnlyCookieName);
 
   return response;
-}
-
-export function isReadOnlyAdminPassword(password: string) {
-  return password === readOnlyPassword;
 }
 
 export async function verifyAdminPassword(password: string) {
@@ -168,11 +144,8 @@ export async function verifyAdminPassword(password: string) {
     return false;
   }
 
-  const provided = Buffer.from(password);
-  const expected = Buffer.from(adminPassword);
+  const provided = createHash("sha256").update(password).digest();
+  const expected = createHash("sha256").update(adminPassword).digest();
 
-  return (
-    provided.byteLength === expected.byteLength &&
-    timingSafeEqual(provided, expected)
-  );
+  return timingSafeEqual(provided, expected);
 }

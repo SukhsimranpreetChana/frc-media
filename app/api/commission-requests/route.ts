@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import {
   requireAdmin,
-  requireAdminOrReadOnly,
   requireSameOrigin,
 } from "@/lib/adminAuth";
 import {
@@ -67,7 +66,7 @@ function validateCommissionInput(input: {
 }
 
 export async function GET(request: Request) {
-  const unauthorized = await requireAdminOrReadOnly(request);
+  const unauthorized = await requireAdmin(request);
 
   if (unauthorized) {
     return unauthorized;

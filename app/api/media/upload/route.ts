@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
+import { requireSameOrigin } from "@/lib/adminAuth";
 import {
   createGoogleDriveUploadFolderForSubmission,
   uploadMediaToGoogleDrive,
 } from "@/lib/googleDrive";
 import { createMediaClip } from "@/lib/supabase";
+import { checkRateLimit } from "@/lib/rateLimit";
 
 export const runtime = "nodejs";
 
@@ -22,6 +24,28 @@ function isValidYear(year: number) {
 }
 
 export async function POST(request: Request) {
+  const forbidden = requireSameOrigin(request);
+
+  if (forbidden) {
+    return forbidden;
+  }
+
+  const rateLimit = checkRateLimit(request, {
+    scope: "legacy-media-upload",
+    limit: 5,
+    windowMs: 60 * 60 * 1000,
+  });
+
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { error: "Too many upload attempts. Please try again later." },
+      {
+        status: 429,
+        headers: { "Retry-After": String(rateLimit.retryAfterSeconds) },
+      },
+    );
+  }
+
   const formData = await request.formData();
   const files = formData.getAll("files").filter((file) => file instanceof File);
   const teamNumber = String(formData.get("teamNumber") || "").trim();

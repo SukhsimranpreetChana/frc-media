@@ -6,7 +6,7 @@ import CommissionsAdmin from "@/components/CommissionsAdmin";
 import CompetitionSubmissionsAdmin from "@/components/CompetitionSubmissionsAdmin";
 import FooterHandlesAdmin from "@/components/FooterHandlesAdmin";
 
-type AdminMode = "locked" | "admin" | "readonly";
+type AdminMode = "locked" | "admin";
 
 export default function AdminGate() {
   const [password, setPassword] = useState("");
@@ -22,13 +22,10 @@ export default function AdminGate() {
         const response = await fetch("/api/admin/session");
         const data = (await response.json()) as {
           authenticated?: boolean;
-          readOnly?: boolean;
           configured?: boolean;
         };
 
-        setAdminMode(
-          data.authenticated ? "admin" : data.readOnly ? "readonly" : "locked",
-        );
+        setAdminMode(data.authenticated ? "admin" : "locked");
         setIsConfigured(data.configured !== false);
       } catch {
         setError("Could not check admin session.");
@@ -63,11 +60,7 @@ export default function AdminGate() {
         return;
       }
 
-      const data = (await response.json().catch(() => null)) as {
-        role?: string;
-      } | null;
-
-      setAdminMode(data?.role === "readonly" ? "readonly" : "admin");
+      setAdminMode("admin");
       setPassword("");
     } catch {
       setError("Could not unlock admin.");
@@ -89,8 +82,6 @@ export default function AdminGate() {
   }
 
   if (adminMode !== "locked") {
-    const isReadOnly = adminMode === "readonly";
-
     return (
       <>
         {/* Once unlocked, show all admin tools behind the same gate. */}
@@ -104,10 +95,10 @@ export default function AdminGate() {
             Log out
           </button>
         </div>
-        <ClipAdmin readOnly={isReadOnly} />
-        <CompetitionSubmissionsAdmin readOnly={isReadOnly} />
-        <CommissionsAdmin readOnly={isReadOnly} />
-        <FooterHandlesAdmin readOnly={isReadOnly} />
+        <ClipAdmin />
+        <CompetitionSubmissionsAdmin />
+        <CommissionsAdmin />
+        <FooterHandlesAdmin />
       </>
     );
   }
@@ -119,8 +110,8 @@ export default function AdminGate() {
     >
       {!isConfigured ? (
         <p className="mb-4 text-sm text-[#F85259]">
-          Admin password is not configured. Add FMC_ADMIN_PASSWORD on the
-          server to enable this dashboard.
+          Admin authentication is not configured. Add FMC_ADMIN_PASSWORD and a
+          separate ADMIN_SESSION_SECRET on the server to enable this dashboard.
         </p>
       ) : null}
       <label className="block text-sm text-[#17001C]/75">
