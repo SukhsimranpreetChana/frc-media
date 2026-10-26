@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { requireAdmin, requireAdminOrReadOnly } from "@/lib/adminAuth";
+import { requireAdmin } from "@/lib/adminAuth";
 import { deleteGoogleDriveFileOrFolder } from "@/lib/googleDrive";
 import {
   deleteMediaClipForAdmin,
@@ -22,7 +22,7 @@ function parseClipIds(value: unknown) {
 }
 
 export async function GET(request: Request) {
-  const unauthorized = await requireAdminOrReadOnly(request);
+  const unauthorized = await requireAdmin(request);
 
   if (unauthorized) {
     return unauthorized;

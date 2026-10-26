@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
+import { requireSameOrigin } from "@/lib/adminAuth";
 import { completeGoogleDriveResumableUpload } from "@/lib/googleDrive";
+import { checkRateLimit } from "@/lib/rateLimit";
 import { createMediaClip } from "@/lib/supabase";
 
 export const runtime = "nodejs";
@@ -16,6 +18,28 @@ function isValidYear(year: number) {
 }
 
 export async function POST(request: Request) {
+  const forbidden = requireSameOrigin(request);
+
+  if (forbidden) {
+    return forbidden;
+  }
+
+  const rateLimit = checkRateLimit(request, {
+    scope: "media-upload-complete",
+    limit: 30,
+    windowMs: 60 * 60 * 1000,
+  });
+
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { error: "Too many upload attempts. Please try again later." },
+      {
+        status: 429,
+        headers: { "Retry-After": String(rateLimit.retryAfterSeconds) },
+      },
+    );
+  }
+
   const payload = (await request.json().catch(() => null)) as {
     fileId?: unknown;
     fileName?: unknown;

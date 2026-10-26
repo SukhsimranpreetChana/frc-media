@@ -38,7 +38,7 @@ type UploadProgress = {
   speedLabel: string;
 };
 
-const maxTotalUploadBytes = 2 * 1024 * 1024 * 1024;
+const maxTotalUploadBytes = 10 * 1024 * 1024 * 1024;
 const chunkSizeBytes = 16 * 1024 * 1024;
 
 function getFileKey(file: File) {
@@ -453,15 +453,22 @@ export default function PublicMediaUpload({
             <input
               checked={isAnonymous}
               className="mt-1 h-4 w-4 accent-[#7137E3]"
-              disabled={isUploading}
-              onChange={(event) => setIsAnonymous(event.target.checked)}
+              disabled={isUploading || creditRequired}
+              onChange={(event) => {
+                setIsAnonymous(event.target.checked);
+
+                if (event.target.checked) {
+                  setCreditRequired(false);
+                }
+              }}
               type="checkbox"
             />
             <span>
               <span className="block font-semibold">Upload anonymously</span>
               <span className="mt-1 block text-xs leading-5 text-[#17001C]/65">
                 You still need to enter a handle, but the public clip and Drive
-                folder will show Anonymous instead.
+                folder will show Anonymous instead. Anonymous uploads cannot
+                require credit.
               </span>
             </span>
           </label>
@@ -469,15 +476,21 @@ export default function PublicMediaUpload({
             <input
               checked={creditRequired}
               className="mt-1 h-4 w-4 accent-[#7137E3]"
-              disabled={isUploading}
-              onChange={(event) => setCreditRequired(event.target.checked)}
+              disabled={isUploading || isAnonymous}
+              onChange={(event) => {
+                setCreditRequired(event.target.checked);
+
+                if (event.target.checked) {
+                  setIsAnonymous(false);
+                }
+              }}
               type="checkbox"
             />
             <span>
               <span className="block font-semibold">Credit required</span>
               <span className="mt-1 block text-xs leading-5 text-[#17001C]/65">
                 Adds a warning badge so viewers know they must give credit if
-                they use this clip.
+                they use this clip. Credit-required uploads cannot be anonymous.
               </span>
             </span>
           </label>
@@ -518,7 +531,7 @@ export default function PublicMediaUpload({
             </p>
           </div>
           <p className="mt-2 text-xs text-[#17001C]/60">
-            Uploads can be up to 2 GB total.
+            Uploads can be up to 10 GB total.
           </p>
           {files.length > 0 ? (
             <div className="mt-3 rounded-md border-2 border-[#17001C]/20 bg-white/70 p-3">

@@ -1,15 +1,17 @@
 import { NextResponse } from "next/server";
+import { requireSameOrigin } from "@/lib/adminAuth";
 import {
   createGoogleDriveUploadFolderForSubmission,
   uploadMediaToGoogleDrive,
 } from "@/lib/googleDrive";
 import { createMediaClip } from "@/lib/supabase";
+import { checkRateLimit } from "@/lib/rateLimit";
 
 export const runtime = "nodejs";
 
 const maxFileCount = 6;
-const maxFileSizeBytes = 100 * 1024 * 1024;
-const maxTotalUploadBytes = 250 * 1024 * 1024;
+const maxFileSizeBytes = 10 * 1024 * 1024 * 1024;
+const maxTotalUploadBytes = 10 * 1024 * 1024 * 1024;
 const maxUploadedByLength = 80;
 const maxTitleLength = 120;
 
@@ -22,6 +24,28 @@ function isValidYear(year: number) {
 }
 
 export async function POST(request: Request) {
+  const forbidden = requireSameOrigin(request);
+
+  if (forbidden) {
+    return forbidden;
+  }
+
+  const rateLimit = checkRateLimit(request, {
+    scope: "legacy-media-upload",
+    limit: 5,
+    windowMs: 60 * 60 * 1000,
+  });
+
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { error: "Too many upload attempts. Please try again later." },
+      {
+        status: 429,
+        headers: { "Retry-After": String(rateLimit.retryAfterSeconds) },
+      },
+    );
+  }
+
   const formData = await request.formData();
   const files = formData.getAll("files").filter((file) => file instanceof File);
   const teamNumber = String(formData.get("teamNumber") || "").trim();
@@ -52,7 +76,7 @@ export async function POST(request: Request) {
     totalUploadBytes > maxTotalUploadBytes
   ) {
     return NextResponse.json(
-      { error: "One or more files are too large for this upload." },
+      { error: "Uploads can be up to 10 GB total, with only image or video files." },
       { status: 400 },
     );
   }

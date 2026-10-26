@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { requireSameOrigin } from "@/lib/adminAuth";
+import { checkRateLimit } from "@/lib/rateLimit";
 import {
   createGoogleDriveResumableUploadSession,
   createGoogleDriveUploadFolderForSubmission,
@@ -6,8 +8,8 @@ import {
 
 export const runtime = "nodejs";
 
-const maxFileSizeBytes = 2 * 1024 * 1024 * 1024;
-const maxTotalUploadBytes = 2 * 1024 * 1024 * 1024;
+const maxFileSizeBytes = 10 * 1024 * 1024 * 1024;
+const maxTotalUploadBytes = 10 * 1024 * 1024 * 1024;
 const maxUploadedByLength = 80;
 const maxTitleLength = 120;
 
@@ -36,6 +38,28 @@ function isUploadSessionFile(file: UploadSessionFile) {
 }
 
 export async function POST(request: Request) {
+  const forbidden = requireSameOrigin(request);
+
+  if (forbidden) {
+    return forbidden;
+  }
+
+  const rateLimit = checkRateLimit(request, {
+    scope: "media-upload-session",
+    limit: 10,
+    windowMs: 60 * 60 * 1000,
+  });
+
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { error: "Too many upload attempts. Please try again later." },
+      {
+        status: 429,
+        headers: { "Retry-After": String(rateLimit.retryAfterSeconds) },
+      },
+    );
+  }
+
   const payload = (await request.json().catch(() => null)) as {
     teamNumber?: unknown;
     year?: unknown;
@@ -96,7 +120,7 @@ export async function POST(request: Request) {
     totalUploadBytes > maxTotalUploadBytes
   ) {
     return NextResponse.json(
-      { error: "Uploads can be up to 2 GB total, with only image or video files." },
+      { error: "Uploads can be up to 10 GB total, with only image or video files." },
       { status: 400 },
     );
   }

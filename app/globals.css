@@ -286,6 +286,36 @@ input:focus-visible + div .fmc-file-picker {
   z-index: 1;
 }
 
+.home-mission-content {
+  align-items: start;
+}
+
+.home-mascot-sticker {
+  display: none;
+  height: auto;
+  opacity: 0.82;
+}
+
+@media (min-width: 1024px) {
+  .home-mission-content {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (min-width: 1280px) {
+  .home-mission-content {
+    grid-template-columns: minmax(0, 1fr) 22rem;
+  }
+
+  .home-mascot-sticker {
+    display: block;
+    align-self: center;
+    justify-self: end;
+    width: 22rem;
+    transform: translateX(3rem);
+  }
+}
+
 .photo-credit {
   position: absolute;
   right: 0.75rem;
@@ -424,6 +454,136 @@ input:focus-visible + div .fmc-file-picker {
 :root[data-theme="dark"] input::placeholder,
 :root[data-theme="dark"] textarea::placeholder {
   color: rgba(249, 240, 251, 0.52);
+}
+
+.admin-readonly-note {
+  border: 2px solid #17001c;
+  background: #fff2a8;
+  color: #17001c;
+}
+
+:root[data-theme="dark"] .admin-readonly-note {
+  border-color: #f85259;
+  background: #4a3411;
+  color: #fff2a8;
+  box-shadow: 5px 5px 0 rgba(248, 82, 89, 0.45);
+}
+
+.recent-uploads-page-section {
+  padding: 2rem 0 0;
+}
+
+.recent-uploads-section {
+  background: transparent;
+  padding: 1.5rem 0 1.75rem;
+}
+
+.home-team-search-section {
+  background: transparent;
+  padding: 1.5rem 0 4rem;
+}
+
+.home-team-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+  gap: 1rem;
+}
+
+.recent-uploads-viewport {
+  position: relative;
+  min-height: 18rem;
+  overflow: hidden;
+}
+
+.recent-uploads-track {
+  inset: 0;
+  transform: translate3d(0, 0, 0);
+  will-change: opacity, transform;
+}
+
+.recent-uploads-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--recent-upload-columns, 1), minmax(0, 19rem));
+  gap: 1rem;
+  justify-content: center;
+}
+
+.recent-uploads-track[class*="recent-uploads-track--exit"] {
+  position: absolute;
+  pointer-events: none;
+}
+
+.recent-uploads-track--enter-next {
+  animation: recent-uploads-enter-next 520ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.recent-uploads-track--exit-next {
+  animation: recent-uploads-exit-next 520ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.recent-uploads-track--enter-previous {
+  animation: recent-uploads-enter-previous 520ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.recent-uploads-track--exit-previous {
+  animation: recent-uploads-exit-previous 520ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes recent-uploads-enter-next {
+  from {
+    opacity: 0.22;
+    transform: translate3d(8%, 0, 0);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes recent-uploads-exit-next {
+  from {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translate3d(-8%, 0, 0);
+  }
+}
+
+@keyframes recent-uploads-enter-previous {
+  from {
+    opacity: 0.22;
+    transform: translate3d(-8%, 0, 0);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes recent-uploads-exit-previous {
+  from {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translate3d(8%, 0, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .recent-uploads-track--enter-next,
+  .recent-uploads-track--exit-next,
+  .recent-uploads-track--enter-previous,
+  .recent-uploads-track--exit-previous {
+    animation: none;
+  }
 }
 
 .nav-tab {
