@@ -10,7 +10,6 @@ const links = [
   { href: "/upload", label: "Upload" },
   { href: "/commissions", label: "Commissions" },
   { href: "/contact", label: "Contact" },
-  { href: "/admin", label: "Admin" },
 ];
 
 const discordInvite = "https://discord.gg/xCqryxThbC";
@@ -20,9 +19,9 @@ export default function Navbar() {
 
   return (
     <header className="no-route-transition z-50 bg-transparent px-4 py-3">
-      <nav className="fmc-dark-halftone flex w-full flex-col gap-4 rounded-2xl border-2 border-[#F85259]/50 px-6 py-4 shadow-[0_10px_0_rgba(23,0,28,0.22)] 2xl:flex-row 2xl:items-start 2xl:justify-between">
+      <nav className="nav-bar-surface flex w-full flex-col gap-4 rounded-2xl border-2 border-[#F85259]/50 px-6 py-4 shadow-[0_10px_0_rgba(23,0,28,0.22)] 2xl:flex-row 2xl:items-start 2xl:justify-between">
         <div className="nav-brand-row flex items-start justify-between gap-3">
-          <Link className="nav-brand-link flex min-w-0 items-start gap-3 text-left" href="/">
+          <Link className="nav-brand-link flex min-w-0 items-center gap-3 text-left" href="/">
             <Image
               alt="FIRST Media Community logo"
               className="h-auto w-20 shrink-0 object-contain 2xl:w-32"
@@ -31,7 +30,7 @@ export default function Navbar() {
               src="/fmc-logo.png"
               width={212}
             />
-            <span className="font-primary nav-brand-name min-w-0 pb-2 text-lg leading-tight text-white 2xl:text-2xl">
+            <span className="font-primary nav-brand-name min-w-0 text-lg leading-tight text-white 2xl:text-2xl">
               FIRST MEDIA COMMUNITY
             </span>
           </Link>

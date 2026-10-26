@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
 import AdminGate from "@/components/AdminGate";
+
+export const metadata: Metadata = {
+  title: "Admin",
+  robots: { index: false, follow: false },
+};
 
 export default function AdminPage() {
   return (
@@ -10,7 +16,7 @@ export default function AdminPage() {
             Content management
           </h1>
           <p className="mt-4 text-[#17001C]/75">
-            This is a private dashboard. Please enter the password to proceed.
+            This is a private dashboard. Log in with Discord to proceed.
           </p>
         </div>
 

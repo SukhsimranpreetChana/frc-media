@@ -329,7 +329,6 @@ export default function RecentUploadsCarousel({
     return (
       <section className="recent-uploads-section">
         <div className="border-b-4 border-[#F85259] pb-3">
-          <p className="text-sm text-[#72007E]">RECENT UPLOADS</p>
           <h2 className="text-2xl text-[#17001C]">Recently uploaded</h2>
         </div>
         <p className="mt-5 text-sm text-[#17001C]/70">
@@ -343,7 +342,6 @@ export default function RecentUploadsCarousel({
     <section className="recent-uploads-section">
       <div className="flex flex-col gap-4 border-b-4 border-[#F85259] pb-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-sm text-[#72007E]">RECENT UPLOADS</p>
           <h2 className="text-2xl text-[#17001C]">Recently uploaded</h2>
         </div>
       </div>

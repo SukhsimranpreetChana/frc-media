@@ -49,7 +49,7 @@ body {
 }
 
 :root[data-theme="dark"] body {
-  background:
+  background-image:
     radial-gradient(circle at 1px 1px, rgba(248, 82, 89, 0.28) 1px, transparent 1.6px),
     linear-gradient(135deg, #09040d 0%, #17001c 46%, #000000 100%);
 }
@@ -140,7 +140,7 @@ h3,
 }
 
 :root[data-theme="dark"] .fmc-surface {
-  background:
+  background-image:
     radial-gradient(circle at 1px 1px, rgba(248, 82, 89, 0.28) 1px, transparent 1.6px),
     linear-gradient(135deg, #09040d 0%, #17001c 48%, #000000 100%);
 }
@@ -155,6 +155,11 @@ h3,
   background-size: 16px 16px, 100% 100%;
 }
 
+/* Same dark gradient as .fmc-dark-halftone, minus the dots, so the navbar stays clean. */
+.nav-bar-surface {
+  background: linear-gradient(135deg, #17001c 0%, #000000 52%, #17001c 100%);
+}
+
 .scrap-card {
   position: relative;
   border: 2px solid rgba(23, 0, 28, 0.9);
@@ -167,6 +172,30 @@ h3,
   border-color: rgba(248, 82, 89, 0.82);
   background: var(--theme-surface);
   box-shadow: 8px 8px 0 rgba(248, 82, 89, 0.62);
+}
+
+.legal-content a {
+  color: #72007e;
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: #f85259;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
+
+:root[data-theme="dark"] .legal-content a {
+  color: #ffd957;
+}
+
+.legal-content ul {
+  display: grid;
+  gap: 0.5rem;
+  padding-left: 1.25rem;
+  list-style: disc;
+}
+
+.legal-content li::marker {
+  color: #f85259;
 }
 
 .scrap-card::before {
@@ -365,19 +394,10 @@ input:focus-visible + div .fmc-file-picker {
     transform 180ms ease;
 }
 
-.theme-toggle::before {
-  content: "";
-  position: absolute;
-  inset: auto;
-  width: 1rem;
-  height: 1rem;
-  border-radius: 50%;
-  background:
-    linear-gradient(90deg, transparent 50%, #17001c 50%),
-    #17001c;
-  box-shadow:
-    0 0 0 2px rgba(255, 255, 255, 0.9),
-    0 0 0 4px rgba(23, 0, 28, 0.16);
+.theme-toggle__icon {
+  width: 1.35rem;
+  height: 1.35rem;
+  color: #17001c;
 }
 
 .theme-toggle:hover,
@@ -385,14 +405,6 @@ input:focus-visible + div .fmc-file-picker {
   background: rgba(255, 255, 255, 0.96);
   box-shadow: 2px 2px 0 rgba(23, 0, 28, 0.28);
   transform: translate(1px, 1px);
-}
-
-.theme-toggle__track {
-  display: none;
-}
-
-.theme-toggle__knob {
-  display: none;
 }
 
 .theme-toggle:focus-visible {
@@ -406,13 +418,8 @@ input:focus-visible + div .fmc-file-picker {
   box-shadow: 3px 3px 0 rgba(248, 82, 89, 0.28);
 }
 
-:root[data-theme="dark"] .theme-toggle::before {
-  background:
-    linear-gradient(90deg, #f4e7e7 50%, transparent 50%),
-    #f4e7e7;
-  box-shadow:
-    0 0 0 2px rgba(23, 0, 28, 0.82),
-    0 0 0 4px rgba(248, 82, 89, 0.22);
+:root[data-theme="dark"] .theme-toggle__icon {
+  color: #ffd957;
 }
 
 :root[data-theme="dark"] [class*="text-[#17001C]"] {
@@ -685,7 +692,6 @@ input:focus-visible + div .fmc-file-picker {
   }
 
   .nav-brand-link {
-    align-items: flex-start;
     justify-content: flex-start;
     text-align: left;
   }
@@ -878,9 +884,7 @@ input:focus-visible + div .fmc-file-picker {
     transition: none;
   }
 
-  .theme-toggle,
-  .theme-toggle__track,
-  .theme-toggle__knob {
+  .theme-toggle {
     transition: none;
   }
 
@@ -904,7 +908,6 @@ input:focus-visible + div .fmc-file-picker {
 
   .nav-brand-link {
     grid-column: 1;
-    align-items: flex-start;
     justify-content: flex-start;
     justify-self: start;
     text-align: left;

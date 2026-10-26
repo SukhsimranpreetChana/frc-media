@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { FormEvent, useState } from "react";
 
 type PublicMediaUploadProps = {
@@ -583,6 +584,17 @@ export default function PublicMediaUpload({
           <p>
             Approved uploads may be publicly visible in team searches and stored
             in Google Drive.
+          </p>
+          <p>
+            Read the full{" "}
+            <Link
+              className="font-semibold text-[#72007E] underline decoration-[#F85259] decoration-2 underline-offset-4"
+              href="/terms"
+              target="_blank"
+            >
+              Terms of Service
+            </Link>
+            .
           </p>
         </div>
         <label className="mt-4 flex items-start gap-3 text-sm font-semibold text-[#17001C]">

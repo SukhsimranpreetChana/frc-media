@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 import CommissionCard from "@/components/CommissionCard";
 import type { Commission } from "@/types";
@@ -169,6 +170,17 @@ export default function CommissionsBoard() {
               <p>
                 Keep links safe, accurate, and relevant to FIRST or FRC media
                 work. FMC admins may approve, deny, edit, or remove requests.
+              </p>
+              <p>
+                Read the full{" "}
+                <Link
+                  className="font-semibold text-[#72007E] underline decoration-[#F85259] decoration-2 underline-offset-4"
+                  href="/terms"
+                  target="_blank"
+                >
+                  Terms of Service
+                </Link>
+                .
               </p>
             </div>
             <label className="mt-4 flex items-start gap-3 text-sm font-semibold text-[#17001C]">

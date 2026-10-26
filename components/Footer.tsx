@@ -1,8 +1,15 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { FooterHandle } from "@/types";
+
+const legalLinks = [
+  { href: "/terms", label: "Terms" },
+  { href: "/privacy", label: "Privacy" },
+  { href: "/cookies", label: "Cookies" },
+];
 
 function getHandleInitials(handle: string) {
   const cleanedHandle = handle.replace("@", "").trim();
@@ -109,10 +116,26 @@ export default function Footer() {
           ) : null}
         </div>
 
-        <p className="max-w-4xl text-xs leading-5 text-[#F4E7E7]/70">
-          We are not affiliated with FIRST HQ and FIRST® is not overseeing,
-          involved with, or responsible for this activity, product, or service.
-        </p>
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
+          <p className="max-w-4xl text-xs leading-5 text-[#F4E7E7]/70">
+            We are not affiliated with FIRST HQ and FIRST® is not overseeing,
+            involved with, or responsible for this activity, product, or service.
+          </p>
+          <nav
+            aria-label="Legal"
+            className="flex shrink-0 flex-wrap gap-x-4 gap-y-1 text-xs text-[#F4E7E7]/85"
+          >
+            {legalLinks.map((link) => (
+              <Link
+                className="underline decoration-[#F85259] underline-offset-4 hover:text-white"
+                href={link.href}
+                key={link.href}
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
+        </div>
       </div>
     </footer>
   );
