@@ -73,11 +73,11 @@ export async function GET(request: Request) {
 
     if (!result.allowed) {
       console.warn(
-        `Denied admin login for Discord user ${result.user.username} (${result.user.id}).`,
+        `Denied admin login for Discord user ${result.user.username} (${result.user.id}): ${result.reason}.`,
       );
 
       return redirectToAdmin(request, {
-        error: "not_allowed",
+        error: "code" in result && result.code ? result.code : "not_allowed",
         discord_id: result.user.id,
       });
     }

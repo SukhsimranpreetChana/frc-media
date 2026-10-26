@@ -12,7 +12,10 @@ const loginErrors: Record<string, string> = {
   rate_limited: "Too many login attempts. Please try again later.",
   cancelled: "Discord login was cancelled.",
   invalid_state: "That login link expired. Please try again.",
-  not_allowed: "This Discord account is not an FMC admin.",
+  not_allowed:
+    "This Discord account does not have an FMC admin role (or ADMIN_DISCORD_ROLE_IDS is wrong on the server).",
+  not_in_server:
+    "This Discord account is not in the FMC Discord server (or DISCORD_GUILD_ID is wrong on the server).",
   discord_failed: "Could not reach Discord. Please try again.",
 };
 
@@ -30,7 +33,7 @@ function readLoginError() {
   const discordId = params.get("discord_id");
   const message = loginErrors[code] || "Discord login failed.";
 
-  return discordId && code === "not_allowed"
+  return discordId
     ? `${message} Send an existing admin your Discord ID (${discordId}) to be added.`
     : message;
 }

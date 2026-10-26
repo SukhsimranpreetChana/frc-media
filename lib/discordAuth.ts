@@ -13,11 +13,13 @@ type DiscordGuildMember = {
   roles: string[];
 };
 
+// Strip quotes too: env values pasted as "123" would otherwise never match.
+function cleanId(value: string) {
+  return value.trim().replace(/^["']|["']$/g, "").trim();
+}
+
 function splitList(value?: string) {
-  return (value || "")
-    .split(",")
-    .map((item) => item.trim())
-    .filter(Boolean);
+  return (value || "").split(",").map(cleanId).filter(Boolean);
 }
 
 function getAllowedUserIds() {
@@ -29,7 +31,7 @@ function getAdminRoleIds() {
 }
 
 function getGuildId() {
-  return process.env.DISCORD_GUILD_ID?.trim() || "";
+  return cleanId(process.env.DISCORD_GUILD_ID || "");
 }
 
 function usesGuildRoles() {
@@ -125,18 +127,39 @@ export async function authenticateDiscordAdmin(
     return { allowed: true, user };
   }
 
-  if (usesGuildRoles()) {
-    // 404 means the user is not in the FMC server at all.
-    const memberResult = await fetchDiscord<DiscordGuildMember>(
-      `/users/@me/guilds/${getGuildId()}/member`,
-      accessToken,
-    );
-    const adminRoleIds = getAdminRoleIds();
-
-    if (memberResult.data?.roles.some((role) => adminRoleIds.includes(role))) {
-      return { allowed: true, user };
-    }
+  if (!usesGuildRoles()) {
+    return { allowed: false, user, reason: "not on the user ID allowlist" };
   }
 
-  return { allowed: false, user };
+  const memberResult = await fetchDiscord<DiscordGuildMember>(
+    `/users/@me/guilds/${getGuildId()}/member`,
+    accessToken,
+  );
+
+  // 404 means the user is not in the configured server (or the server ID is wrong).
+  if (memberResult.status === 404) {
+    return {
+      allowed: false,
+      user,
+      code: "not_in_server",
+      reason: `not a member of server ${getGuildId()}`,
+    };
+  }
+
+  // Anything else (like a 429 rate limit) is a Discord problem, not a "no".
+  if (!memberResult.data) {
+    throw new Error(`Unable to load Discord server roles (${memberResult.status}).`);
+  }
+
+  const adminRoleIds = getAdminRoleIds();
+
+  if (memberResult.data.roles.some((role) => adminRoleIds.includes(role))) {
+    return { allowed: true, user };
+  }
+
+  return {
+    allowed: false,
+    user,
+    reason: `has roles [${memberResult.data.roles.join(", ")}] but none match ADMIN_DISCORD_ROLE_IDS [${adminRoleIds.join(", ")}]`,
+  };
 }
