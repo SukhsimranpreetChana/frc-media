@@ -1,23 +1,19 @@
 import { NextResponse } from "next/server";
-import { hasAdminSession } from "@/lib/adminAuth";
 import {
   getGoogleDriveFileIdFromUrl,
   getGoogleDrivePreviewImage,
 } from "@/lib/googleDrive";
-import { getMediaClips } from "@/lib/supabase";
+import { canViewDriveFile } from "@/lib/mediaAccess";
 
 export const runtime = "nodejs";
 
-async function canPreviewFile(fileId: string) {
-  if (await hasAdminSession()) {
-    return true;
-  }
+// Only a few sizes, so the cache is shared and nobody can request huge originals.
+const allowedPreviewSizes = [400, 2048];
 
-  const approvedClips = await getMediaClips({ approved: true });
+function getPreviewSize(value: string | null) {
+  const size = Number(value);
 
-  return approvedClips.some(
-    (clip) => getGoogleDriveFileIdFromUrl(clip.videoUrl) === fileId,
-  );
+  return allowedPreviewSizes.includes(size) ? size : undefined;
 }
 
 export async function GET(request: Request) {
@@ -34,11 +30,14 @@ export async function GET(request: Request) {
   }
 
   try {
-    if (!(await canPreviewFile(fileId))) {
+    if (!(await canViewDriveFile(fileId))) {
       return NextResponse.json({ error: "Forbidden." }, { status: 403 });
     }
 
-    const preview = await getGoogleDrivePreviewImage(fileId);
+    const preview = await getGoogleDrivePreviewImage(
+      fileId,
+      getPreviewSize(searchParams.get("size")),
+    );
 
     return new NextResponse(new Uint8Array(preview.bytes), {
       headers: {

@@ -2,6 +2,7 @@
 
 import { type CSSProperties, useEffect, useRef, useState } from "react";
 import CreditRequiredBadge from "@/components/CreditRequiredBadge";
+import MediaViewer from "@/components/MediaViewer";
 import {
   getCollageCoverClip,
   type MediaCollage,
@@ -48,18 +49,17 @@ function getCollageCoverUrl(collage: MediaCollage) {
 }
 
 function RecentUploadCard({ collage }: { collage: MediaCollage }) {
-  const coverClip = getCollageCoverClip(collage);
-  const viewUrl = collage.folderUrl || coverClip?.videoUrl || "#";
+  const [isViewerOpen, setIsViewerOpen] = useState(false);
   const coverUrl = getCollageCoverUrl(collage);
   const creditRequired = collage.clips.some((clip) => clip.creditRequired);
 
   return (
     <article className="fmc-dark-halftone flex min-h-72 flex-col overflow-hidden rounded-lg border-2 border-[#F85259]/50 text-white shadow-[5px_5px_0_#17001C]">
-      <a
-        className="block"
-        href={viewUrl}
-        rel="noopener noreferrer"
-        target="_blank"
+      <button
+        aria-label={`View ${collage.title}`}
+        className="block w-full"
+        onClick={() => setIsViewerOpen(true)}
+        type="button"
       >
         <div className="aspect-video overflow-hidden bg-[#17001C]">
           {coverUrl ? (
@@ -75,7 +75,7 @@ function RecentUploadCard({ collage }: { collage: MediaCollage }) {
             </div>
           )}
         </div>
-      </a>
+      </button>
       <div className="flex flex-1 flex-col gap-3 p-4">
         <div>
           <p className="scrap-chip inline-flex rounded-md px-2 py-1 text-xs text-[#17001C]">
@@ -99,15 +99,17 @@ function RecentUploadCard({ collage }: { collage: MediaCollage }) {
             )}
           </div>
         </div>
-        <a
+        <button
           className="font-primary fmc-button mt-auto inline-flex h-9 items-center justify-center bg-[#F85259] px-3 text-xs text-white hover:bg-[#A335E6]"
-          href={viewUrl}
-          rel="noopener noreferrer"
-          target="_blank"
+          onClick={() => setIsViewerOpen(true)}
+          type="button"
         >
           View
-        </a>
+        </button>
       </div>
+      {isViewerOpen ? (
+        <MediaViewer collage={collage} onClose={() => setIsViewerOpen(false)} />
+      ) : null}
     </article>
   );
 }

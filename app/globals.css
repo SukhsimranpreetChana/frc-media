@@ -198,6 +198,162 @@ h3,
   color: #f85259;
 }
 
+.media-viewer {
+  background: rgba(9, 4, 13, 0.97);
+  backdrop-filter: blur(6px);
+  animation: media-viewer-in 180ms ease-out both;
+}
+
+.media-viewer__icon-button {
+  display: inline-flex;
+  width: 2.75rem;
+  height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid rgba(248, 82, 89, 0.6);
+  border-radius: 999px;
+  background: rgba(23, 0, 28, 0.85);
+  color: #f4e7e7;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    transform 160ms ease;
+}
+
+.media-viewer__icon-button svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.media-viewer__icon-button:hover,
+.media-viewer__icon-button:focus-visible {
+  border-color: #f85259;
+  background: #f85259;
+  color: #ffffff;
+  outline: none;
+  transform: translateY(-1px);
+}
+
+.media-viewer__thumb {
+  position: relative;
+  width: 5.5rem;
+  height: 3.5rem;
+  flex-shrink: 0;
+  overflow: hidden;
+  border: 2px solid transparent;
+  border-radius: 6px;
+  background: #17001c;
+  opacity: 0.6;
+  transition:
+    border-color 160ms ease,
+    opacity 160ms ease;
+}
+
+.media-viewer__thumb:hover,
+.media-viewer__thumb:focus-visible {
+  opacity: 1;
+  outline: none;
+}
+
+.media-viewer__thumb--current {
+  border-color: #f85259;
+  opacity: 1;
+}
+
+.media-viewer__play-badge {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.35);
+  color: #ffffff;
+  font-size: 0.85rem;
+}
+
+/* Room for the offset purple shadow under the last button. */
+.media-viewer__toolbar {
+  gap: 0.75rem;
+  padding: 0 4px 4px 0;
+}
+
+/* Same look as .fmc-button on a dark background: red face, purple offset layer. */
+.media-viewer__tool {
+  display: inline-flex;
+  width: 2.75rem;
+  height: 2.75rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #f85259;
+  border-radius: 8px;
+  background: #f85259;
+  box-shadow: 4px 4px 0 #7137e3;
+  color: #ffffff;
+  transition:
+    transform 150ms ease,
+    box-shadow 150ms ease,
+    background-color 150ms ease;
+}
+
+.media-viewer__tool svg {
+  width: 1.3rem;
+  height: 1.3rem;
+}
+
+.media-viewer__tool:hover,
+.media-viewer__tool:focus-visible {
+  background: #a335e6;
+  outline: none;
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 #7137e3;
+}
+
+.media-viewer__tool[aria-pressed="true"] {
+  background: #a335e6;
+  transform: translate(4px, 4px);
+  box-shadow: none;
+}
+
+.media-viewer__info {
+  border: 2px solid rgba(248, 82, 89, 0.6);
+  background: #17001c;
+  box-shadow: 6px 6px 0 #7137e3;
+}
+
+.media-viewer__info-heading {
+  margin-top: 1.1rem;
+  margin-bottom: 0.25rem;
+  border-bottom: 1px solid rgba(248, 82, 89, 0.3);
+  padding-bottom: 0.35rem;
+  color: #f85259;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.media-viewer__stage:fullscreen {
+  max-width: none;
+  background: #000000;
+}
+
+@keyframes media-viewer-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .media-viewer {
+    animation: none;
+  }
+}
+
 .scrap-card::before {
   content: "";
   position: absolute;

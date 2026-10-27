@@ -18,6 +18,8 @@ const nextConfig: NextConfig = {
       "base-uri 'self'",
       "form-action 'self'",
       "frame-ancestors 'none'",
+      // The media viewer embeds Google Drive's video player.
+      "frame-src https://drive.google.com",
       ...(isProduction ? ["upgrade-insecure-requests"] : []),
     ].join("; ");
     const securityHeaders = [

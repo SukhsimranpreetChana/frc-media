@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import CreditRequiredBadge from "@/components/CreditRequiredBadge";
+import MediaViewer from "@/components/MediaViewer";
 import {
   getCollageCoverClip,
   getCreatedTime,
@@ -36,8 +37,8 @@ export default function MediaCollageCard({
 }) {
   const [folderFiles, setFolderFiles] = useState<DriveFolderFile[]>([]);
   const [hasCoverError, setHasCoverError] = useState(false);
+  const [isViewerOpen, setIsViewerOpen] = useState(false);
   const coverClip = getCollageCoverClip(collage);
-  const viewUrl = collage.folderUrl || coverClip?.videoUrl || "#";
   const folderCover = useMemo(
     () =>
       folderFiles.find((file) => file.thumbnailUrl && file.mimeType?.startsWith("image/")) ||
@@ -93,11 +94,11 @@ export default function MediaCollageCard({
 
   return (
     <article className="fmc-dark-halftone flex h-full flex-col overflow-hidden rounded-2xl border-2 border-[#F85259]/50 text-white shadow-[8px_8px_0_#17001C]">
-      <a
-        className="block"
-        href={viewUrl}
-        rel="noopener noreferrer"
-        target="_blank"
+      <button
+        aria-label={`View ${collage.title}`}
+        className="block w-full"
+        onClick={() => setIsViewerOpen(true)}
+        type="button"
       >
         <div className="aspect-video overflow-hidden bg-[#17001C]">
           {coverUrl && !hasCoverError ? (
@@ -114,7 +115,7 @@ export default function MediaCollageCard({
             </div>
           )}
         </div>
-      </a>
+      </button>
       <div className="flex flex-1 flex-col gap-4 p-5">
         <div>
           <p className="scrap-chip inline-flex rounded-md px-2 py-1 text-sm text-[#17001C]">
@@ -137,15 +138,17 @@ export default function MediaCollageCard({
             )}
           </div>
         </div>
-        <a
+        <button
           className="font-primary fmc-button mt-auto inline-flex h-10 items-center justify-center bg-[#F85259] px-4 text-sm text-white hover:bg-[#A335E6]"
-          href={viewUrl}
-          rel="noopener noreferrer"
-          target="_blank"
+          onClick={() => setIsViewerOpen(true)}
+          type="button"
         >
           View
-        </a>
+        </button>
       </div>
+      {isViewerOpen ? (
+        <MediaViewer collage={collage} onClose={() => setIsViewerOpen(false)} />
+      ) : null}
     </article>
   );
 }
