@@ -53,6 +53,23 @@ export type GoogleDrivePreviewImage = {
   fileName: string;
 };
 
+export type GoogleDriveFileInfo = {
+  name: string;
+  mimeType?: string;
+  sizeBytes?: number;
+  width?: number;
+  height?: number;
+  durationMs?: number;
+  takenAt?: string;
+  cameraMake?: string;
+  cameraModel?: string;
+  lens?: string;
+  focalLength?: number;
+  aperture?: number;
+  exposureTime?: number;
+  isoSpeed?: number;
+};
+
 export type GoogleDriveUploadedMedia = {
   fileId: string;
   fileName: string;
@@ -565,6 +582,7 @@ async function findGoogleDriveFileInFolder(input: {
 
 export async function getGoogleDrivePreviewImage(
   fileId: string,
+  size?: number,
 ): Promise<GoogleDrivePreviewImage> {
   const accessToken = await getGoogleAccessToken();
   const params = new URLSearchParams({
@@ -588,7 +606,11 @@ export async function getGoogleDrivePreviewImage(
   const file = (await metadataResponse.json()) as GoogleDriveFile;
 
   if (file.thumbnailLink) {
-    const thumbnailResponse = await fetch(file.thumbnailLink, {
+    // Drive thumbnail links end in =s220; swapping the number returns a bigger image.
+    const thumbnailLink = size
+      ? file.thumbnailLink.replace(/=s\d+$/, `=s${size}`)
+      : file.thumbnailLink;
+    const thumbnailResponse = await fetch(thumbnailLink, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
@@ -629,6 +651,77 @@ export async function getGoogleDrivePreviewImage(
   }
 
   throw new Error("Google Drive did not return a previewable image.");
+}
+
+export async function getGoogleDriveFileInfo(
+  fileId: string,
+): Promise<GoogleDriveFileInfo> {
+  const accessToken = await getGoogleAccessToken();
+  const params = new URLSearchParams({
+    fields: [
+      "name",
+      "mimeType",
+      "size",
+      "imageMediaMetadata(width,height,time,cameraMake,cameraModel,lens,focalLength,aperture,exposureTime,isoSpeed)",
+      "videoMediaMetadata(width,height,durationMillis)",
+    ].join(","),
+    supportsAllDrives: "true",
+  });
+  const response = await fetch(
+    `${driveApiBaseUrl}/files/${fileId}?${params.toString()}`,
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    },
+  );
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Unable to load Google Drive file info. ${errorText}`);
+  }
+
+  const file = (await response.json()) as {
+    name?: string;
+    mimeType?: string;
+    size?: string;
+    imageMediaMetadata?: {
+      width?: number;
+      height?: number;
+      time?: string;
+      cameraMake?: string;
+      cameraModel?: string;
+      lens?: string;
+      focalLength?: number;
+      aperture?: number;
+      exposureTime?: number;
+      isoSpeed?: number;
+    };
+    videoMediaMetadata?: {
+      width?: number;
+      height?: number;
+      durationMillis?: string;
+    };
+  };
+  const image = file.imageMediaMetadata;
+  const video = file.videoMediaMetadata;
+
+  return {
+    name: file.name || "Media file",
+    mimeType: file.mimeType,
+    sizeBytes: file.size ? Number(file.size) : undefined,
+    width: image?.width || video?.width,
+    height: image?.height || video?.height,
+    durationMs: video?.durationMillis ? Number(video.durationMillis) : undefined,
+    takenAt: image?.time,
+    cameraMake: image?.cameraMake,
+    cameraModel: image?.cameraModel,
+    lens: image?.lens,
+    focalLength: image?.focalLength,
+    aperture: image?.aperture,
+    exposureTime: image?.exposureTime,
+    isoSpeed: image?.isoSpeed,
+  };
 }
 
 export async function deleteGoogleDriveFileOrFolder(fileOrFolderUrl: string) {
