@@ -48,65 +48,48 @@ function getCollageCoverUrl(collage: MediaCollage) {
   return getThumbnailProxyUrl(coverClip?.videoUrl, coverClip?.thumbnailUrl);
 }
 
+// Image first: the whole card opens the viewer, with a slim caption under the photo.
 function RecentUploadCard({ collage }: { collage: MediaCollage }) {
   const [isViewerOpen, setIsViewerOpen] = useState(false);
   const coverUrl = getCollageCoverUrl(collage);
   const creditRequired = collage.clips.some((clip) => clip.creditRequired);
+  const fileCount = collage.clips.length;
 
   return (
-    <article className="fmc-dark-halftone flex min-h-72 flex-col overflow-hidden rounded-lg border-2 border-[#F85259]/50 text-white shadow-[5px_5px_0_#17001C]">
+    <article className="media-card h-full">
       <button
         aria-label={`View ${collage.title}`}
-        className="block w-full"
+        className="group flex h-full w-full flex-col text-left"
         onClick={() => setIsViewerOpen(true)}
         type="button"
       >
-        <div className="aspect-video overflow-hidden bg-[#17001C]">
+        <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#17001C]">
           {coverUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               alt=""
-              className="h-full w-full object-cover transition duration-300 hover:scale-105"
+              className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
               src={coverUrl}
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center text-xs uppercase tracking-wide text-[#F4E7E7]/70">
+            <div className="flex h-full w-full items-center justify-center text-sm uppercase tracking-wide text-[#F4E7E7]/85">
               Media preview loading
             </div>
           )}
+          {creditRequired ? (
+            <span className="absolute left-2 top-2">
+              <CreditRequiredBadge compact />
+            </span>
+          ) : null}
+        </div>
+        <div className="flex flex-1 flex-col gap-1 p-3">
+          <h3 className="line-clamp-1 text-sm text-white">{collage.title}</h3>
+          <p className="text-sm text-[#F4E7E7]/85">
+            FRC {collage.teamNumber} · {collage.year} · {fileCount} file
+            {fileCount === 1 ? "" : "s"}
+          </p>
         </div>
       </button>
-      <div className="flex flex-1 flex-col gap-3 p-4">
-        <div>
-          <p className="scrap-chip inline-flex rounded-md px-2 py-1 text-xs text-[#17001C]">
-            FRC {collage.teamNumber}
-          </p>
-          <h3 className="mt-3 line-clamp-2 text-base text-white">
-            {collage.title}
-          </h3>
-          <p className="mt-2 text-xs text-[#F4E7E7]">
-            {collage.year} / {collage.clips.length} file
-            {collage.clips.length === 1 ? "" : "s"}
-          </p>
-          <div
-            className={`mt-3 min-h-9 ${creditRequired ? "" : "invisible"}`}
-            aria-hidden={creditRequired ? undefined : "true"}
-          >
-            {creditRequired ? (
-              <CreditRequiredBadge compact />
-            ) : (
-              <span className="block h-9" />
-            )}
-          </div>
-        </div>
-        <button
-          className="font-primary fmc-button mt-auto inline-flex h-9 items-center justify-center bg-[#F85259] px-3 text-xs text-white hover:bg-[#A335E6]"
-          onClick={() => setIsViewerOpen(true)}
-          type="button"
-        >
-          View
-        </button>
-      </div>
       {isViewerOpen ? (
         <MediaViewer collage={collage} onClose={() => setIsViewerOpen(false)} />
       ) : null}
@@ -330,10 +313,10 @@ export default function RecentUploadsCarousel({
   if (totalCount === 0) {
     return (
       <section className="recent-uploads-section">
-        <div className="border-b-4 border-[#F85259] pb-3">
+        <div className="section-heading">
           <h2 className="text-2xl text-[#17001C]">Recently uploaded</h2>
         </div>
-        <p className="mt-5 text-sm text-[#17001C]/70">
+        <p className="mt-5 text-sm text-[#17001C]/85">
           No approved uploads have been posted yet.
         </p>
       </section>
@@ -342,16 +325,14 @@ export default function RecentUploadsCarousel({
 
   return (
     <section className="recent-uploads-section">
-      <div className="flex flex-col gap-4 border-b-4 border-[#F85259] pb-3 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h2 className="text-2xl text-[#17001C]">Recently uploaded</h2>
-        </div>
+      <div className="section-heading">
+        <h2 className="text-2xl text-[#17001C]">Recently uploaded</h2>
       </div>
 
       <div className="mt-5 grid grid-cols-[auto_1fr_auto] items-center gap-3">
         <button
           aria-label="Show previous recent uploads"
-          className="font-primary fmc-button flex h-10 w-10 items-center justify-center bg-[#17001C] text-sm text-white hover:bg-[#72007E] disabled:cursor-not-allowed disabled:opacity-45"
+          className="font-primary fmc-button fmc-button--secondary flex h-10 w-10 items-center justify-center text-sm disabled:cursor-not-allowed disabled:opacity-45"
           disabled={!hasMultipleUploads || !canShowPrevious || isAnimating}
           onClick={showPreviousUploads}
           type="button"
@@ -390,7 +371,7 @@ export default function RecentUploadsCarousel({
         </div>
         <button
           aria-label="Show next recent uploads"
-          className="font-primary fmc-button flex h-10 w-10 items-center justify-center bg-[#7137E3] text-sm text-white hover:bg-[#A335E6] disabled:cursor-not-allowed disabled:opacity-45"
+          className="font-primary fmc-button fmc-button--secondary flex h-10 w-10 items-center justify-center text-sm disabled:cursor-not-allowed disabled:opacity-45"
           disabled={
             !hasMultipleUploads || !canShowNext || isAnimating || isLoadingMore
           }

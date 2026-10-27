@@ -18,7 +18,7 @@ export default function ClipCard({ clip }: ClipCardProps) {
           {clip.year}
         </span>
       </div>
-      <p className="mt-3 text-sm leading-6 text-[#17001C]/75">
+      <p className="mt-3 text-sm leading-6 text-[#17001C]/80">
         {clip.description}
       </p>
       <div className="mt-4 flex flex-wrap gap-2 text-xs text-[#72007E]">

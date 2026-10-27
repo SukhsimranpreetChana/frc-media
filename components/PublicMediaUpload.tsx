@@ -445,12 +445,12 @@ export default function PublicMediaUpload({
       onSubmit={handleSubmit}
     >
       <h2 className="text-lg text-[#17001C]">Upload team media</h2>
-      <p className="mt-2 text-sm text-[#17001C]/70">
+      <p className="mt-2 text-sm text-[#17001C]/80">
         Upload photos or videos. FMC will save them to Google Drive in a folder
         for your name, then send each clip to admin review.
       </p>
       <div className="mt-5 grid gap-4 md:grid-cols-2">
-        <label className="block text-sm text-[#17001C]/75">
+        <label className="block text-sm text-[#17001C]/80">
           Team Number
           <input
             className="mt-2 h-11 w-full rounded-md border-2 border-[#17001C] bg-[#F4E7E7] px-4 text-sm text-[#17001C] outline-none ring-[#A335E6]/20 focus:border-[#7137E3] focus:ring-4"
@@ -465,7 +465,7 @@ export default function PublicMediaUpload({
             value={teamNumber}
           />
         </label>
-        <label className="block text-sm text-[#17001C]/75">
+        <label className="block text-sm text-[#17001C]/80">
           Year
           <input
             className="mt-2 h-11 w-full rounded-md border-2 border-[#17001C] bg-[#F4E7E7] px-4 text-sm text-[#17001C] outline-none ring-[#A335E6]/20 focus:border-[#7137E3] focus:ring-4"
@@ -475,7 +475,7 @@ export default function PublicMediaUpload({
             value={year}
           />
         </label>
-        <label className="block text-sm text-[#17001C]/75 md:col-span-2">
+        <label className="block text-sm text-[#17001C]/80 md:col-span-2">
           Title
           <input
             className="mt-2 h-11 w-full rounded-md border-2 border-[#17001C] bg-[#F4E7E7] px-4 text-sm text-[#17001C] outline-none ring-[#A335E6]/20 focus:border-[#7137E3] focus:ring-4"
@@ -484,7 +484,7 @@ export default function PublicMediaUpload({
             value={title}
           />
         </label>
-        <label className="block text-sm text-[#17001C]/75 md:col-span-2">
+        <label className="block text-sm text-[#17001C]/80 md:col-span-2">
           Uploaded By
           <input
             className="mt-2 h-11 w-full rounded-md border-2 border-[#17001C] bg-[#F4E7E7] px-4 text-sm text-[#17001C] outline-none ring-[#A335E6]/20 focus:border-[#7137E3] focus:ring-4"
@@ -515,7 +515,7 @@ export default function PublicMediaUpload({
             />
             <span>
               <span className="block font-semibold">Upload anonymously</span>
-              <span className="mt-1 block text-xs leading-5 text-[#17001C]/65">
+              <span className="mt-1 block text-xs leading-5 text-[#17001C]/80">
                 You still need to enter a handle, but the public clip and Drive
                 folder will show Anonymous instead. Anonymous uploads cannot
                 require credit.
@@ -538,14 +538,14 @@ export default function PublicMediaUpload({
             />
             <span>
               <span className="block font-semibold">Credit required</span>
-              <span className="mt-1 block text-xs leading-5 text-[#17001C]/65">
+              <span className="mt-1 block text-xs leading-5 text-[#17001C]/80">
                 Adds a warning badge so viewers know they must give credit if
                 they use this clip. Credit-required uploads cannot be anonymous.
               </span>
             </span>
           </label>
         </div>
-        <div className="block text-sm text-[#17001C]/75 md:col-span-2">
+        <div className="block text-sm text-[#17001C]/80 md:col-span-2">
           <span>Media Files</span>
           <input
             accept="image/*,video/*"
@@ -616,14 +616,14 @@ export default function PublicMediaUpload({
             <p className="font-primary text-base text-[#17001C]">
               {isDraggingFiles ? "Drop to add files" : "Drag & drop photos or videos here"}
             </p>
-            <p className="text-xs text-[#17001C]/60">or</p>
+            <p className="text-xs text-[#17001C]/80">or</p>
             <label
               className="font-primary fmc-file-picker inline-flex h-12 w-full cursor-pointer items-center justify-center rounded-md bg-[#F85259] px-4 text-center text-sm text-white sm:w-auto"
               htmlFor="media-files"
             >
               Choose files
             </label>
-            <p className="min-w-0 text-sm text-[#17001C]/70">
+            <p className="min-w-0 text-sm text-[#17001C]/80">
               {files.length > 0
                 ? `${files.length} file${files.length === 1 ? "" : "s"} selected`
                 : "No files selected yet"}
@@ -632,12 +632,12 @@ export default function PublicMediaUpload({
               <p className="text-xs text-[#F85259]">{skippedFilesMessage}</p>
             ) : null}
           </div>
-          <p className="mt-2 text-xs text-[#17001C]/60">
+          <p className="mt-2 text-xs text-[#17001C]/80">
             Uploads can be up to 10 GB total.
           </p>
           {files.length > 0 ? (
             <div className="mt-3 rounded-md border-2 border-[#17001C]/20 bg-white/70 p-3">
-              <p className="text-xs text-[#17001C]/60">
+              <p className="text-xs text-[#17001C]/80">
                 {files.length} file{files.length === 1 ? "" : "s"} selected
               </p>
               <ul className="mt-2 grid gap-2">
@@ -673,7 +673,7 @@ export default function PublicMediaUpload({
       </div>
       <section className="mt-5 rounded-md border-2 border-[#F85259] bg-[#F4E7E7] p-4 text-sm text-[#17001C]">
         <h3 className="text-base text-[#17001C]">Upload terms and warning</h3>
-        <div className="mt-3 grid gap-2 text-sm leading-6 text-[#17001C]/75">
+        <div className="mt-3 grid gap-2 text-sm leading-6 text-[#17001C]/80">
           <p>
             Only upload photos or videos that you created, own, or have clear
             permission to share.
@@ -712,7 +712,7 @@ export default function PublicMediaUpload({
         </label>
       </section>
       <button
-        className="font-primary fmc-button mt-5 h-11 w-full bg-[#F85259] px-4 text-sm text-white hover:bg-[#A335E6] disabled:cursor-not-allowed disabled:bg-[#6f6673] disabled:opacity-65 disabled:shadow-none sm:w-auto"
+        className="font-primary fmc-button fmc-button--primary mt-5 h-11 w-full px-4 text-sm disabled:cursor-not-allowed disabled:bg-[#6f6673] disabled:opacity-65 disabled:shadow-none sm:w-auto"
         disabled={isUploading || !hasAcceptedUploadTerms}
         type="submit"
       >
@@ -720,7 +720,7 @@ export default function PublicMediaUpload({
       </button>
       {uploadProgress ? (
         <div className="mt-5 rounded-md border-2 border-[#17001C]/20 bg-white/75 p-3">
-          <div className="flex flex-col gap-1 text-sm text-[#17001C]/75 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-1 text-sm text-[#17001C]/80 sm:flex-row sm:items-center sm:justify-between">
             <span className="overflow-wrap-anywhere">
               {uploadProgress.fileName}
             </span>
@@ -741,7 +741,7 @@ export default function PublicMediaUpload({
               style={{ width: `${uploadProgress.percent}%` }}
             />
           </div>
-          <div className="mt-2 flex flex-col gap-1 text-xs text-[#17001C]/60 sm:flex-row sm:items-center sm:justify-between">
+          <div className="mt-2 flex flex-col gap-1 text-xs text-[#17001C]/80 sm:flex-row sm:items-center sm:justify-between">
             <span>
               {formatBytes(uploadProgress.uploadedBytes)} of{" "}
               {formatBytes(uploadProgress.totalBytes)}
@@ -750,7 +750,7 @@ export default function PublicMediaUpload({
           </div>
         </div>
       ) : null}
-      {message ? <p className="mt-4 text-sm text-[#17001C]/75">{message}</p> : null}
+      {message ? <p className="mt-4 text-sm text-[#17001C]/80">{message}</p> : null}
     </form>
   );
 }

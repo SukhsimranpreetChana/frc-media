@@ -28,7 +28,7 @@ export default function ClipsFilter({ clips }: ClipsFilterProps) {
   return (
     <div className="scrap-card p-5">
       <div className="grid gap-4 md:grid-cols-2">
-        <label className="block text-sm text-[#17001C]/75">
+        <label className="block text-sm text-[#17001C]/80">
           Team Number
           <input
             className="mt-2 h-11 w-full rounded-md border-2 border-[#17001C] bg-[#F4E7E7] px-4 text-sm text-[#17001C] outline-none ring-[#A335E6]/20 focus:border-[#7137E3] focus:ring-4"
@@ -37,7 +37,7 @@ export default function ClipsFilter({ clips }: ClipsFilterProps) {
             value={teamNumber}
           />
         </label>
-        <label className="block text-sm text-[#17001C]/75">
+        <label className="block text-sm text-[#17001C]/80">
           Year
           <input
             className="mt-2 h-11 w-full rounded-md border-2 border-[#17001C] bg-[#F4E7E7] px-4 text-sm text-[#17001C] outline-none ring-[#A335E6]/20 focus:border-[#7137E3] focus:ring-4"
@@ -59,7 +59,7 @@ export default function ClipsFilter({ clips }: ClipsFilterProps) {
       </div>
 
       {filteredClips.length === 0 ? (
-        <div className="mt-6 rounded-lg border-2 border-dashed border-[#72007E] bg-[#F4E7E7] p-6 text-sm text-[#17001C]/70">
+        <div className="mt-6 rounded-lg border-2 border-dashed border-[#72007E] bg-[#F4E7E7] p-6 text-sm text-[#17001C]/80">
           No clips match those filters yet.
         </div>
       ) : null}

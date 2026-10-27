@@ -41,14 +41,14 @@ export default function LegalPage({
 }: LegalPageProps) {
   return (
     <main className="fmc-surface flex-1">
-      <section className="mx-auto w-full max-w-4xl px-6 py-12">
-        <div className="max-w-2xl border-l-8 border-[#F85259] bg-white/75 px-5 py-4">
+      <section className="page-container py-12">
+        <div className="page-intro max-w-2xl border-l-8 border-[#F85259] bg-white/75 px-5 py-4">
           <p className="text-sm text-[#72007E]">{eyebrow}</p>
           <h1 className="mt-2 text-3xl text-[#17001C]">{title}</h1>
-          <p className="mt-2 text-sm text-[#17001C]/60">
+          <p className="mt-2 text-sm text-[#17001C]/80">
             Last updated {legalLastUpdated}
           </p>
-          <div className="mt-4 text-[#17001C]/75">{intro}</div>
+          <div className="mt-4 text-[#17001C]/80">{intro}</div>
         </div>
 
         <nav
@@ -76,7 +76,7 @@ export default function LegalPage({
           )}
         </nav>
 
-        <div className="legal-content scrap-card mt-8 grid gap-8 p-6 sm:p-8">
+        <div className="legal-content scrap-card mt-8 grid max-w-4xl gap-8 p-6 sm:p-8">
           {children}
         </div>
       </section>

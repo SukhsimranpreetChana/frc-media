@@ -116,12 +116,12 @@ export default function CommissionsBoard() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="text-lg text-[#17001C]">Add your commission</h2>
-          <p className="mt-2 text-sm text-[#17001C]/70">
+          <p className="mt-2 text-sm text-[#17001C]/80">
             Submit your commission details for admin review.
           </p>
         </div>
         <button
-          className="font-primary fmc-button h-10 bg-[#7137E3] px-4 text-sm text-white hover:bg-[#A335E6]"
+          className="font-primary fmc-button fmc-button--primary h-10 px-4 text-sm"
           onClick={() => setIsRequestFormOpen((current) => !current)}
           type="button"
         >
@@ -131,7 +131,7 @@ export default function CommissionsBoard() {
 
       {isRequestFormOpen ? (
         <form className="mt-5 grid gap-4" onSubmit={handleSubmitRequest}>
-          <label className="block text-sm text-[#17001C]/75">
+          <label className="block text-sm text-[#17001C]/80">
             Title
             <input
               className="mt-2 h-11 w-full rounded-md border-2 border-[#17001C] bg-[#F4E7E7] px-4 text-sm text-[#17001C] outline-none ring-[#A335E6]/20 focus:border-[#7137E3] focus:ring-4"
@@ -140,7 +140,7 @@ export default function CommissionsBoard() {
               value={requestTitle}
             />
           </label>
-          <label className="block text-sm text-[#17001C]/75">
+          <label className="block text-sm text-[#17001C]/80">
             Link
             <input
               className="mt-2 h-11 w-full rounded-md border-2 border-[#17001C] bg-[#F4E7E7] px-4 text-sm text-[#17001C] outline-none ring-[#A335E6]/20 focus:border-[#7137E3] focus:ring-4"
@@ -150,7 +150,7 @@ export default function CommissionsBoard() {
               value={requestLink}
             />
           </label>
-          <label className="block text-sm text-[#17001C]/75">
+          <label className="block text-sm text-[#17001C]/80">
             Cost range
             <input
               className="mt-2 h-11 w-full rounded-md border-2 border-[#17001C] bg-[#F4E7E7] px-4 text-sm text-[#17001C] outline-none ring-[#A335E6]/20 focus:border-[#7137E3] focus:ring-4"
@@ -162,7 +162,7 @@ export default function CommissionsBoard() {
           </label>
           <section className="rounded-md border-2 border-[#F85259] bg-[#F4E7E7] p-4 text-sm text-[#17001C]">
             <h3 className="text-base text-[#17001C]">Commission request terms</h3>
-            <div className="mt-3 grid gap-2 text-sm leading-6 text-[#17001C]/75">
+            <div className="mt-3 grid gap-2 text-sm leading-6 text-[#17001C]/80">
               <p>
                 Only submit commission listings that you own, manage, or have
                 permission to post.
@@ -197,7 +197,7 @@ export default function CommissionsBoard() {
             </label>
           </section>
           <button
-            className="font-primary fmc-button h-10 bg-[#F85259] px-4 text-sm text-white hover:bg-[#A335E6] disabled:cursor-not-allowed disabled:bg-[#6f6673] disabled:opacity-65 disabled:shadow-none sm:w-fit"
+            className="font-primary fmc-button fmc-button--primary h-10 px-4 text-sm disabled:cursor-not-allowed disabled:bg-[#6f6673] disabled:opacity-65 disabled:shadow-none sm:w-fit"
             disabled={isSubmittingRequest || !hasAcceptedRequestTerms}
             type="submit"
           >
@@ -207,7 +207,7 @@ export default function CommissionsBoard() {
       ) : null}
 
       {requestMessage ? (
-        <p className="mt-4 text-sm text-[#17001C]/75">{requestMessage}</p>
+        <p className="mt-4 text-sm text-[#17001C]/80">{requestMessage}</p>
       ) : null}
     </section>
   );
@@ -216,7 +216,7 @@ export default function CommissionsBoard() {
     return (
       <>
         {requestPanel}
-        <div className="scrap-card mt-8 p-6 text-sm text-[#17001C]/75">
+        <div className="scrap-card mt-8 p-6 text-sm text-[#17001C]/80">
           Loading commissions...
         </div>
       </>
@@ -227,7 +227,7 @@ export default function CommissionsBoard() {
     return (
       <>
         {requestPanel}
-        <div className="scrap-card mt-8 p-6 text-sm text-[#17001C]/75">
+        <div className="scrap-card mt-8 p-6 text-sm text-[#17001C]/80">
           {error}
         </div>
       </>
@@ -238,7 +238,7 @@ export default function CommissionsBoard() {
     return (
       <>
         {requestPanel}
-        <div className="scrap-card mt-8 p-6 text-sm text-[#17001C]/75">
+        <div className="scrap-card mt-8 p-6 text-sm text-[#17001C]/80">
           no commisions right no sorry :/
         </div>
       </>
@@ -248,7 +248,7 @@ export default function CommissionsBoard() {
   return (
     <>
       {requestPanel}
-      <div className="mt-8 grid gap-6 md:grid-cols-2">
+      <div className="card-grid mt-8">
         {commissions.map((commission) => (
           <CommissionCard commission={commission} key={commission.id} />
         ))}

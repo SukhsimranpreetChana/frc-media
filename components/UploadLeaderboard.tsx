@@ -105,7 +105,7 @@ export default async function UploadLeaderboard() {
                 <p className="overflow-wrap-anywhere text-sm font-bold text-[#17001C]">
                   {entry.name}
                 </p>
-                <p className="mt-1 text-xs text-[#17001C]/60">
+                <p className="mt-1 text-xs text-[#17001C]/80">
                   {entry.teamCount} team{entry.teamCount === 1 ? "" : "s"} /
                   latest {entry.latestYear}
                 </p>
@@ -122,7 +122,7 @@ export default async function UploadLeaderboard() {
           ))}
         </ol>
       ) : (
-        <p className="mt-5 rounded-md border-2 border-[#17001C]/15 bg-white/75 p-3 text-sm text-[#17001C]/70">
+        <p className="mt-5 rounded-md border-2 border-[#17001C]/15 bg-white/75 p-3 text-sm text-[#17001C]/80">
           No approved uploads yet.
         </p>
       )}

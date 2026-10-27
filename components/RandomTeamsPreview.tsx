@@ -177,7 +177,7 @@ function pickRandomTeams() {
   const availableTeams = [...teamPool];
   const selectedTeams: string[] = [];
 
-  while (selectedTeams.length < 3 && availableTeams.length > 0) {
+  while (selectedTeams.length < 4 && availableTeams.length > 0) {
     const teamNumber = pickWeightedTeam(availableTeams);
     selectedTeams.push(teamNumber);
     availableTeams.splice(availableTeams.indexOf(teamNumber), 1);
@@ -253,7 +253,7 @@ export default function RandomTeamsPreview() {
 
   if (teams.length === 0) {
     return (
-      <div className="rounded-lg border-2 border-dashed border-[#72007E] bg-[#F4E7E7] p-6 text-sm text-[#17001C]/70">
+      <div className="rounded-lg border-2 border-dashed border-[#72007E] bg-[#F4E7E7] p-6 text-sm text-[#17001C]/80">
         Team previews are loading slowly. Open the Teams tab to search directly.
       </div>
     );

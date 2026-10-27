@@ -51,7 +51,7 @@ export default function ContactForm() {
   return (
     <form className="scrap-card mt-8 p-6" onSubmit={handleSubmit}>
       <div className="grid gap-4 md:grid-cols-2">
-        <label className="block text-sm text-[#17001C]/75">
+        <label className="block text-sm text-[#17001C]/80">
           Name
           <input
             className="mt-2 h-11 w-full rounded-md border-2 border-[#17001C] bg-[#F4E7E7] px-4 text-sm text-[#17001C] outline-none ring-[#A335E6]/20 focus:border-[#7137E3] focus:ring-4"
@@ -59,7 +59,7 @@ export default function ContactForm() {
             required
           />
         </label>
-        <label className="block text-sm text-[#17001C]/75">
+        <label className="block text-sm text-[#17001C]/80">
           Email
           <input
             className="mt-2 h-11 w-full rounded-md border-2 border-[#17001C] bg-[#F4E7E7] px-4 text-sm text-[#17001C] outline-none ring-[#A335E6]/20 focus:border-[#7137E3] focus:ring-4"
@@ -68,14 +68,14 @@ export default function ContactForm() {
             type="email"
           />
         </label>
-        <label className="block text-sm text-[#17001C]/75 md:col-span-2">
+        <label className="block text-sm text-[#17001C]/80 md:col-span-2">
           Subject
           <input
             className="mt-2 h-11 w-full rounded-md border-2 border-[#17001C] bg-[#F4E7E7] px-4 text-sm text-[#17001C] outline-none ring-[#A335E6]/20 focus:border-[#7137E3] focus:ring-4"
             name="subject"
             placeholder=""          />
         </label>
-        <label className="block text-sm text-[#17001C]/75 md:col-span-2">
+        <label className="block text-sm text-[#17001C]/80 md:col-span-2">
           Message
           <textarea
             className="mt-2 min-h-40 w-full resize-y rounded-md border-2 border-[#17001C] bg-[#F4E7E7] px-4 py-3 text-sm text-[#17001C] outline-none ring-[#A335E6]/20 focus:border-[#7137E3] focus:ring-4"
@@ -87,14 +87,14 @@ export default function ContactForm() {
 
       <div className="mt-5 flex flex-wrap items-center gap-4">
         <button
-          className="font-primary fmc-button h-11 bg-[#F85259] px-5 text-sm text-white hover:bg-[#A335E6] disabled:opacity-60"
+          className="font-primary fmc-button fmc-button--primary h-11 px-5 text-sm disabled:opacity-60"
           disabled={isSending}
           type="submit"
         >
           {isSending ? "Sending..." : "Submit"}
         </button>
         {message ? (
-          <p className="text-sm text-[#17001C]/75" role="status">
+          <p className="text-sm text-[#17001C]/80" role="status">
             {message}
           </p>
         ) : null}

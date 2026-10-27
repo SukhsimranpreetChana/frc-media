@@ -85,7 +85,7 @@ export default function Footer() {
 
   return (
     <footer className="relative mt-auto border-t border-[#72007E]/30 bg-[#17001C] text-white">
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-2 px-6 py-3">
+      <div className="page-container flex flex-col gap-2 py-3">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-wrap items-center gap-3">
             <span className="font-primary text-xl uppercase text-[#F4E7E7]">
@@ -117,7 +117,7 @@ export default function Footer() {
         </div>
 
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
-          <p className="max-w-4xl text-xs leading-5 text-[#F4E7E7]/70">
+          <p className="max-w-4xl text-xs leading-5 text-[#F4E7E7]/85">
             We are not affiliated with FIRST HQ and FIRST® is not overseeing,
             involved with, or responsible for this activity, product, or service.
           </p>

@@ -9,7 +9,7 @@ export default function MediaClipCard({ clip }: MediaClipCardProps) {
   const thumbnailUrl = `/api/media/thumbnail?fileUrl=${encodeURIComponent(clip.videoUrl)}`;
 
   return (
-    <article className="fmc-dark-halftone flex h-full flex-col overflow-hidden rounded-2xl border-2 border-[#F85259]/50 text-white shadow-[8px_8px_0_#17001C]">
+    <article className="media-card flex h-full flex-col overflow-hidden rounded-2xl border-2 border-[#F85259]/50 text-white shadow-[8px_8px_0_#17001C]">
       <a
         className="block"
         href={clip.videoUrl}
@@ -50,7 +50,7 @@ export default function MediaClipCard({ clip }: MediaClipCardProps) {
         </div>
         <div className="mt-auto flex flex-col gap-2 sm:flex-row">
           <a
-            className="font-primary fmc-button inline-flex h-10 items-center justify-center bg-[#F85259] px-4 text-sm text-white hover:bg-[#A335E6]"
+            className="font-primary fmc-button fmc-button--primary inline-flex h-10 items-center justify-center px-4 text-sm"
             href={clip.videoUrl}
             target="_blank"
             rel="noopener noreferrer"

@@ -21,18 +21,20 @@ export const metadata: Metadata = {
 export default function ContactPage() {
   return (
     <main className="fmc-surface flex-1">
-      <section className="mx-auto w-full max-w-4xl px-6 py-12">
-        <div className="max-w-2xl border-l-8 border-[#F85259] bg-white/75 px-5 py-4">
+      <section className="page-container py-12">
+        <div className="page-intro max-w-2xl border-l-8 border-[#F85259] bg-white/75 px-5 py-4">
           <p className="text-sm text-[#72007E]">Contact</p>
           <h1 className="mt-2 text-3xl text-[#17001C]">
             Send FIRST Media Community a message
           </h1>
-          <p className="mt-4 text-[#17001C]/75">
+          <p className="mt-4 text-[#17001C]/80">
             Fill out the form to email us about business inquiries.
           </p>
         </div>
 
-        <ContactForm />
+        <div className="max-w-3xl">
+          <ContactForm />
+        </div>
       </section>
     </main>
   );

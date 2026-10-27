@@ -350,7 +350,7 @@ export default function FooterHandlesAdmin({
         <div className="mt-5 grid gap-3">
           {handles.map((item) => (
             <div
-              className="fmc-dark-halftone flex flex-col gap-3 rounded-2xl border-2 border-[#F85259]/40 px-4 py-3 text-white sm:flex-row sm:items-center sm:justify-between"
+              className="media-card flex flex-col gap-3 rounded-2xl border-2 border-[#F85259]/40 px-4 py-3 text-white sm:flex-row sm:items-center sm:justify-between"
               key={item.id}
             >
               <div className="flex items-center gap-3">

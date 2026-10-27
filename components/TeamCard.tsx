@@ -37,7 +37,7 @@ export default function TeamCard({ team }: TeamCardProps) {
       <h3 className="mt-3 overflow-wrap-anywhere text-lg leading-tight text-[#17001C]">
         {team.name}
       </h3>
-      <p className="mt-2 text-sm leading-5 text-[#17001C]/75">
+      <p className="mt-2 text-sm leading-5 text-[#17001C]/80">
         {team.description}
       </p>
       <div className="mt-3 flex flex-wrap gap-2 text-xs text-[#72007E]">
@@ -51,13 +51,13 @@ export default function TeamCard({ team }: TeamCardProps) {
       </div>
       <div className="mt-auto grid gap-3 pt-5 sm:grid-cols-[repeat(auto-fit,minmax(8.5rem,1fr))]">
         <Link
-          className="font-primary fmc-button inline-flex h-10 min-w-0 items-center justify-center whitespace-nowrap bg-[#7137E3] px-3 text-sm text-white hover:bg-[#A335E6]"
+          className="font-primary fmc-button fmc-button--primary inline-flex h-10 min-w-0 items-center justify-center whitespace-nowrap px-3 text-sm"
           href={`/upload?team=${encodedTeamNumber}#upload-media`}
         >
           Upload
         </Link>
         <Link
-          className="font-primary fmc-button inline-flex h-10 min-w-0 items-center justify-center whitespace-nowrap bg-[#17001C] px-3 text-sm text-white hover:bg-[#72007E]"
+          className="font-primary fmc-button fmc-button--secondary inline-flex h-10 min-w-0 items-center justify-center whitespace-nowrap px-3 text-sm"
           href={`/teams?team=${encodedTeamNumber}`}
         >
           Find clips

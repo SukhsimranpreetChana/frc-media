@@ -34,13 +34,13 @@ export default function ExternalMediaCard({ item }: ExternalMediaCardProps) {
             {item.label}
           </p>
           <h3 className="mt-3 text-lg text-[#17001C]">{item.title}</h3>
-          <p className="mt-2 text-sm text-[#17001C]/65">
+          <p className="mt-2 text-sm text-[#17001C]/80">
             {item.year ? `${item.year} / ` : null}
             {item.source === "tba" ? "The Blue Alliance" : "YouTube"}
           </p>
         </div>
         <a
-          className="font-primary fmc-button mt-auto inline-flex h-10 items-center justify-center bg-[#7137E3] px-4 text-sm text-white hover:bg-[#A335E6]"
+          className="font-primary fmc-button fmc-button--primary mt-auto inline-flex h-10 items-center justify-center px-4 text-sm"
           href={item.url}
           rel="noopener noreferrer"
           target="_blank"

@@ -28,12 +28,12 @@ export default function MatchVideoCard({ video }: MatchVideoCardProps) {
             Match Video
           </p>
           <h3 className="mt-3 text-lg text-[#17001C]">{video.title}</h3>
-          <p className="mt-2 text-sm text-[#17001C]/65">
+          <p className="mt-2 text-sm text-[#17001C]/80">
             {video.eventKey} / {video.year} / YouTube
           </p>
         </div>
         <a
-          className="font-primary fmc-button mt-auto inline-flex h-10 items-center justify-center bg-[#F85259] px-4 text-sm text-white hover:bg-[#A335E6]"
+          className="font-primary fmc-button fmc-button--primary mt-auto inline-flex h-10 items-center justify-center px-4 text-sm"
           href={video.url}
           rel="noopener noreferrer"
           target="_blank"

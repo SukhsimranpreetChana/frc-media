@@ -39,7 +39,7 @@ export default function TermsPrompt() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h2 className="text-base text-[#17001C]">Terms, privacy &amp; cookies</h2>
-          <p className="mt-2 text-sm leading-5 text-[#17001C]/75">
+          <p className="mt-2 text-sm leading-5 text-[#17001C]/80">
             By using FIRST Media Community, you agree to our{" "}
             <Link className={linkClassName} href="/terms">
               Terms of Service
@@ -56,7 +56,7 @@ export default function TermsPrompt() {
           </p>
         </div>
         <button
-          className="font-primary fmc-button h-10 shrink-0 bg-[#F85259] px-4 text-sm text-white hover:bg-[#A335E6] sm:min-w-48"
+          className="font-primary fmc-button fmc-button--primary h-10 shrink-0 px-4 text-sm sm:min-w-48"
           onClick={acceptTerms}
           type="button"
         >

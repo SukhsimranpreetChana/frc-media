@@ -8,7 +8,7 @@ import { canViewDriveFile } from "@/lib/mediaAccess";
 export const runtime = "nodejs";
 
 // Only a few sizes, so the cache is shared and nobody can request huge originals.
-const allowedPreviewSizes = [400, 2048];
+const allowedPreviewSizes = [400, 800, 2048];
 
 function getPreviewSize(value: string | null) {
   const size = Number(value);

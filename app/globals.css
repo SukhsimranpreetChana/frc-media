@@ -15,7 +15,6 @@
   --fmc-plum: #72007e;
   --fmc-violet: #a335e6;
   --fmc-indigo: #7137e3;
-  --halftone-offset: 0px;
 }
 
 :root[data-theme="dark"] {
@@ -52,7 +51,9 @@ body {
     rgba(113, 55, 227, 0.18) 1px,
     transparent 1.6px
   );
-  background-position: 0 0;
+  /* Centered: half the leftover width (window widths are rarely a multiple of
+     the grid) goes on each side, so both side margins hold the same dots. */
+  background-position: calc(mod(100%, var(--dot-grid)) / 2) 0;
   background-size: var(--dot-grid) var(--dot-grid);
   color: var(--foreground);
   font-family: var(--font-nunito);
@@ -78,10 +79,11 @@ body {
 }
 
 /*
- * Lines that sweep across the page, spread from top to bottom. The layer
+ * Lines that sweep across the home page, spread from top to bottom. The layer
  * covers the whole page (it scrolls with it) at z-index 0 and comes before the
  * page in the DOM, so page blocks (cards, text panels, the navbar) paint over
- * it and the lines pass behind them.
+ * it and the lines pass behind them. Kept few, faint, and slow so they never
+ * compete with the media.
  */
 .motion-lines {
   position: absolute;
@@ -89,7 +91,7 @@ body {
   z-index: 0;
   overflow: hidden;
   pointer-events: none;
-  opacity: 0.32;
+  opacity: 0.22;
 }
 
 /*
@@ -134,7 +136,10 @@ body {
   --stroke: clamp(120px, 32vh, 360px);
   top: 0;
   left: var(--line-position);
-  left: calc(round(down, var(--line-position), var(--dot-grid)) - 1.5px);
+  left: calc(
+    round(down, var(--line-position), var(--dot-grid)) +
+      mod(100%, var(--dot-grid)) / 2 - 1.5px
+  );
   width: 3px;
   height: 100%;
   background: linear-gradient(
@@ -147,75 +152,37 @@ body {
 
 /* Negative delays start each line mid-journey, so the page is never empty on load. */
 .motion-line:nth-child(1) {
-  --line-position: 7%;
+  --line-position: 22%;
   --line-color: #f85259;
-  --line-duration: 14s;
-  --line-delay: -3s;
+  --line-duration: 22s;
+  --line-delay: -5s;
 }
 
 .motion-line:nth-child(2) {
-  --line-position: 23%;
+  --line-position: 51%;
   --line-color: #7137e3;
-  --line-duration: 18s;
-  --line-delay: -11s;
+  --line-duration: 26s;
+  --line-delay: -16s;
   --line-direction: reverse;
 }
 
 .motion-line:nth-child(3) {
-  --line-position: 40%;
+  --line-position: 80%;
   --line-color: #a335e6;
-  --line-duration: 16s;
-  --line-delay: -6s;
+  --line-duration: 24s;
+  --line-delay: -10s;
 }
 
+/* The vertical line crosses the whole page height, so it gets a longer trip. */
 .motion-line:nth-child(4) {
-  --line-position: 56%;
-  --line-color: #72007e;
-  --line-duration: 20s;
-  --line-delay: -15s;
-  --line-direction: reverse;
-}
-
-.motion-line:nth-child(5) {
-  --line-position: 73%;
-  --line-color: #f85259;
-  --line-duration: 17s;
-  --line-delay: -9s;
-}
-
-.motion-line:nth-child(6) {
-  --line-position: 89%;
-  --line-color: #7137e3;
-  --line-duration: 15s;
-  --line-delay: -4s;
-  --line-direction: reverse;
-}
-
-/* Vertical lines cross the whole page height, so they get longer trips. */
-.motion-line:nth-child(7) {
   --line-position: 9%;
   --line-color: #a335e6;
-  --line-duration: 30s;
-  --line-delay: -8s;
-}
-
-.motion-line:nth-child(8) {
-  --line-position: 52%;
-  --line-color: #f85259;
-  --line-duration: 36s;
-  --line-delay: -20s;
-  --line-direction: reverse;
-}
-
-.motion-line:nth-child(9) {
-  --line-position: 88%;
-  --line-color: #7137e3;
-  --line-duration: 33s;
-  --line-delay: -13s;
+  --line-duration: 44s;
+  --line-delay: -14s;
 }
 
 :root[data-theme="dark"] .motion-lines {
-  opacity: 0.4;
+  opacity: 0.3;
 }
 
 h1,
@@ -226,43 +193,127 @@ h3,
   font-weight: 400;
 }
 
-.fmc-dark-halftone {
-  background:
-    radial-gradient(circle at 1px 1px, rgba(248, 82, 89, 0.35) 1px, transparent 1.7px),
-    linear-gradient(135deg, #17001c 0%, #000000 52%, #17001c 100%);
-  background-position:
-    calc(var(--halftone-offset) * -1) var(--halftone-offset),
-    center;
-  background-size: 16px 16px, 100% 100%;
+/*
+ * The site's two card styles share one corner size and one offset shadow:
+ * .scrap-card for text and forms, .media-card for photos and videos. Media
+ * cards are flat dark so nothing competes with the image.
+ */
+.media-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 2px solid rgba(248, 82, 89, 0.5);
+  border-radius: 12px;
+  background: #17001c;
+  box-shadow: 6px 6px 0 #17001c;
+  color: #ffffff;
+}
+
+:root[data-theme="dark"] .media-card {
+  box-shadow: 6px 6px 0 rgba(248, 82, 89, 0.62);
+}
+
+/* Photos framed on dark sections: same border as a media card, purple shadow. */
+.photo-frame {
+  position: relative;
+  overflow: hidden;
+  border: 2px solid rgba(248, 82, 89, 0.6);
+  border-radius: 12px;
+  background: #000000;
+  box-shadow: 6px 6px 0 #7137e3;
+}
+
+/* Section titles get a short accent bar instead of a full-width rule. */
+.section-heading h2::after {
+  content: "";
+  display: block;
+  width: 3rem;
+  height: 4px;
+  margin-top: 0.6rem;
+  border-radius: 999px;
+  background: #f85259;
+}
+
+/*
+ * Page content spans the whole window, inset a whole number of grid cells
+ * (three, or two on phones) so its edges run in the gaps between dot columns.
+ * The navbar's content uses the same inset, so both line up with the dots and
+ * with each other. The right side takes the same leftover sliver as the header.
+ */
+body {
+  --page-inset: calc(var(--dot-grid) * 3);
+}
+
+@media (max-width: 640px) {
+  body {
+    --page-inset: calc(var(--dot-grid) * 2);
+  }
+}
+
+.page-container {
+  width: 100%;
+  padding-left: calc(var(--page-inset) + mod(100%, var(--dot-grid)) / 2);
+  padding-right: calc(var(--page-inset) + mod(100%, var(--dot-grid)) / 2);
+}
+
+/* Side-scrolling card row. It loops endlessly, so a scrollbar would be
+   misleading; the arrows and swiping move it instead. */
+.collab-scroller {
+  scrollbar-width: none;
+}
+
+.collab-scroller::-webkit-scrollbar {
+  display: none;
+}
+
+/* Stand-in for collabs without a thumbnail (Instagram posts without an image). */
+.collab-placeholder {
+  background: #17001c;
+  transition: background-color 200ms ease;
+}
+
+.collab-placeholder:hover {
+  background: #72007e;
+}
+
+/* Card lists add columns as the window widens instead of stretching three.
+   Cards top out at 24rem, and a row with only a few cards sits centered. */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 24rem));
+  justify-content: center;
+  gap: 1.5rem;
 }
 
 /* One dot cell of space around the navbar, so it sits exactly on the dot grid. */
 .site-header {
-  padding: var(--dot-grid);
-  /* Window widths are rarely a multiple of the grid, so give the leftover
-     sliver to the right gap; that keeps the bar's right edge on a grid line. */
-  padding-right: calc(var(--dot-grid) + mod(100%, var(--dot-grid)));
+  /* One cell plus half the leftover sliver on each side, matching the
+     centered dot grid, so exactly one column of dots shows either side. */
+  padding: var(--dot-grid) calc(var(--dot-grid) + mod(100%, var(--dot-grid)) / 2);
 }
 
-/* Same dark gradient as .fmc-dark-halftone, minus the dots, so the navbar stays clean.
-   Its closed height is a whole number of dot cells so the row below it lines up too. */
+/* Dark gradient bar with no dots, so the navbar stays clean. Its closed height
+   is a whole number of dot cells so the row below it lines up too. */
 .nav-bar-surface {
   min-height: calc(var(--dot-grid) * 6);
+  /* Header gap + bar border + this padding = the page inset, so the logo and
+     links start on the same grid line as the page content. */
+  padding-inline: calc(var(--page-inset) - var(--dot-grid) - 2px);
   background: linear-gradient(135deg, #17001c 0%, #000000 52%, #17001c 100%);
 }
 
 .scrap-card {
   position: relative;
   border: 2px solid rgba(23, 0, 28, 0.9);
-  border-radius: 8px;
+  border-radius: 12px;
   background: #ffffff;
-  box-shadow: 8px 8px 0 #17001c;
+  box-shadow: 6px 6px 0 #17001c;
 }
 
 :root[data-theme="dark"] .scrap-card {
   border-color: rgba(248, 82, 89, 0.82);
   background: var(--theme-surface);
-  box-shadow: 8px 8px 0 rgba(248, 82, 89, 0.62);
+  box-shadow: 6px 6px 0 rgba(248, 82, 89, 0.62);
 }
 
 .legal-content a {
@@ -445,7 +496,8 @@ h3,
   }
 }
 
-.scrap-card::before {
+/* Tape is a special touch for a few decorative cards, so it is opt-in. */
+.scrap-card--taped::before {
   content: "";
   position: absolute;
   top: -13px;
@@ -457,12 +509,12 @@ h3,
   background: rgba(244, 231, 231, 0.85);
 }
 
-:root[data-theme="dark"] .scrap-card::before {
+:root[data-theme="dark"] .scrap-card--taped::before {
   border-color: rgba(248, 82, 89, 0.38);
   background: rgba(113, 55, 227, 0.45);
 }
 
-.scrap-card:nth-child(2n)::before {
+.scrap-card--taped:nth-child(2n)::before {
   left: auto;
   right: 28px;
   rotate: 5deg;
@@ -499,6 +551,29 @@ h3,
 .fmc-button:hover {
   transform: translate(2px, 2px);
   box-shadow: 2px 2px 0 #72007e;
+}
+
+/* The two public button styles: red for the main action, dark for everything else. */
+.fmc-button--primary {
+  background: #f85259;
+  color: #ffffff;
+}
+
+.fmc-button--secondary {
+  background: #17001c;
+  color: #ffffff;
+}
+
+.fmc-button--primary:hover,
+.fmc-button--secondary:hover {
+  background: #a335e6;
+}
+
+.fmc-button--primary:disabled,
+.fmc-button--secondary:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+  transform: none;
 }
 
 .fmc-file-picker {
@@ -551,69 +626,108 @@ input:focus-visible + div .fmc-file-picker {
   outline-offset: 3px;
 }
 
-.home-mission-section {
+.home-hero {
   position: relative;
   overflow: hidden;
-  contain: paint;
-  background:
-    linear-gradient(90deg, rgba(0, 0, 0, 0.52), rgba(0, 0, 0, 0.18) 58%, rgba(0, 0, 0, 0.48));
-  background-color: #000000;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: 100% 100%;
 }
 
-.home-mission-section::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background:
-    linear-gradient(180deg, rgba(0, 0, 0, 0.42), transparent 36%, rgba(0, 0, 0, 0.34)),
-    radial-gradient(ellipse at 42% 50%, rgba(248, 82, 89, 0.14), transparent 32%);
-  opacity: 0.9;
-}
-
-.home-mission-section::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: rgba(0, 0, 0, 0.22);
-}
-
-.home-mission-section > * {
-  position: relative;
-  z-index: 1;
-}
-
-.home-mission-content {
-  align-items: start;
-}
-
-.home-mascot-sticker {
-  display: none;
-  height: auto;
-  opacity: 0.82;
-}
-
-@media (min-width: 1024px) {
-  .home-mission-content {
-    grid-template-columns: minmax(0, 1fr);
-  }
-}
-
+/*
+ * Text and wall side by side from 1280px: the text never gets narrower than a comfortable
+ * reading width, the wall grows up to its full size, and any extra room on
+ * wide screens goes to the text.
+ */
 @media (min-width: 1280px) {
-  .home-mission-content {
-    grid-template-columns: minmax(0, 1fr) 22rem;
+  .home-hero__content {
+    grid-template-columns: minmax(30rem, 1fr) minmax(0, 57rem);
+    column-gap: 4rem;
+    align-items: center;
   }
+}
 
-  .home-mascot-sticker {
-    display: block;
-    align-self: center;
+/*
+ * The latest upload from five different teams: one big tile and four small,
+ * in two rows. The wall keeps its shape as it scales, maxes out at 57rem wide,
+ * and sits at the right, so wide screens add space rather than bigger photos.
+ */
+.media-wall {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  width: 100%;
+  max-width: 57rem;
+  aspect-ratio: 2 / 1;
+}
+
+/* Below 1280px the wall stacks under the text; beside it, it sits at the right. */
+@media (min-width: 1280px) {
+  .media-wall {
+    aspect-ratio: 2.8 / 1;
     justify-self: end;
-    width: 22rem;
-    transform: translateX(3rem);
+  }
+}
+
+.media-wall__tile {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  border: 2px solid rgba(248, 82, 89, 0.5);
+  border-radius: 10px;
+  background: #17001c;
+  cursor: pointer;
+}
+
+.media-wall__tile:first-child {
+  grid-column: span 2;
+  grid-row: span 2;
+}
+
+.media-wall__tile img {
+  transition: transform 300ms ease;
+}
+
+.media-wall__tile:hover img,
+.media-wall__tile:focus-visible img {
+  transform: scale(1.05);
+}
+
+.media-wall__tile:focus-visible {
+  outline: 3px solid #a335e6;
+  outline-offset: -3px;
+}
+
+.media-wall__caption {
+  position: absolute;
+  left: 0.5rem;
+  bottom: 0.5rem;
+  border-radius: 6px;
+  background: rgba(23, 0, 28, 0.85);
+  padding: 0.2rem 0.45rem;
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* Until there are uploads: one tall photo on the left, two stacked on the right. */
+.media-wall--fallback {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.media-wall--fallback .media-wall__tile:first-child {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+}
+
+/* The mascot sits beside the "Who are we?" heading, about heading size. */
+.home-hero__mascot {
+  width: 3.5rem;
+  height: auto;
+  flex-shrink: 0;
+}
+
+@media (min-width: 640px) {
+  .home-hero__mascot {
+    width: 5rem;
   }
 }
 
@@ -748,24 +862,28 @@ input:focus-visible + div .fmc-file-picker {
   box-shadow: 5px 5px 0 rgba(248, 82, 89, 0.45);
 }
 
-.recent-uploads-page-section {
-  padding: 2rem 0 0;
-}
-
 .recent-uploads-section {
   background: transparent;
-  padding: 1.5rem 0 1.75rem;
+  padding: 0 0 1.75rem;
 }
 
-.home-team-search-section {
-  background: transparent;
-  padding: 1.5rem 0 4rem;
-}
-
+/* Four team previews: one, two, or four per row, so no row has a lone card. */
 .home-team-preview-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .home-team-preview-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1280px) {
+  .home-team-preview-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
 }
 
 .recent-uploads-viewport {
@@ -782,9 +900,8 @@ input:focus-visible + div .fmc-file-picker {
 
 .recent-uploads-grid {
   display: grid;
-  grid-template-columns: repeat(var(--recent-upload-columns, 1), minmax(0, 19rem));
+  grid-template-columns: repeat(var(--recent-upload-columns, 1), minmax(0, 1fr));
   gap: 1rem;
-  justify-content: center;
 }
 
 .recent-uploads-track[class*="recent-uploads-track--exit"] {
@@ -890,7 +1007,7 @@ input:focus-visible + div .fmc-file-picker {
   border-radius: 10px;
   background: #f85259;
   box-shadow: 0 0 0 0 #17001c;
-  transform: translateY(calc(100% - 4px)) scaleX(0.72);
+  transform: translateY(calc(100% - 4px)) scaleX(0);
   transform-origin: bottom center;
   transition:
     transform 260ms cubic-bezier(0.16, 1, 0.3, 1),
@@ -907,6 +1024,20 @@ input:focus-visible + div .fmc-file-picker {
 .nav-tab:focus-visible::before {
   transform: translateY(0) scaleX(1);
   box-shadow: 3px 3px 0 #72007e;
+}
+
+/* Only the page you are on gets the red bar under its link. */
+.nav-tab[aria-current="page"] {
+  color: #ffffff;
+}
+
+.nav-tab[aria-current="page"]::before {
+  transform: translateY(calc(100% - 4px)) scaleX(0.72);
+}
+
+.nav-tab[aria-current="page"]:hover::before,
+.nav-tab[aria-current="page"]:focus-visible::before {
+  transform: translateY(0) scaleX(1);
 }
 
 .nav-tab:focus-visible {
@@ -954,7 +1085,8 @@ input:focus-visible + div .fmc-file-picker {
   outline-offset: 3px;
 }
 
-@media (min-width: 1536px) {
+/* Full menu from laptop widths (Tailwind's xl) up; the hamburger is for smaller screens. */
+@media (min-width: 1280px) {
   .nav-menu-toggle {
     display: none !important;
   }
@@ -1080,7 +1212,7 @@ input:focus-visible + div .fmc-file-picker {
   }
 }
 
-@media (max-width: 1535px) {
+@media (max-width: 1279px) {
   .nav-brand-row {
     display: grid;
     grid-template-columns: minmax(0, 1fr) 2.35rem;
@@ -1158,10 +1290,6 @@ input:focus-visible + div .fmc-file-picker {
 }
 
 @media (max-width: 640px) {
-  header.no-route-transition nav {
-    padding-inline: 1rem;
-  }
-
   .scrap-card {
     box-shadow: 5px 5px 0 #17001c;
   }
@@ -1170,7 +1298,7 @@ input:focus-visible + div .fmc-file-picker {
     box-shadow: 5px 5px 0 rgba(248, 82, 89, 0.62);
   }
 
-  .scrap-card::before {
+  .scrap-card--taped::before {
     width: 56px;
     height: 18px;
   }

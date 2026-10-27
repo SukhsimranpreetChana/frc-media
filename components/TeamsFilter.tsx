@@ -49,7 +49,7 @@ const randomTeamPool = [
 ];
 
 function pickRandomTeams() {
-  return [...randomTeamPool].sort(() => Math.random() - 0.5).slice(0, 3);
+  return [...randomTeamPool].sort(() => Math.random() - 0.5).slice(0, 4);
 }
 
 const mediaPageSize = 6;
@@ -103,12 +103,12 @@ function PaginationControls({
 
   return (
     <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
-      <p className="text-sm text-[#17001C]/65">
+      <p className="text-sm text-[#17001C]/80">
         Page {currentPage} of {pageCount} for {label}
       </p>
       <div className="flex gap-3">
         <button
-          className="font-primary fmc-button h-10 bg-[#17001C] px-4 text-sm text-white hover:bg-[#72007E] disabled:opacity-45"
+          className="font-primary fmc-button fmc-button--secondary h-10 px-4 text-sm disabled:opacity-45"
           disabled={currentPage === 1}
           onClick={() => onPageChange(Math.max(1, currentPage - 1))}
           type="button"
@@ -116,7 +116,7 @@ function PaginationControls({
           Previous
         </button>
         <button
-          className="font-primary fmc-button h-10 bg-[#7137E3] px-4 text-sm text-white hover:bg-[#A335E6] disabled:opacity-45"
+          className="font-primary fmc-button fmc-button--primary h-10 px-4 text-sm disabled:opacity-45"
           disabled={currentPage === pageCount}
           onClick={() => onPageChange(Math.min(pageCount, currentPage + 1))}
           type="button"
@@ -673,7 +673,7 @@ export default function TeamsFilter({
       </label>
 
       {!isTeamNumberSearch && isLoadingPreviewTeams && !normalizedQuery ? (
-        <div className="mt-6 grid gap-4 md:grid-cols-3">
+        <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {selectedPreviewTeams.map((teamNumber) => (
             <div
               className="scrap-card min-h-64 animate-pulse p-5"
@@ -689,7 +689,7 @@ export default function TeamsFilter({
       ) : null}
 
       {!isTeamNumberSearch && (!isLoadingPreviewTeams || normalizedQuery) ? (
-        <div className="mt-6 grid gap-4 md:grid-cols-3">
+        <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {filteredTeams.map((team) => (
             <TeamCard key={team.id} team={team} />
           ))}
@@ -697,14 +697,14 @@ export default function TeamsFilter({
       ) : null}
 
       {isLoadingTeam ? (
-        <div className="mt-6 rounded-lg border-2 border-dashed border-[#72007E] bg-[#F4E7E7] p-6 text-sm text-[#17001C]/70">
+        <div className="mt-6 rounded-lg border-2 border-dashed border-[#72007E] bg-[#F4E7E7] p-6 text-sm text-[#17001C]/80">
           Looking up FRC {normalizedQuery}...
         </div>
       ) : null}
 
       {isTeamNumberSearch && remoteTeam ? (
         <section className="mt-6">
-          <div className="mb-4 flex flex-wrap items-end justify-between gap-3 border-b-4 border-[#17001C] pb-3">
+          <div className="section-heading mb-4 flex flex-wrap items-end justify-between gap-3">
             <div>
               <p className="text-sm text-[#72007E]">Team profile</p>
               <h2 className="text-2xl text-[#17001C]">
@@ -729,7 +729,7 @@ export default function TeamsFilter({
 
       {isTeamNumberSearch ? (
         <section className="mt-8">
-          <div className="mb-4 flex flex-wrap items-end justify-between gap-3 border-b-4 border-[#F85259] pb-3">
+          <div className="section-heading mb-4 flex flex-wrap items-end justify-between gap-3">
             <div>
               <p className="text-sm text-[#72007E]">FMC Approved Media</p>
               <h2 className="text-2xl text-[#17001C]">
@@ -739,24 +739,24 @@ export default function TeamsFilter({
           </div>
 
           {isLoadingClips ? (
-            <div className="rounded-lg border-2 border-dashed border-[#72007E] bg-[#F4E7E7] p-6 text-sm text-[#17001C]/70">
+            <div className="rounded-lg border-2 border-dashed border-[#72007E] bg-[#F4E7E7] p-6 text-sm text-[#17001C]/80">
               Loading uploaded media...
             </div>
           ) : null}
 
           {isAdmin && adminMessage ? (
-            <p className="mb-4 text-sm text-[#17001C]/75">{adminMessage}</p>
+            <p className="mb-4 text-sm text-[#17001C]/80">{adminMessage}</p>
           ) : null}
 
           {!isLoadingClips && sortedTeamCollages.length > 0 ? (
             <>
-              <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+              <div className="card-grid">
                 {visibleTeamCollages.map((collage) => (
                   <div className="flex flex-col gap-3" key={collage.id}>
                     <MediaCollageCard collage={collage} />
                     {isAdmin ? (
                       <button
-                        className="font-primary fmc-button h-10 bg-[#17001C] px-4 text-sm text-white hover:bg-[#72007E] disabled:opacity-60"
+                        className="font-primary fmc-button fmc-button--secondary h-10 px-4 text-sm disabled:opacity-60"
                         disabled={removingCollageId === collage.id}
                         onClick={() => void handleRemoveCollage(collage)}
                         type="button"
@@ -777,7 +777,7 @@ export default function TeamsFilter({
           ) : null}
 
           {!isLoadingClips && sortedTeamCollages.length === 0 ? (
-            <div className="rounded-lg border-2 border-dashed border-[#72007E] bg-[#F4E7E7] p-6 text-sm text-[#17001C]/70">
+            <div className="rounded-lg border-2 border-dashed border-[#72007E] bg-[#F4E7E7] p-6 text-sm text-[#17001C]/80">
               Sorry there is no media for this team right now :/{" "}
               <a
                 className="font-primary text-[#7137E3] underline decoration-[#F85259] decoration-2 underline-offset-4 hover:text-[#F85259]"
@@ -792,7 +792,7 @@ export default function TeamsFilter({
 
       {isTeamNumberSearch ? (
         <section className="mt-10">
-          <div className="mb-4 flex flex-wrap items-end justify-between gap-3 border-b-4 border-[#7137E3] pb-3">
+          <div className="section-heading mb-4 flex flex-wrap items-end justify-between gap-3">
             <div>
               <p className="text-sm text-[#72007E]">The Blue Alliance Media</p>
               <h2 className="text-2xl text-[#17001C]">
@@ -802,14 +802,14 @@ export default function TeamsFilter({
           </div>
 
           {isLoadingTbaMedia ? (
-            <div className="rounded-lg border-2 border-dashed border-[#72007E] bg-[#F4E7E7] p-6 text-sm text-[#17001C]/70">
+            <div className="rounded-lg border-2 border-dashed border-[#72007E] bg-[#F4E7E7] p-6 text-sm text-[#17001C]/80">
               Loading TBA media...
             </div>
           ) : null}
 
           {!isLoadingTbaMedia && sortedTbaMedia.length > 0 ? (
             <>
-              <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+              <div className="card-grid">
                 {visibleTbaMedia.map((item) => (
                   <ExternalMediaCard item={item} key={item.id} />
                 ))}
@@ -824,7 +824,7 @@ export default function TeamsFilter({
           ) : null}
 
           {!isLoadingTbaMedia && sortedTbaMedia.length === 0 ? (
-            <div className="rounded-lg border-2 border-dashed border-[#72007E] bg-[#F4E7E7] p-6 text-sm text-[#17001C]/70">
+            <div className="rounded-lg border-2 border-dashed border-[#72007E] bg-[#F4E7E7] p-6 text-sm text-[#17001C]/80">
               {tbaMediaConfigured
                 ? "No TBA media was found for this team yet."
                 : "Add a TBA_AUTH_KEY server env var to show media from The Blue Alliance."}
@@ -835,7 +835,7 @@ export default function TeamsFilter({
 
       {isTeamNumberSearch ? (
         <section className="mt-10">
-          <div className="mb-4 flex flex-wrap items-end justify-between gap-3 border-b-4 border-[#A335E6] pb-3">
+          <div className="section-heading mb-4 flex flex-wrap items-end justify-between gap-3">
             <div>
               <p className="text-sm text-[#72007E]">YouTube Results</p>
               <h2 className="text-2xl text-[#17001C]">
@@ -845,14 +845,14 @@ export default function TeamsFilter({
           </div>
 
           {isLoadingYoutubeResults ? (
-            <div className="rounded-lg border-2 border-dashed border-[#72007E] bg-[#F4E7E7] p-6 text-sm text-[#17001C]/70">
+            <div className="rounded-lg border-2 border-dashed border-[#72007E] bg-[#F4E7E7] p-6 text-sm text-[#17001C]/80">
               Loading YouTube results...
             </div>
           ) : null}
 
           {!isLoadingYoutubeResults && sortedYoutubeResults.length > 0 ? (
             <>
-              <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+              <div className="card-grid">
                 {visibleYoutubeResults.map((item) => (
                   <ExternalMediaCard item={item} key={item.id} />
                 ))}
@@ -867,7 +867,7 @@ export default function TeamsFilter({
           ) : null}
 
           {!isLoadingYoutubeResults && sortedYoutubeResults.length === 0 ? (
-            <div className="rounded-lg border-2 border-dashed border-[#72007E] bg-[#F4E7E7] p-6 text-sm text-[#17001C]/70">
+            <div className="rounded-lg border-2 border-dashed border-[#72007E] bg-[#F4E7E7] p-6 text-sm text-[#17001C]/80">
               {youtubeResultsConfigured
                 ? "No YouTube results were found for this team yet."
                 : "Add a YOUTUBE_API_KEY server env var to show general YouTube search results."}
@@ -878,7 +878,7 @@ export default function TeamsFilter({
 
       {isTeamNumberSearch ? (
         <section className="mt-10">
-          <div className="mb-4 flex flex-wrap items-end justify-between gap-3 border-b-4 border-[#F85259] pb-3">
+          <div className="section-heading mb-4 flex flex-wrap items-end justify-between gap-3">
             <div>
               <p className="text-sm text-[#72007E]">Match Video</p>
               <h2 className="text-2xl text-[#17001C]">
@@ -888,14 +888,14 @@ export default function TeamsFilter({
           </div>
 
           {isLoadingMatchVideos ? (
-            <div className="rounded-lg border-2 border-dashed border-[#72007E] bg-[#F4E7E7] p-6 text-sm text-[#17001C]/70">
+            <div className="rounded-lg border-2 border-dashed border-[#72007E] bg-[#F4E7E7] p-6 text-sm text-[#17001C]/80">
               Loading match videos...
             </div>
           ) : null}
 
           {!isLoadingMatchVideos && sortedMatchVideos.length > 0 ? (
             <>
-              <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+              <div className="card-grid">
                 {visibleMatchVideos.map((video) => (
                   <MatchVideoCard key={video.id} video={video} />
                 ))}
@@ -910,7 +910,7 @@ export default function TeamsFilter({
           ) : null}
 
           {!isLoadingMatchVideos && sortedMatchVideos.length === 0 ? (
-            <div className="rounded-lg border-2 border-dashed border-[#72007E] bg-[#F4E7E7] p-6 text-sm text-[#17001C]/70">
+            <div className="rounded-lg border-2 border-dashed border-[#72007E] bg-[#F4E7E7] p-6 text-sm text-[#17001C]/80">
               {matchVideosConfigured
                 ? "No match videos were found for this team yet."
                 : "Add a TBA_AUTH_KEY server env var to show match videos from The Blue Alliance."}
@@ -920,7 +920,7 @@ export default function TeamsFilter({
       ) : null}
 
       {filteredTeams.length === 0 && !isTeamNumberSearch ? (
-        <div className="mt-6 rounded-lg border-2 border-dashed border-[#72007E] bg-[#F4E7E7] p-6 text-sm text-[#17001C]/70">
+        <div className="mt-6 rounded-lg border-2 border-dashed border-[#72007E] bg-[#F4E7E7] p-6 text-sm text-[#17001C]/80">
           Sorry there is no media for this team right now :/{" "}
           <a
             className="font-primary text-[#7137E3] underline decoration-[#F85259] decoration-2 underline-offset-4 hover:text-[#F85259]"

@@ -93,59 +93,42 @@ export default function MediaCollageCard({
   }, [collage.folderUrl]);
 
   return (
-    <article className="fmc-dark-halftone flex h-full flex-col overflow-hidden rounded-2xl border-2 border-[#F85259]/50 text-white shadow-[8px_8px_0_#17001C]">
+    <article className="media-card h-full">
+      {/* Image first: the whole card opens the viewer, with a slim caption under the photo. */}
       <button
         aria-label={`View ${collage.title}`}
-        className="block w-full"
+        className="group flex h-full w-full flex-col text-left"
         onClick={() => setIsViewerOpen(true)}
         type="button"
       >
-        <div className="aspect-video overflow-hidden bg-[#17001C]">
+        <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#17001C]">
           {coverUrl && !hasCoverError ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               alt=""
-              className="h-full w-full object-cover transition duration-300 hover:scale-105"
+              className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
               onError={() => setHasCoverError(true)}
               src={coverUrl}
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center bg-[#17001C] text-sm uppercase tracking-wide text-[#F4E7E7]/70">
+            <div className="flex h-full w-full items-center justify-center bg-[#17001C] text-sm uppercase tracking-wide text-[#F4E7E7]/85">
               Media preview loading
             </div>
           )}
+          {creditRequired ? (
+            <span className="absolute left-2 top-2">
+              <CreditRequiredBadge compact />
+            </span>
+          ) : null}
+        </div>
+        <div className="flex flex-1 flex-col gap-1 p-4">
+          <h3 className="line-clamp-2 text-base text-white">{collage.title}</h3>
+          <p className="text-sm text-[#F4E7E7]/85">
+            FRC {collage.teamNumber} · {collage.year} · {fileCount} file
+            {fileCount === 1 ? "" : "s"}
+          </p>
         </div>
       </button>
-      <div className="flex flex-1 flex-col gap-4 p-5">
-        <div>
-          <p className="scrap-chip inline-flex rounded-md px-2 py-1 text-sm text-[#17001C]">
-            FRC {collage.teamNumber}
-          </p>
-          <h3 className="mt-3 line-clamp-2 text-xl text-white">
-            {collage.title}
-          </h3>
-          <p className="mt-2 text-sm text-[#F4E7E7]">
-            {collage.year} / {fileCount} file{fileCount === 1 ? "" : "s"}
-          </p>
-          <div
-            className={`mt-3 min-h-10 ${creditRequired ? "" : "invisible"}`}
-            aria-hidden={creditRequired ? undefined : "true"}
-          >
-            {creditRequired ? (
-              <CreditRequiredBadge />
-            ) : (
-              <span className="block h-10" />
-            )}
-          </div>
-        </div>
-        <button
-          className="font-primary fmc-button mt-auto inline-flex h-10 items-center justify-center bg-[#F85259] px-4 text-sm text-white hover:bg-[#A335E6]"
-          onClick={() => setIsViewerOpen(true)}
-          type="button"
-        >
-          View
-        </button>
-      </div>
       {isViewerOpen ? (
         <MediaViewer collage={collage} onClose={() => setIsViewerOpen(false)} />
       ) : null}

@@ -494,7 +494,7 @@ export default function ClipAdmin({ readOnly = false }: ClipAdminProps) {
 
             return (
               <div className="flex flex-col gap-4" key={group.id}>
-                <article className="fmc-dark-halftone flex flex-col overflow-hidden rounded-2xl border-2 border-[#F85259]/50 text-white shadow-[8px_8px_0_#17001C]">
+                <article className="media-card flex flex-col overflow-hidden rounded-2xl border-2 border-[#F85259]/50 text-white shadow-[8px_8px_0_#17001C]">
                   <a
                     className="block"
                     href={viewUrl}
@@ -640,7 +640,7 @@ export default function ClipAdmin({ readOnly = false }: ClipAdminProps) {
 
             return (
               <div className="flex flex-col gap-4" key={group.id}>
-                <article className="fmc-dark-halftone flex flex-col overflow-hidden rounded-2xl border-2 border-[#F85259]/50 text-white shadow-[8px_8px_0_#17001C]">
+                <article className="media-card flex flex-col overflow-hidden rounded-2xl border-2 border-[#F85259]/50 text-white shadow-[8px_8px_0_#17001C]">
                   <a
                     className="block"
                     href={viewUrl}

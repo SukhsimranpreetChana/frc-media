@@ -177,7 +177,7 @@ function InfoRow({ label, value }: { label: string; value?: ReactNode }) {
 
   return (
     <div className="flex justify-between gap-4 py-1.5">
-      <dt className="shrink-0 text-[#F4E7E7]/70">{label}</dt>
+      <dt className="shrink-0 text-[#F4E7E7]/85">{label}</dt>
       <dd className="min-w-0 break-words text-right text-white">{value}</dd>
     </div>
   );
@@ -294,10 +294,10 @@ function InfoPanel({
       ) : null}
 
       {!info && !hasError ? (
-        <p className="mt-4 text-xs text-[#F4E7E7]/70">Loading file details...</p>
+        <p className="mt-4 text-xs text-[#F4E7E7]/85">Loading file details...</p>
       ) : null}
       {hasError ? (
-        <p className="mt-4 text-xs text-[#F4E7E7]/70">
+        <p className="mt-4 text-xs text-[#F4E7E7]/85">
           File details are not available right now.
         </p>
       ) : null}
@@ -377,7 +377,7 @@ function ViewerStage({
   // Wait for the folder listing so a photo does not flash in Drive's player first.
   if (!isTypeKnown) {
     return (
-      <p className="text-sm uppercase tracking-wide text-[#F4E7E7]/70">
+      <p className="text-sm uppercase tracking-wide text-[#F4E7E7]/85">
         Loading...
       </p>
     );
@@ -399,7 +399,7 @@ function ViewerStage({
   return (
     <div className="relative flex h-full w-full items-center justify-center">
       {!isLoaded ? (
-        <p className="absolute text-sm uppercase tracking-wide text-[#F4E7E7]/70">
+        <p className="absolute text-sm uppercase tracking-wide text-[#F4E7E7]/85">
           Loading photo...
         </p>
       ) : null}
