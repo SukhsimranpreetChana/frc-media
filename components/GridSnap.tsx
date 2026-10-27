@@ -10,7 +10,6 @@ const snapTargets = [
   "main .section-heading",
   "main .scrap-card",
   "main .media-card",
-  "main .photo-frame",
 ].join(", ");
 
 // Sliding carousels clip and swap their cards, so their contents are left
@@ -25,7 +24,7 @@ export default function GridSnap() {
   useEffect(() => {
     const main = document.querySelector("main");
 
-    if (!main) {
+    if (!main || main.hasAttribute("data-no-grid-snap")) {
       return;
     }
 

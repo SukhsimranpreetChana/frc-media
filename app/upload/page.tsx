@@ -43,8 +43,9 @@ export default async function UploadPage({ searchParams }: UploadPageProps) {
   const initialTeamNumber = getDigitsOnly(getSearchParamValue(params.team));
 
   return (
-    <main className="fmc-surface flex-1">
-      <section className="page-container py-12">
+    // This page keeps its original centered layout, so it opts out of grid snapping.
+    <main className="fmc-surface flex-1" data-no-grid-snap>
+      <section className="mx-auto w-full max-w-6xl px-6 py-12">
         <div className="mb-10 page-intro max-w-2xl border-l-8 border-[#F85259] bg-white/75 px-5 py-4">
           <p className="text-sm text-[#72007E]">Public uploads</p>
           <h1 className="mt-2 text-3xl text-[#17001C]">Upload</h1>
@@ -54,24 +55,22 @@ export default async function UploadPage({ searchParams }: UploadPageProps) {
             search from newest to oldest year.
           </p>
         </div>
-        <div className="grid gap-8 lg:grid-cols-[minmax(0,52rem)_22rem] lg:items-start">
-          <PublicMediaUpload initialTeamNumber={initialTeamNumber} />
-          <div className="grid gap-8">
-            <figure className="scrap-card group overflow-hidden p-3">
-              <div className="relative aspect-[4/3] overflow-hidden rounded-md border-2 border-[#17001C]">
-                <Image
-                  alt="Robot detail seen through clear polycarbonate"
-                  className="object-cover"
-                  fill
-                  priority
-                  sizes="(min-width: 1024px) 22rem, 100vw"
-                  src="/media/alex-5193-detail.jpg"
-                />
-                <span className="photo-credit">{alexCredit}</span>
-              </div>
-            </figure>
-            <UploadLeaderboard />
+        <figure className="scrap-card scrap-card--taped group mb-10 rotate-[-0.5deg] overflow-hidden p-3">
+          <div className="relative aspect-[16/7] overflow-hidden rounded-md border-2 border-[#17001C]">
+            <Image
+              alt="Robot detail seen through clear polycarbonate"
+              className="object-cover"
+              fill
+              priority
+              sizes="(min-width: 1152px) 72rem, 100vw"
+              src="/media/alex-5193-detail.jpg"
+            />
+            <span className="photo-credit">{alexCredit}</span>
           </div>
+        </figure>
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
+          <PublicMediaUpload initialTeamNumber={initialTeamNumber} />
+          <UploadLeaderboard />
         </div>
       </section>
     </main>

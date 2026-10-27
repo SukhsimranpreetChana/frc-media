@@ -23,7 +23,7 @@ function CollaborationCard({
   return (
     <article
       aria-hidden={isCopy || undefined}
-      className="scrap-card flex w-[18rem] shrink-0 snap-start flex-col overflow-hidden p-0 sm:w-[20rem]"
+      className="scrap-card flex w-[78vw] max-w-[20rem] shrink-0 snap-center flex-col overflow-hidden p-0 sm:w-[20rem] sm:snap-start"
       inert={isCopy}
     >
       <a
@@ -195,10 +195,11 @@ export default function CollaborationsShowcase() {
         </div>
       </div>
 
-      <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3">
+      {/* Phones swipe the row; the arrows show from tablet width up. */}
+      <div className="grid grid-cols-1 items-center gap-3 sm:grid-cols-[auto_minmax(0,1fr)_auto]">
         <button
           aria-label="Show previous collabs"
-          className="font-primary fmc-button fmc-button--secondary flex h-10 w-10 items-center justify-center text-sm"
+          className="font-primary fmc-button fmc-button--secondary hidden h-10 w-10 items-center justify-center text-sm sm:flex"
           onClick={() => scrollByPage(-1)}
           type="button"
         >
@@ -222,7 +223,7 @@ export default function CollaborationsShowcase() {
         </div>
         <button
           aria-label="Show more collabs"
-          className="font-primary fmc-button fmc-button--secondary flex h-10 w-10 items-center justify-center text-sm"
+          className="font-primary fmc-button fmc-button--secondary hidden h-10 w-10 items-center justify-center text-sm sm:flex"
           onClick={() => scrollByPage(1)}
           type="button"
         >

@@ -80,7 +80,7 @@ export default async function UploadLeaderboard() {
   }
 
   return (
-    <aside className="scrap-card h-fit p-4 sm:p-5">
+    <aside className="scrap-card scrap-card--taped h-fit p-4 sm:p-5">
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-sm text-[#72007E]">Global leaderboard</p>

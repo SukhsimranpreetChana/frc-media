@@ -83,7 +83,7 @@ export default function MediaWall({ collages }: MediaWallProps) {
 
           return (
             <button
-              aria-label={`View ${collage.title}`}
+              aria-label={`View ${collage.title}, FRC ${collage.teamNumber}`}
               className="media-wall__tile"
               key={collage.id}
               onClick={() => setOpenCollage(collage)}
@@ -96,7 +96,6 @@ export default function MediaWall({ collages }: MediaWallProps) {
                 fetchPriority={index === 0 ? "high" : undefined}
                 src={getPreviewUrl(cover.videoUrl, index === 0 ? 800 : 400)}
               />
-              <span className="media-wall__caption">FRC {collage.teamNumber}</span>
             </button>
           );
         })}

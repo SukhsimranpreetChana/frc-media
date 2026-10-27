@@ -696,18 +696,6 @@ input:focus-visible + div .fmc-file-picker {
   outline-offset: -3px;
 }
 
-.media-wall__caption {
-  position: absolute;
-  left: 0.5rem;
-  bottom: 0.5rem;
-  border-radius: 6px;
-  background: rgba(23, 0, 28, 0.85);
-  padding: 0.2rem 0.45rem;
-  color: #ffffff;
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-
 /* Until there are uploads: one tall photo on the left, two stacked on the right. */
 .media-wall--fallback {
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -886,10 +874,17 @@ input:focus-visible + div .fmc-file-picker {
   }
 }
 
+/* The viewport clips sliding cards, so it leaves room for their borders and offset shadows. */
 .recent-uploads-viewport {
   position: relative;
-  min-height: 18rem;
   overflow: hidden;
+  padding: 2px 8px 10px 2px;
+}
+
+@media (min-width: 640px) {
+  .recent-uploads-viewport {
+    min-height: 18rem;
+  }
 }
 
 .recent-uploads-track {

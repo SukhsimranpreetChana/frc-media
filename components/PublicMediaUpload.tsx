@@ -440,7 +440,7 @@ export default function PublicMediaUpload({
 
   return (
     <form
-      className="scrap-card p-4 sm:p-5"
+      className="scrap-card scrap-card--taped p-4 sm:p-5"
       id="upload-media"
       onSubmit={handleSubmit}
     >
