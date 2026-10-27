@@ -38,12 +38,6 @@ export default function PrivacyPage() {
             <strong>Commission requests:</strong> the title, link, and cost
             range you submit.
           </li>
-          <li>
-            <strong>Admin login:</strong> FMC admins sign in with Discord. We
-            receive their Discord user ID and username (and, if set up, their
-            roles in the FMC Discord server) only to check that they are an
-            admin. We do not get Discord passwords.
-          </li>
         </ul>
       </LegalSection>
 
@@ -105,9 +99,6 @@ export default function PrivacyPage() {
           <li>
             <strong>Resend</strong> delivers contact form messages to our email
             inbox.
-          </li>
-          <li>
-            <strong>Discord</strong> handles admin sign-in.
           </li>
           <li>
             <strong>YouTube and The Blue Alliance</strong> provide team videos

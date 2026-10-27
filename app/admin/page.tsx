@@ -16,7 +16,7 @@ export default function AdminPage() {
             Content management
           </h1>
           <p className="mt-4 text-[#17001C]/75">
-            This is a private dashboard. Log in with Discord to proceed.
+            This is a private dashboard. Please enter the password to proceed.
           </p>
         </div>
 

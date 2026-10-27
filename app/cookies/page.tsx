@@ -23,12 +23,6 @@ const cookies: StorageItem[] = [
     lasts: "8 hours",
   },
   {
-    name: "fmc_discord_oauth_state",
-    purpose: "Protects the Discord admin login from forged requests.",
-    who: "Admins, while logging in",
-    lasts: "10 minutes",
-  },
-  {
     name: "fmc_google_oauth_state",
     purpose: "Protects the Google Drive connection step from forged requests.",
     who: "Admins, while connecting Drive",

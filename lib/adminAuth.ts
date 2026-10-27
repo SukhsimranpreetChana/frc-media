@@ -1,11 +1,14 @@
-import { createHmac, randomUUID, timingSafeEqual } from "crypto";
+import { createHash, createHmac, randomUUID, timingSafeEqual } from "crypto";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { isDiscordAuthConfigured } from "@/lib/discordAuth";
 
 const adminCookieName = "fmc_admin_session";
 const readOnlyCookieName = "fmc_admin_readonly_session";
 const sessionMaxAgeSeconds = 60 * 60 * 8;
+
+function getAdminPassword() {
+  return process.env.FMC_ADMIN_PASSWORD;
+}
 
 function getSessionSecret() {
   return process.env.ADMIN_SESSION_SECRET;
@@ -79,7 +82,7 @@ export function requireSameOrigin(request: Request) {
 }
 
 export function isAdminConfigured() {
-  return Boolean(getSessionSecret() && isDiscordAuthConfigured());
+  return Boolean(getAdminPassword() && getSessionSecret());
 }
 
 export async function hasAdminSession() {
@@ -117,9 +120,13 @@ function setSignedSessionCookie(response: NextResponse, cookieName: string) {
   });
 }
 
-export function setAdminSessionCookie(response: NextResponse) {
+export function createAdminSessionResponse() {
+  const response = NextResponse.json({ ok: true, role: "admin" });
+
   setSignedSessionCookie(response, adminCookieName);
   response.cookies.delete(readOnlyCookieName);
+
+  return response;
 }
 
 export function clearAdminSessionResponse() {
@@ -128,4 +135,17 @@ export function clearAdminSessionResponse() {
   response.cookies.delete(readOnlyCookieName);
 
   return response;
+}
+
+export async function verifyAdminPassword(password: string) {
+  const adminPassword = getAdminPassword();
+
+  if (!adminPassword) {
+    return false;
+  }
+
+  const provided = createHash("sha256").update(password).digest();
+  const expected = createHash("sha256").update(adminPassword).digest();
+
+  return timingSafeEqual(provided, expected);
 }
