@@ -84,7 +84,7 @@ export default function Footer() {
   }, []);
 
   return (
-    <footer className="mt-auto bg-[#17001C] text-white">
+    <footer className="relative mt-auto border-t border-[#72007E]/30 bg-[#17001C] text-white">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-2 px-6 py-3">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-wrap items-center gap-3">

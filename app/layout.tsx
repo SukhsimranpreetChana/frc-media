@@ -3,6 +3,7 @@ import { Dela_Gothic_One, Nunito } from "next/font/google";
 import Footer from "@/components/Footer";
 import DarkModeToggle from "@/components/DarkModeToggle";
 import HalftoneScroll from "@/components/HalftoneScroll";
+import MotionLines from "@/components/MotionLines";
 import Navbar from "@/components/Navbar";
 import SplashIntro from "@/components/SplashIntro";
 import TermsPrompt from "@/components/TermsPrompt";
@@ -61,11 +62,12 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${delaGothicOne.variable} ${nunito.variable} h-full antialiased`}
+      className={`${delaGothicOne.variable} ${nunito.variable} antialiased`}
     >
       <body className="flex min-h-dvh flex-col">
         <SplashIntro />
         <HalftoneScroll />
+        <MotionLines />
         <DarkModeToggle />
         <Navbar />
         {children}

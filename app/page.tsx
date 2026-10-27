@@ -12,7 +12,7 @@ export default async function Home() {
   return (
     <main className="fmc-surface flex-1">
       <section
-        className="home-mission-section -mt-44 border-b border-[#72007E]/30 bg-black pt-44 text-white sm:-mt-32 sm:pt-32"
+        className="home-mission-section border-y border-[#72007E]/30 bg-black text-white"
       >
         <div className="home-mission-media group">
           <Image
@@ -101,7 +101,7 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="bg-[#17001C] py-14 text-white">
+      <section className="border-y border-[#72007E]/30 bg-[#17001C] py-14 text-white">
         <div className="mx-auto grid w-full max-w-6xl gap-8 px-6 lg:grid-cols-[0.72fr_1.28fr] lg:items-center">
           <div>
             <p className="text-sm uppercase text-[#F85259]">From the field</p>

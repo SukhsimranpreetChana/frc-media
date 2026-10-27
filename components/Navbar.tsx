@@ -18,8 +18,8 @@ export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <header className="no-route-transition z-50 bg-transparent px-4 py-3">
-      <nav className="nav-bar-surface flex w-full flex-col gap-4 rounded-2xl border-2 border-[#F85259]/50 px-6 py-4 shadow-[0_10px_0_rgba(23,0,28,0.22)] 2xl:flex-row 2xl:items-start 2xl:justify-between">
+    <header className="site-header no-route-transition relative z-50 bg-transparent">
+      <nav className="nav-bar-surface flex w-full flex-col justify-center gap-4 rounded-2xl border-2 border-[#F85259]/50 px-6 py-4 shadow-[0_10px_0_rgba(23,0,28,0.22)] 2xl:flex-row 2xl:items-center 2xl:justify-between">
         <div className="nav-brand-row flex items-start justify-between gap-3">
           <Link className="nav-brand-link flex min-w-0 items-center gap-3 text-left" href="/">
             <Image

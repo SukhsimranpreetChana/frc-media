@@ -36,22 +36,35 @@
   --font-secondary: var(--font-nunito);
 }
 
+/*
+ * Flat page color with one exact dot grid, starting at the page's top-left.
+ * Each dot sits in the middle of its --dot-grid cell, so the gaps between
+ * dots fall on multiples of --dot-grid; the motion lines run along those gaps.
+ * The header's gap is exactly one cell, which puts one even row of dots
+ * around the navbar.
+ */
 body {
-  background:
-    radial-gradient(circle at 1px 1px, rgba(113, 55, 227, 0.18) 1px, transparent 1.6px),
-    linear-gradient(135deg, #f4e7e7 0%, #ffffff 46%, #f4e7e7 100%);
-  background-position:
-    var(--halftone-offset) var(--halftone-offset),
-    center;
-  background-size: 18px 18px, 100% 100%;
+  --dot-grid: 18px;
+  position: relative;
+  background-color: #f8f0f0;
+  background-image: radial-gradient(
+    circle at center,
+    rgba(113, 55, 227, 0.18) 1px,
+    transparent 1.6px
+  );
+  background-position: 0 0;
+  background-size: var(--dot-grid) var(--dot-grid);
   color: var(--foreground);
   font-family: var(--font-nunito);
 }
 
 :root[data-theme="dark"] body {
-  background-image:
-    radial-gradient(circle at 1px 1px, rgba(248, 82, 89, 0.28) 1px, transparent 1.6px),
-    linear-gradient(135deg, #09040d 0%, #17001c 46%, #000000 100%);
+  background-color: #0e0412;
+  background-image: radial-gradient(
+    circle at center,
+    rgba(248, 82, 89, 0.28) 1px,
+    transparent 1.6px
+  );
 }
 
 .fmc-surface {
@@ -64,59 +77,145 @@ body {
   z-index: 2;
 }
 
-.fmc-surface::before {
-  content: "";
+/*
+ * Lines that sweep across the page, spread from top to bottom. The layer
+ * covers the whole page (it scrolls with it) at z-index 0 and comes before the
+ * page in the DOM, so page blocks (cards, text panels, the navbar) paint over
+ * it and the lines pass behind them.
+ */
+.motion-lines {
   position: absolute;
   inset: 0;
-  z-index: 1;
+  z-index: 0;
+  overflow: hidden;
   pointer-events: none;
-  background:
-    linear-gradient(#f85259, #f85259),
-    linear-gradient(#f85259, #f85259),
-    linear-gradient(#7137e3, #7137e3),
-    linear-gradient(#7137e3, #7137e3),
-    linear-gradient(#a335e6, #a335e6);
-  background-position:
-    8vw 18vh,
-    42vw 18vh,
-    42vw 42vh,
-    right 16vw top 68vh,
-    right 46vw top 68vh;
-  background-repeat: no-repeat;
-  background-size:
-    0 3px,
-    3px 0,
-    0 3px,
-    0 3px,
-    3px 0;
-  opacity: 0.22;
-  animation: fmc-motion-lines 7.5s ease-in-out infinite;
+  opacity: 0.32;
 }
 
-.fmc-surface::after {
-  content: "";
+/*
+ * Each line is a full-length track with the visible stroke at its far end.
+ * Sliding the track from -100% to +stroke moves the stroke from just off one
+ * edge to just off the other, however long the page is, so loops are invisible.
+ */
+.motion-line {
   position: absolute;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  background:
-    linear-gradient(#72007e, #72007e),
-    linear-gradient(#72007e, #72007e),
-    linear-gradient(#f85259, #f85259),
-    linear-gradient(#17001c, #17001c);
-  background-position:
-    14vw 78vh,
-    14vw 52vh,
-    58vw 28vh,
-    58vw 28vh;
-  background-repeat: no-repeat;
-  background-size:
-    3px 0,
-    30vw 3px,
-    0 3px,
-    3px 0;
-  opacity: 0.2;
-  animation: fmc-motion-lines-alt 8.5s ease-in-out 1.4s infinite;
+  animation-delay: var(--line-delay);
+  animation-direction: var(--line-direction, normal);
+  animation-duration: var(--line-duration);
+  animation-iteration-count: infinite;
+  animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1);
+  will-change: transform;
+}
+
+/* Rounded down to the grid, so each line runs in the gap between two rows of
+   dots, and kept below the header so none hugs the navbar's bottom edge. */
+.motion-line--across {
+  --stroke: clamp(140px, 30vw, 460px);
+  top: var(--line-position);
+  top: calc(
+    round(
+      down,
+      max(var(--line-position), calc(var(--dot-grid) * 9)),
+      var(--dot-grid)
+    ) - 1.5px
+  );
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(
+    to left,
+    var(--line-color) var(--stroke),
+    transparent var(--stroke)
+  );
+  animation-name: motion-line-across;
+}
+
+.motion-line--down {
+  --stroke: clamp(120px, 32vh, 360px);
+  top: 0;
+  left: var(--line-position);
+  left: calc(round(down, var(--line-position), var(--dot-grid)) - 1.5px);
+  width: 3px;
+  height: 100%;
+  background: linear-gradient(
+    to top,
+    var(--line-color) var(--stroke),
+    transparent var(--stroke)
+  );
+  animation-name: motion-line-down;
+}
+
+/* Negative delays start each line mid-journey, so the page is never empty on load. */
+.motion-line:nth-child(1) {
+  --line-position: 7%;
+  --line-color: #f85259;
+  --line-duration: 14s;
+  --line-delay: -3s;
+}
+
+.motion-line:nth-child(2) {
+  --line-position: 23%;
+  --line-color: #7137e3;
+  --line-duration: 18s;
+  --line-delay: -11s;
+  --line-direction: reverse;
+}
+
+.motion-line:nth-child(3) {
+  --line-position: 40%;
+  --line-color: #a335e6;
+  --line-duration: 16s;
+  --line-delay: -6s;
+}
+
+.motion-line:nth-child(4) {
+  --line-position: 56%;
+  --line-color: #72007e;
+  --line-duration: 20s;
+  --line-delay: -15s;
+  --line-direction: reverse;
+}
+
+.motion-line:nth-child(5) {
+  --line-position: 73%;
+  --line-color: #f85259;
+  --line-duration: 17s;
+  --line-delay: -9s;
+}
+
+.motion-line:nth-child(6) {
+  --line-position: 89%;
+  --line-color: #7137e3;
+  --line-duration: 15s;
+  --line-delay: -4s;
+  --line-direction: reverse;
+}
+
+/* Vertical lines cross the whole page height, so they get longer trips. */
+.motion-line:nth-child(7) {
+  --line-position: 9%;
+  --line-color: #a335e6;
+  --line-duration: 30s;
+  --line-delay: -8s;
+}
+
+.motion-line:nth-child(8) {
+  --line-position: 52%;
+  --line-color: #f85259;
+  --line-duration: 36s;
+  --line-delay: -20s;
+  --line-direction: reverse;
+}
+
+.motion-line:nth-child(9) {
+  --line-position: 88%;
+  --line-color: #7137e3;
+  --line-duration: 33s;
+  --line-delay: -13s;
+}
+
+:root[data-theme="dark"] .motion-lines {
+  opacity: 0.4;
 }
 
 h1,
@@ -125,24 +224,6 @@ h3,
 .font-primary {
   font-family: var(--font-dela-gothic-one);
   font-weight: 400;
-}
-
-.fmc-surface {
-  background:
-    radial-gradient(circle at 1px 1px, rgba(113, 55, 227, 0.18) 1px, transparent 1.6px),
-    linear-gradient(135deg, #f4e7e7 0%, #ffffff 46%, #f4e7e7 100%);
-  background-position:
-    var(--halftone-offset) var(--halftone-offset),
-    center;
-  background-size:
-    18px 18px,
-    100% 100%;
-}
-
-:root[data-theme="dark"] .fmc-surface {
-  background-image:
-    radial-gradient(circle at 1px 1px, rgba(248, 82, 89, 0.28) 1px, transparent 1.6px),
-    linear-gradient(135deg, #09040d 0%, #17001c 48%, #000000 100%);
 }
 
 .fmc-dark-halftone {
@@ -155,8 +236,18 @@ h3,
   background-size: 16px 16px, 100% 100%;
 }
 
-/* Same dark gradient as .fmc-dark-halftone, minus the dots, so the navbar stays clean. */
+/* One dot cell of space around the navbar, so it sits exactly on the dot grid. */
+.site-header {
+  padding: var(--dot-grid);
+  /* Window widths are rarely a multiple of the grid, so give the leftover
+     sliver to the right gap; that keeps the bar's right edge on a grid line. */
+  padding-right: calc(var(--dot-grid) + mod(100%, var(--dot-grid)));
+}
+
+/* Same dark gradient as .fmc-dark-halftone, minus the dots, so the navbar stays clean.
+   Its closed height is a whole number of dot cells so the row below it lines up too. */
 .nav-bar-surface {
+  min-height: calc(var(--dot-grid) * 6);
   background: linear-gradient(135deg, #17001c 0%, #000000 52%, #17001c 100%);
 }
 
@@ -430,6 +521,31 @@ h3,
   box-shadow: 0 0 0 #72007e;
 }
 
+.upload-drop-zone {
+  border-color: #17001c;
+  background: #f4e7e7;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.upload-drop-zone--active {
+  border-color: #a335e6;
+  background: #f1dcff;
+  box-shadow: inset 0 0 0 3px rgba(163, 53, 230, 0.25);
+}
+
+:root[data-theme="dark"] .upload-drop-zone {
+  border-color: #f85259;
+  background: var(--theme-surface-soft);
+}
+
+:root[data-theme="dark"] .upload-drop-zone--active {
+  border-color: #a335e6;
+  background: rgba(113, 55, 227, 0.22);
+}
+
 input:focus-visible + div .fmc-file-picker {
   outline: 3px solid rgba(163, 53, 230, 0.35);
   outline-offset: 3px;
@@ -575,7 +691,7 @@ input:focus-visible + div .fmc-file-picker {
 }
 
 :root[data-theme="dark"] .theme-toggle__icon {
-  color: #ffd957;
+  color: #ffffff;
 }
 
 :root[data-theme="dark"] [class*="text-[#17001C]"] {
@@ -844,7 +960,7 @@ input:focus-visible + div .fmc-file-picker {
   }
 
   .nav-brand-row {
-    align-self: flex-start;
+    align-self: center;
   }
 
   .nav-brand-link {
@@ -915,103 +1031,21 @@ input:focus-visible + div .fmc-file-picker {
   }
 }
 
-@keyframes fmc-motion-lines {
-  0%,
-  100% {
-    opacity: 0;
-    background-size:
-      0 3px,
-      3px 0,
-      0 3px,
-      0 3px,
-      3px 0;
+@keyframes motion-line-across {
+  from {
+    transform: translateX(-100%);
   }
-  8% {
-    opacity: 0.24;
-  }
-  25% {
-    background-size:
-      34vw 3px,
-      3px 0,
-      0 3px,
-      0 3px,
-      3px 0;
-  }
-  45% {
-    background-size:
-      34vw 3px,
-      3px 24vh,
-      0 3px,
-      0 3px,
-      3px 0;
-  }
-  64% {
-    background-size:
-      34vw 3px,
-      3px 24vh,
-      28vw 3px,
-      0 3px,
-      3px 0;
-  }
-  82% {
-    opacity: 0.24;
-    background-size:
-      34vw 3px,
-      3px 24vh,
-      28vw 3px,
-      30vw 3px,
-      3px 24vh;
-  }
-  94% {
-    opacity: 0;
-    background-size:
-      34vw 3px,
-      3px 24vh,
-      28vw 3px,
-      30vw 3px,
-      3px 24vh;
+  to {
+    transform: translateX(var(--stroke));
   }
 }
 
-@keyframes fmc-motion-lines-alt {
-  0%,
-  100% {
-    opacity: 0;
-    background-size:
-      3px 0,
-      0 3px,
-      0 3px,
-      3px 0;
+@keyframes motion-line-down {
+  from {
+    transform: translateY(-100%);
   }
-  10% {
-    opacity: 0.22;
-  }
-  30% {
-    background-size:
-      3px 26vh,
-      0 3px,
-      0 3px,
-      3px 0;
-  }
-  52% {
-    background-size:
-      3px 26vh,
-      30vw 3px,
-      0 3px,
-      3px 0;
-  }
-  74% {
-    background-size:
-      3px 26vh,
-      30vw 3px,
-      24vw 3px,
-      3px 22vh;
-  }
-  88% {
-    opacity: 0.22;
-  }
-  96% {
-    opacity: 0;
+  to {
+    transform: translateY(var(--stroke));
   }
 }
 
@@ -1020,12 +1054,8 @@ input:focus-visible + div .fmc-file-picker {
     animation: none;
   }
 
-  .fmc-surface::before {
-    animation: none;
-  }
-
-  .fmc-surface::after {
-    animation: none;
+  .motion-lines {
+    display: none;
   }
 
   .fmc-splash-intro {
@@ -1085,15 +1115,24 @@ input:focus-visible + div .fmc-file-picker {
     max-height: 0;
     overflow: hidden;
     opacity: 0;
+    margin-top: 0;
     padding-bottom: 0;
     transition:
       max-height 220ms cubic-bezier(0.16, 1, 0.3, 1),
+      margin-top 220ms cubic-bezier(0.16, 1, 0.3, 1),
       opacity 170ms ease,
       padding-bottom 220ms cubic-bezier(0.16, 1, 0.3, 1);
   }
 
+  /* The closed menu takes no space, so the logo stays centered in the bar;
+     the gap above the links only appears once the menu opens. */
+  .nav-bar-surface {
+    row-gap: 0;
+  }
+
   .nav-menu-panel--open {
     max-height: 22rem;
+    margin-top: 1rem;
     opacity: 1;
     padding-bottom: 0.5rem;
   }
@@ -1119,10 +1158,6 @@ input:focus-visible + div .fmc-file-picker {
 }
 
 @media (max-width: 640px) {
-  header.no-route-transition {
-    padding-inline: 0.75rem;
-  }
-
   header.no-route-transition nav {
     padding-inline: 1rem;
   }

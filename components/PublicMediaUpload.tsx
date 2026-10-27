@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 
 type PublicMediaUploadProps = {
   initialTeamNumber?: string;
@@ -203,6 +203,15 @@ async function finishUploadedFile(payload: {
   throw lastError || new Error("Unable to finish upload.");
 }
 
+function hasDraggedFiles(event: { dataTransfer: DataTransfer | null }) {
+  return Boolean(event.dataTransfer?.types.includes("Files"));
+}
+
+// Dropped files skip the input's accept="image/*,video/*" filter, so check here.
+function isMediaFile(file: File) {
+  return file.type.startsWith("image/") || file.type.startsWith("video/");
+}
+
 export default function PublicMediaUpload({
   initialTeamNumber = "",
 }: PublicMediaUploadProps) {
@@ -219,6 +228,46 @@ export default function PublicMediaUpload({
   const [uploadProgress, setUploadProgress] = useState<UploadProgress | null>(
     null,
   );
+  const [isDraggingFiles, setIsDraggingFiles] = useState(false);
+  const [skippedFilesMessage, setSkippedFilesMessage] = useState("");
+  const dragDepthRef = useRef(0);
+
+  // A file dropped just outside the drop zone would make the browser open it
+  // and leave the page, losing the form, so swallow stray file drops.
+  useEffect(() => {
+    function preventStrayFileDrop(event: DragEvent) {
+      if (hasDraggedFiles(event)) {
+        event.preventDefault();
+      }
+    }
+
+    window.addEventListener("dragover", preventStrayFileDrop);
+    window.addEventListener("drop", preventStrayFileDrop);
+
+    return () => {
+      window.removeEventListener("dragover", preventStrayFileDrop);
+      window.removeEventListener("drop", preventStrayFileDrop);
+    };
+  }, []);
+
+  function addFiles(incomingFiles: File[]) {
+    const mediaFiles = incomingFiles.filter(isMediaFile);
+    const skippedFiles = incomingFiles.filter((file) => !isMediaFile(file));
+
+    setSkippedFilesMessage(
+      skippedFiles.length > 0
+        ? `Skipped ${skippedFiles.map((file) => file.name).join(", ")}: only photos and videos can be uploaded.`
+        : "",
+    );
+    setFiles((currentFiles) => {
+      const existingKeys = new Set(currentFiles.map(getFileKey));
+      const newFiles = mediaFiles.filter(
+        (file) => !existingKeys.has(getFileKey(file)),
+      );
+
+      return [...currentFiles, ...newFiles];
+    });
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -504,21 +553,70 @@ export default function PublicMediaUpload({
             id="media-files"
             multiple
             onChange={(event) => {
-              const selectedFiles = Array.from(event.target.files || []);
-
-              setFiles((currentFiles) => {
-                const existingKeys = new Set(currentFiles.map(getFileKey));
-                const newFiles = selectedFiles.filter(
-                  (file) => !existingKeys.has(getFileKey(file)),
-                );
-
-                return [...currentFiles, ...newFiles];
-              });
+              addFiles(Array.from(event.target.files || []));
               event.target.value = "";
             }}
             type="file"
           />
-          <div className="mt-2 flex flex-col gap-3 rounded-md border-2 border-[#17001C] bg-[#F4E7E7] p-3 sm:flex-row sm:items-center">
+          <div
+            className={`upload-drop-zone mt-2 flex flex-col items-center gap-3 rounded-md border-2 border-dashed p-6 text-center ${
+              isDraggingFiles ? "upload-drop-zone--active" : ""
+            }`}
+            onDragEnter={(event) => {
+              if (!hasDraggedFiles(event) || isUploading) {
+                return;
+              }
+
+              event.preventDefault();
+              dragDepthRef.current += 1;
+              setIsDraggingFiles(true);
+            }}
+            onDragLeave={(event) => {
+              if (!hasDraggedFiles(event)) {
+                return;
+              }
+
+              // Moving over a child fires leave on the parent, so count depth.
+              dragDepthRef.current = Math.max(0, dragDepthRef.current - 1);
+
+              if (dragDepthRef.current === 0) {
+                setIsDraggingFiles(false);
+              }
+            }}
+            onDragOver={(event) => {
+              if (!hasDraggedFiles(event) || isUploading) {
+                return;
+              }
+
+              event.preventDefault();
+              event.dataTransfer.dropEffect = "copy";
+            }}
+            onDrop={(event) => {
+              event.preventDefault();
+              dragDepthRef.current = 0;
+              setIsDraggingFiles(false);
+
+              if (!isUploading) {
+                addFiles(Array.from(event.dataTransfer.files));
+              }
+            }}
+          >
+            <svg
+              aria-hidden="true"
+              className="h-10 w-10 text-[#F85259]"
+              fill="none"
+              stroke="currentColor"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              viewBox="0 0 24 24"
+            >
+              <path d="M12 16V4M7 9l5-5 5 5M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3" />
+            </svg>
+            <p className="font-primary text-base text-[#17001C]">
+              {isDraggingFiles ? "Drop to add files" : "Drag & drop photos or videos here"}
+            </p>
+            <p className="text-xs text-[#17001C]/60">or</p>
             <label
               className="font-primary fmc-file-picker inline-flex h-12 w-full cursor-pointer items-center justify-center rounded-md bg-[#F85259] px-4 text-center text-sm text-white sm:w-auto"
               htmlFor="media-files"
@@ -530,6 +628,9 @@ export default function PublicMediaUpload({
                 ? `${files.length} file${files.length === 1 ? "" : "s"} selected`
                 : "No files selected yet"}
             </p>
+            {skippedFilesMessage ? (
+              <p className="text-xs text-[#F85259]">{skippedFilesMessage}</p>
+            ) : null}
           </div>
           <p className="mt-2 text-xs text-[#17001C]/60">
             Uploads can be up to 10 GB total.
