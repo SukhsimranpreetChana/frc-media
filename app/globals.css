@@ -645,7 +645,7 @@ input:focus-visible + div .fmc-file-picker {
 }
 
 /*
- * The latest upload from five different teams: one big tile and four small,
+ * Archive uploads from five different teams: one big tile and four small,
  * in two rows. The wall keeps its shape as it scales, maxes out at 57rem wide,
  * and sits at the right, so wide screens add space rather than bigger photos.
  */
@@ -704,19 +704,6 @@ input:focus-visible + div .fmc-file-picker {
 .media-wall--fallback .media-wall__tile:first-child {
   grid-column: 1;
   grid-row: 1 / span 2;
-}
-
-/* The mascot sits beside the "Who are we?" heading, about heading size. */
-.home-hero__mascot {
-  width: 3.5rem;
-  height: auto;
-  flex-shrink: 0;
-}
-
-@media (min-width: 640px) {
-  .home-hero__mascot {
-    width: 5rem;
-  }
 }
 
 .photo-credit {

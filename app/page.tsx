@@ -5,8 +5,6 @@ import RandomTeamsPreview from "@/components/RandomTeamsPreview";
 import RecentUploadsCarousel from "@/components/RecentUploadsCarousel";
 import { getHomeMedia, type MediaStats } from "@/lib/recentUploads";
 
-const discordInvite = "https://discord.gg/xCqryxThbC";
-
 // Rebuild every 5 minutes so new uploads and stats show without a redeploy.
 export const revalidate = 300;
 
@@ -44,19 +42,9 @@ export default async function Home() {
       <section className="home-hero border-y border-[#72007E]/30 bg-black text-white">
         <div className="page-container home-hero__content grid gap-10 py-14 lg:py-16">
           <div>
-            <div className="flex items-center gap-4">
-              <h1 className="text-[2rem] leading-tight text-white sm:text-5xl">
-                Who are we?
-              </h1>
-              <Image
-                alt="FMC mascot holding a camera"
-                className="home-hero__mascot"
-                height={480}
-                src="/media/fmc-mascot.gif"
-                unoptimized
-                width={480}
-              />
-            </div>
+            <h1 className="text-[2rem] leading-tight text-white sm:text-5xl">
+              Who are we?
+            </h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-[#F4E7E7] xl:max-w-3xl">
               We&apos;re the FIRST Media Community (FMC): students, alumni, and
               mentors who share ideas and create media of every kind, from
@@ -69,7 +57,7 @@ export default async function Home() {
                 className="font-primary fmc-button fmc-button--primary inline-flex h-11 items-center justify-center whitespace-nowrap px-5 text-sm"
                 href="/upload"
               >
-                Upload yours
+                Upload media
               </Link>
               <Link
                 className="font-primary fmc-button fmc-button--secondary inline-flex h-11 items-center justify-center whitespace-nowrap px-5 text-sm"
@@ -77,14 +65,6 @@ export default async function Home() {
               >
                 Browse teams
               </Link>
-              <a
-                className="text-sm font-semibold text-[#F4E7E7] underline decoration-[#F85259] decoration-2 underline-offset-4 hover:text-white sm:ml-2"
-                href={discordInvite}
-                rel="noopener noreferrer"
-                target="_blank"
-              >
-                Join the Discord
-              </a>
             </div>
 
             {homeMedia.stats.files > 0 ? (

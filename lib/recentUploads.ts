@@ -50,11 +50,23 @@ function getMediaStats(clips: MediaClip[]): MediaStats {
   };
 }
 
-// The newest upload from each team, so one team's big batch cannot fill the wall.
-function getWallCollages(collages: MediaCollage[], count: number) {
+function shuffle<T>(items: T[]) {
+  const shuffled = [...items];
+
+  for (let index = shuffled.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
+  }
+
+  return shuffled;
+}
+
+// Random picks from the archive, one per team. The recent uploads row already shows the newest
+// collages right below the hero, so those are skipped here to avoid repeating the same photos.
+function getWallCollages(collages: MediaCollage[], count: number, skipNewest: number) {
   const seenTeams = new Set<string>();
 
-  return collages
+  return shuffle(collages.slice(skipNewest))
     .filter((collage) => {
       if (seenTeams.has(collage.teamNumber)) {
         return false;
@@ -74,7 +86,7 @@ export async function getHomeMedia({ limit = 9, wallCount = 5 } = {}) {
 
     return {
       collages: collages.slice(0, limit),
-      wallCollages: getWallCollages(collages, wallCount),
+      wallCollages: getWallCollages(collages, wallCount, limit),
       totalCount: collages.length,
       stats: getMediaStats(clips),
     };
