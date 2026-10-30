@@ -16,6 +16,7 @@ import type { ExternalMediaItem, MatchVideo, MediaClip, Team } from "@/types";
 
 type TeamsFilterProps = {
   initialTeamNumber?: string;
+  initialUploader?: string;
   recentUploads?: MediaCollage[];
   recentUploadsTotalCount?: number;
   teams: Team[];
@@ -130,17 +131,20 @@ function PaginationControls({
 
 export default function TeamsFilter({
   initialTeamNumber = "",
+  initialUploader = "",
   recentUploads = [],
   recentUploadsTotalCount = recentUploads.length,
   teams,
 }: TeamsFilterProps) {
-  const [query, setQuery] = useState(getDigitsOnly(initialTeamNumber));
+  const [query, setQuery] = useState(
+    getDigitsOnly(initialTeamNumber) || initialUploader,
+  );
   const [yearFilter, setYearFilter] = useState("");
   const [remoteTeam, setRemoteTeam] = useState<Team | null>(null);
   const [isLoadingTeam, setIsLoadingTeam] = useState(false);
   const [previewTeams, setPreviewTeams] = useState<Team[]>([]);
   const [isLoadingPreviewTeams, setIsLoadingPreviewTeams] = useState(true);
-  const [teamClips, setTeamClips] = useState<MediaClip[]>([]);
+  const [uploadClips, setUploadClips] = useState<MediaClip[]>([]);
   const [isLoadingClips, setIsLoadingClips] = useState(false);
   const [matchVideos, setMatchVideos] = useState<MatchVideo[]>([]);
   const [isLoadingMatchVideos, setIsLoadingMatchVideos] = useState(false);
@@ -161,8 +165,8 @@ export default function TeamsFilter({
   const [adminMessage, setAdminMessage] = useState("");
 
   useEffect(() => {
-    setQuery(getDigitsOnly(initialTeamNumber));
-  }, [initialTeamNumber]);
+    setQuery(getDigitsOnly(initialTeamNumber) || initialUploader);
+  }, [initialTeamNumber, initialUploader]);
 
   useEffect(() => {
     let isMounted = true;
@@ -204,18 +208,21 @@ export default function TeamsFilter({
     ? Number(normalizedYearFilter)
     : undefined;
   const isTeamNumberSearch = /^\d{1,5}$/.test(normalizedQuery);
+  // Anything with letters or symbols is treated as the name someone uploaded under.
+  const isUploaderSearch = /\D/.test(normalizedQuery) && normalizedQuery.length >= 2;
+  const isMediaSearch = isTeamNumberSearch || isUploaderSearch;
   const shouldLookupTeam = isTeamNumberSearch;
-  const sortedTeamCollages = useMemo(
+  const sortedUploadCollages = useMemo(
     () =>
       getMediaCollages(
         selectedYear
-          ? teamClips.filter((clip) => clip.year === selectedYear)
-          : teamClips,
+          ? uploadClips.filter((clip) => clip.year === selectedYear)
+          : uploadClips,
       ).map((collage) => ({
         ...collage,
         folderUrl: collage.folderUrl || resolvedCollageFolderUrls[collage.id],
       })),
-    [resolvedCollageFolderUrls, selectedYear, teamClips],
+    [resolvedCollageFolderUrls, selectedYear, uploadClips],
   );
   const sortedTbaMedia = useMemo(
     () =>
@@ -244,9 +251,9 @@ export default function TeamsFilter({
       ),
     [matchVideos, selectedYear],
   );
-  const visibleTeamCollages = useMemo(
-    () => paginateItems(sortedTeamCollages, fmcPage),
-    [fmcPage, sortedTeamCollages],
+  const visibleUploadCollages = useMemo(
+    () => paginateItems(sortedUploadCollages, fmcPage),
+    [fmcPage, sortedUploadCollages],
   );
   const visibleTbaMedia = useMemo(
     () => paginateItems(sortedTbaMedia, tbaPage),
@@ -311,10 +318,10 @@ export default function TeamsFilter({
       }
     }
 
-    sortedTeamCollages.forEach((collage) => {
+    sortedUploadCollages.forEach((collage) => {
       void resolveCollageFolderUrl(collage);
     });
-  }, [resolvedCollageFolderUrls, sortedTeamCollages]);
+  }, [resolvedCollageFolderUrls, sortedUploadCollages]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -402,9 +409,9 @@ export default function TeamsFilter({
   useEffect(() => {
     const controller = new AbortController();
 
-    async function loadClipsForTeam() {
-      if (!isTeamNumberSearch) {
-        setTeamClips([]);
+    async function loadUploadedClips() {
+      if (!isMediaSearch) {
+        setUploadClips([]);
         setIsLoadingClips(false);
         return;
       }
@@ -413,18 +420,20 @@ export default function TeamsFilter({
 
       try {
         // The FMC uploads are go to approved media stored through Supabase/Google Drive.
-        const clips = await getMediaClips({
-          teamNumber: normalizedQuery,
-        });
+        const clips = await getMediaClips(
+          isTeamNumberSearch
+            ? { teamNumber: normalizedQuery }
+            : { uploadedBy: normalizedQuery },
+        );
 
         if (!controller.signal.aborted) {
-          setTeamClips(
+          setUploadClips(
             clips.sort((a, b) => b.year - a.year),
           );
         }
       } catch {
         if (!controller.signal.aborted) {
-          setTeamClips([]);
+          setUploadClips([]);
         }
       } finally {
         if (!controller.signal.aborted) {
@@ -434,17 +443,22 @@ export default function TeamsFilter({
     }
 
     function handleMediaUploaded() {
-      void loadClipsForTeam();
+      void loadUploadedClips();
     }
 
-    void loadClipsForTeam();
+    // Names are typed a letter at a time, so wait for a pause before searching uploaders.
+    const loadTimer = window.setTimeout(
+      () => void loadUploadedClips(),
+      isUploaderSearch ? 300 : 0,
+    );
     window.addEventListener("fmc-media-uploaded", handleMediaUploaded);
 
     return () => {
       controller.abort();
+      window.clearTimeout(loadTimer);
       window.removeEventListener("fmc-media-uploaded", handleMediaUploaded);
     };
-  }, [isTeamNumberSearch, normalizedQuery]);
+  }, [isMediaSearch, isTeamNumberSearch, isUploaderSearch, normalizedQuery]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -627,7 +641,7 @@ export default function TeamsFilter({
         throw new Error(data?.error || "Could not remove upload.");
       }
 
-      setTeamClips((clips) =>
+      setUploadClips((clips) =>
         clips.filter(
           (clip) => !collage.clips.some((collageClip) => collageClip.id === clip.id),
         ),
@@ -648,16 +662,14 @@ export default function TeamsFilter({
   return (
     <div className="scrap-card p-5">
       <label className="block">
-        <span className="sr-only">Search teams</span>
+        <span className="sr-only">Search by team number or uploader</span>
         <div className="grid gap-3 md:grid-cols-[1fr_9rem]">
           <input
             className="h-12 w-full rounded-md border-2 border-[#17001C] bg-[#F4E7E7] px-4 text-sm text-[#17001C] outline-none ring-[#A335E6]/20 placeholder:text-[#17001C]/45 focus:border-[#7137E3] focus:ring-4"
-            inputMode="numeric"
-            maxLength={5}
-            onChange={(event) => setQuery(getDigitsOnly(event.target.value))}
-            pattern="[0-9]*"
-            placeholder="Search teams by number"
-            type="text"
+            maxLength={60}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Search by team number or uploader"
+            type="search"
             value={query}
           />
           <input
@@ -688,7 +700,7 @@ export default function TeamsFilter({
         </div>
       ) : null}
 
-      {!isTeamNumberSearch && (!isLoadingPreviewTeams || normalizedQuery) ? (
+      {!isMediaSearch && (!isLoadingPreviewTeams || normalizedQuery) ? (
         <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {filteredTeams.map((team) => (
             <TeamCard key={team.id} team={team} />
@@ -718,7 +730,7 @@ export default function TeamsFilter({
         </section>
       ) : null}
 
-      {!isTeamNumberSearch ? (
+      {!isMediaSearch ? (
         <div className="mt-8">
           <RecentUploadsCarousel
             collages={recentUploads}
@@ -727,13 +739,15 @@ export default function TeamsFilter({
         </div>
       ) : null}
 
-      {isTeamNumberSearch ? (
+      {isMediaSearch ? (
         <section className="mt-8">
           <div className="section-heading mb-4 flex flex-wrap items-end justify-between gap-3">
             <div>
               <p className="text-sm text-[#72007E]">FMC Approved Media</p>
               <h2 className="text-2xl text-[#17001C]">
-                FRC {normalizedQuery} community uploads
+                {isTeamNumberSearch
+                  ? `FRC ${normalizedQuery} community uploads`
+                  : `Uploads by "${normalizedQuery}"`}
               </h2>
             </div>
           </div>
@@ -748,10 +762,10 @@ export default function TeamsFilter({
             <p className="mb-4 text-sm text-[#17001C]/80">{adminMessage}</p>
           ) : null}
 
-          {!isLoadingClips && sortedTeamCollages.length > 0 ? (
+          {!isLoadingClips && sortedUploadCollages.length > 0 ? (
             <>
               <div className="card-grid">
-                {visibleTeamCollages.map((collage) => (
+                {visibleUploadCollages.map((collage) => (
                   <div className="flex flex-col gap-3" key={collage.id}>
                     <MediaCollageCard collage={collage} />
                     {isAdmin ? (
@@ -769,16 +783,18 @@ export default function TeamsFilter({
               </div>
               <PaginationControls
                 currentPage={fmcPage}
-                itemCount={sortedTeamCollages.length}
+                itemCount={sortedUploadCollages.length}
                 label="FMC Approved Media"
                 onPageChange={setFmcPage}
               />
             </>
           ) : null}
 
-          {!isLoadingClips && sortedTeamCollages.length === 0 ? (
+          {!isLoadingClips && sortedUploadCollages.length === 0 ? (
             <div className="rounded-lg border-2 border-dashed border-[#72007E] bg-[#F4E7E7] p-6 text-sm text-[#17001C]/80">
-              Sorry there is no media for this team right now :/{" "}
+              {isTeamNumberSearch
+                ? "Sorry there is no media for this team right now :/"
+                : "No uploads match that name yet :/"}{" "}
               <a
                 className="font-primary text-[#7137E3] underline decoration-[#F85259] decoration-2 underline-offset-4 hover:text-[#F85259]"
                 href={uploadLink}
@@ -919,7 +935,7 @@ export default function TeamsFilter({
         </section>
       ) : null}
 
-      {filteredTeams.length === 0 && !isTeamNumberSearch ? (
+      {filteredTeams.length === 0 && !isMediaSearch ? (
         <div className="mt-6 rounded-lg border-2 border-dashed border-[#72007E] bg-[#F4E7E7] p-6 text-sm text-[#17001C]/80">
           Sorry there is no media for this team right now :/{" "}
           <a

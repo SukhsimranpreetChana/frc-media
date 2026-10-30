@@ -6,12 +6,13 @@ import { featuredTeams } from "@/lib/search";
 type TeamsPageProps = {
   searchParams: Promise<{
     team?: string | string[];
+    uploader?: string | string[];
   }>;
 };
 
 export const metadata: Metadata = {
   title: "Teams | FIRST Media Community",
-  description: "Search teams and uploaded team media by team number.",
+  description: "Search uploaded media by team number or uploader name.",
   keywords: [
     "FRC team media",
     "FIRST team media",
@@ -40,6 +41,7 @@ function getDigitsOnly(value: string) {
 export default async function TeamsPage({ searchParams }: TeamsPageProps) {
   const params = await searchParams;
   const initialTeamNumber = getDigitsOnly(getSearchParamValue(params.team));
+  const initialUploader = getSearchParamValue(params.uploader).trim();
   const recentUploads = await getRecentUploadCollages();
 
   return (
@@ -49,12 +51,13 @@ export default async function TeamsPage({ searchParams }: TeamsPageProps) {
           <p className="text-sm text-[#72007E]">Media library</p>
           <h1 className="mt-2 text-3xl text-[#17001C]">Teams</h1>
           <p className="mt-4 text-[#17001C]/80">
-            Search teams and uploaded team media by team number.
+            Search uploaded media by team number or uploader name.
           </p>
         </div>
 
         <TeamsFilter
           initialTeamNumber={initialTeamNumber}
+          initialUploader={initialUploader}
           recentUploads={recentUploads.collages}
           recentUploadsTotalCount={recentUploads.totalCount}
           teams={featuredTeams}

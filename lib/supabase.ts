@@ -88,6 +88,7 @@ export function mapMediaClipRecord(record: MediaClipRecord): MediaClip {
 
 export async function getMediaClips(filters?: {
   teamNumber?: string;
+  uploadedBy?: string;
   year?: number;
   approved?: boolean;
   includePending?: boolean;
@@ -99,6 +100,12 @@ export async function getMediaClips(filters?: {
 
   if (filters?.teamNumber) {
     params.set("team_number", `eq.${filters.teamNumber}`);
+  }
+
+  if (filters?.uploadedBy) {
+    // Partial, case-insensitive match. Wildcard characters typed by the user are treated literally.
+    const uploader = filters.uploadedBy.replace(/\*/g, "").replace(/[\\%_]/g, "\\$&");
+    params.set("uploaded_by", `ilike.*${uploader}*`);
   }
 
   if (filters?.year) {
