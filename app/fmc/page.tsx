@@ -169,16 +169,16 @@ export default function FmcPage() {
               </a>
             </div>
 
-            <dl className="mt-10 grid max-w-md grid-cols-2 gap-4 border-t border-[#72007E]/30 pt-6">
+            <dl className="mt-10 flex max-w-xl flex-wrap gap-x-12 gap-y-4 border-t border-[#72007E]/30 pt-6">
               <div>
                 <dt className="text-sm text-[#F4E7E7]/85">Version</dt>
-                <dd className="font-primary mt-1 text-2xl text-white">
+                <dd className="font-primary mt-1 whitespace-nowrap text-xl text-white sm:text-2xl">
                   {latest.version}
                 </dd>
               </div>
               <div>
                 <dt className="text-sm text-[#F4E7E7]/85">Released</dt>
-                <dd className="font-primary mt-1 text-2xl text-white">
+                <dd className="font-primary mt-1 whitespace-nowrap text-xl text-white sm:text-2xl">
                   <time dateTime={latest.released}>{releaseDate}</time>
                 </dd>
               </div>
