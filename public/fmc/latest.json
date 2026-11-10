@@ -1,0 +1,12 @@
+{
+  "product": "FMC",
+  "version": "2.0.0",
+  "released": "2026-11-09",
+  "download": "https://www.firstmediacommunity.org/fmc",
+  "notes": "https://www.firstmediacommunity.org/fmc#whats-new",
+  "message": "FMC 2.0 adds DaVinci Resolve, OBS, Figma, Affinity and Camera Raw/Lightroom looks.",
+  "files": {
+    "windows": "https://github.com/SukhsimranpreetChana/frc-media/releases/download/fmc-v2.0.0/FMC.Setup.2.0.0.exe",
+    "mac": "https://github.com/SukhsimranpreetChana/frc-media/releases/download/fmc-v2.0.0/FMC-Mac-2.0.0.zip"
+  }
+}

@@ -85,6 +85,26 @@ const nextConfig: NextConfig = {
         ],
       },
       {
+        // FMC's plugins check this file for updates from panels with unusual
+        // origins (file://, null, Figma and Canva iframes), so any origin may
+        // read it. Cached for five minutes.
+        source: "/fmc/latest.json",
+        headers: [
+          {
+            key: "Access-Control-Allow-Origin",
+            value: "*",
+          },
+          {
+            key: "Access-Control-Allow-Methods",
+            value: "GET, HEAD, OPTIONS",
+          },
+          {
+            key: "Cache-Control",
+            value: "public, max-age=300",
+          },
+        ],
+      },
+      {
         source: "/api/admin/:path*",
         headers: [
           {
