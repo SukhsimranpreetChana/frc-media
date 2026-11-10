@@ -10,6 +10,7 @@ const links = [
   { href: "/teams", label: "Teams" },
   { href: "/upload", label: "Upload" },
   { href: "/commissions", label: "Commissions" },
+  { href: "/fmc", label: "Plugins" },
   { href: "/contact", label: "Contact" },
 ];
 
